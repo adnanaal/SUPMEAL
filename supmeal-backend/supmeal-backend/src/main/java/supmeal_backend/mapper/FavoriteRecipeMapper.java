@@ -1,4 +1,4 @@
-package supmeal_backend.dto.mapper;
+package supmeal_backend.mapper;
 
 import org.springframework.stereotype.Component;
 import supmeal_backend.dto.FavoriteRecipeDTO;
