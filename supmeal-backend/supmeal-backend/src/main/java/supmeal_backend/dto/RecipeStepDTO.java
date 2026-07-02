@@ -1,0 +1,17 @@
+package supmeal_backend.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class RecipeStepDTO {
+    private Long id;
+    private Integer stepOrder;
+    private String instruction;
+    private Long recipeId;
+}
