@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ChefHat, Mail, Lock, User, AlertCircle } from 'lucide-react';
 
 export function SignUp() {
+  const router = useRouter();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -26,7 +28,27 @@ export function SignUp() {
     // Simulation - sera remplacé par l'API backend
     setTimeout(() => {
       setIsLoading(false);
-      setError('Inscription non disponible - backend non implémenté');
+      
+      // Simulation d'inscription réussie
+      if (name && email && password) {
+        // Stocker l'utilisateur simulé dans localStorage
+        const simulatedUser = {
+          id: '1',
+          email: email,
+          name: name,
+          avatar: null,
+          preferences: {},
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+        localStorage.setItem('user', JSON.stringify(simulatedUser));
+        localStorage.setItem('isAuthenticated', 'true');
+        
+        // Rediriger vers le dashboard (pour l'instant vers home)
+        router.push('/');
+      } else {
+        setError('Veuillez remplir tous les champs');
+      }
     }, 1000);
   };
 
