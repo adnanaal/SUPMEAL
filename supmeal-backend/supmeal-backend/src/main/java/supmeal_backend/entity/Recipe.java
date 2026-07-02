@@ -2,14 +2,11 @@ package supmeal_backend.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import supmeal_backend.entity.enums.MealType;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.CascadeType;
-import lombok.Builder;
 
 @Entity
 @Table(name = "recipes")
@@ -43,6 +40,10 @@ public class Recipe {
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private MealType mealType;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")

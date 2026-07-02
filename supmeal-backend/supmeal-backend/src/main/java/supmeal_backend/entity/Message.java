@@ -30,6 +30,10 @@ public class Message {
     private User sender;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "receiver_id", nullable = false)
+    private User receiver;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cookbook_id", nullable = false)
     private Cookbook cookbook;
 }

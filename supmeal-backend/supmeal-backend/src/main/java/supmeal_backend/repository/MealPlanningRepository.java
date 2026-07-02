@@ -11,6 +11,6 @@ public interface MealPlanningRepository extends JpaRepository<MealPlanning, Long
 
     List<MealPlanning> findByUser(User user);
 
-    List<MealPlanning> findByUserAndMealDate(User user, LocalDate mealDate);
+    List<MealPlanning> findByUserAndPlannedDate(User user, LocalDate plannedDate);
 
 }
