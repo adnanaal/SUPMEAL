@@ -1,19 +1,17 @@
-package supmeal_backend.dto;
+package supmeal_backend.dto.request;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CookbookMemberDTO {
-    private Long id;
-    private LocalDateTime joinedAt;
-    private Long userId;
+public class CookbookMemberCreateRequest {
+
+    @NotNull(message = "Cookbook ID is required")
     private Long cookbookId;
 }

@@ -1,5 +1,6 @@
-package supmeal_backend.dto;
+package supmeal_backend.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,11 +12,14 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class NotificationDTO {
+public class TagResponse {
+
     private Long id;
-    private String title;
-    private String message;
-    private Boolean isRead;
+
+    private String name;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
-    private Long userId;
+
+    private Long recipeId;
 }

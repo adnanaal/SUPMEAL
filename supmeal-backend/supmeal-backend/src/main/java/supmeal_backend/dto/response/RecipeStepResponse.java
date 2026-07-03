@@ -1,19 +1,21 @@
-package supmeal_backend.dto;
+package supmeal_backend.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TagDTO {
+public class RecipeStepResponse {
+
     private Long id;
-    private String name;
-    private LocalDateTime createdAt;
+
+    private Integer stepOrder;
+
+    private String instruction;
+
     private Long recipeId;
 }

@@ -1,4 +1,4 @@
-package supmeal_backend.dto;
+package supmeal_backend.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,10 +9,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class IngredientDTO {
-    private Long id;
+public class CookbookUpdateRequest {
+
     private String name;
-    private Double quantity;
-    private String unit;
-    private Long recipeId;
+
+    private String description;
 }

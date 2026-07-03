@@ -1,29 +1,33 @@
-package supmeal_backend.dto;
+package supmeal_backend.dto.request;
 
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDTO {
-    private Long id;
+public class UserUpdateRequest {
+
     private String firstname;
+
     private String lastname;
-    private String email;
+
+    @Size(min = 8, message = "Password must be at least 8 characters")
+    private String password;
+
     private String avatar;
-    private String oauthProvider;
-    private String providerId;
-    private Boolean isVerified;
+
     private String dietaryPreferences;
+
     private String allergies;
+
     private String favoriteCuisine;
+
+    @Positive(message = "Default servings must be positive")
     private Integer defaultServings;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 }

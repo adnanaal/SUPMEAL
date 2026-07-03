@@ -1,5 +1,6 @@
-package supmeal_backend.dto;
+package supmeal_backend.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,20 +14,37 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RecipeDTO {
+public class RecipeResponse {
+
     private Long id;
+
     private String title;
+
     private String description;
+
     private Integer preparationTime;
+
     private Integer cookingTime;
+
     private Integer servings;
+
     private String imagePath;
+
     private String source;
+
     private MealType mealType;
+
     private Long ownerId;
+
+    private List<String> ingredients;
+
+    private List<String> steps;
+
+    private List<String> tags;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedAt;
-    private List<IngredientDTO> ingredients;
-    private List<RecipeStepDTO> steps;
-    private List<TagDTO> tags;
 }
