@@ -1,46 +1,19 @@
 package supmeal_backend.mapper;
 
 import org.springframework.stereotype.Component;
-import supmeal_backend.dto.IngredientDTO;
-import supmeal_backend.dto.RecipeDTO;
-import supmeal_backend.dto.RecipeStepDTO;
-import supmeal_backend.dto.TagDTO;
-import supmeal_backend.entity.Ingredient;
+import supmeal_backend.dto.request.RecipeCreateRequest;
+import supmeal_backend.dto.request.RecipeUpdateRequest;
+import supmeal_backend.dto.response.RecipeResponse;
 import supmeal_backend.entity.Recipe;
-import supmeal_backend.entity.RecipeStep;
-import supmeal_backend.entity.Tag;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class RecipeMapper {
 
-    private final IngredientMapper ingredientMapper;
-    private final RecipeStepMapper recipeStepMapper;
-    private final TagMapper tagMapper;
-
-    public RecipeMapper(IngredientMapper ingredientMapper, RecipeStepMapper recipeStepMapper, TagMapper tagMapper) {
-        this.ingredientMapper = ingredientMapper;
-        this.recipeStepMapper = recipeStepMapper;
-        this.tagMapper = tagMapper;
-    }
-
-    public RecipeDTO toDTO(Recipe recipe) {
+    public RecipeResponse toResponse(Recipe recipe) {
         if (recipe == null) {
             return null;
         }
-        List<IngredientDTO> ingredientDTOs = recipe.getIngredients() != null
-                ? recipe.getIngredients().stream().map(ingredientMapper::toDTO).collect(Collectors.toList())
-                : List.of();
-        List<RecipeStepDTO> recipeStepDTOs = recipe.getSteps() != null
-                ? recipe.getSteps().stream().map(recipeStepMapper::toDTO).collect(Collectors.toList())
-                : List.of();
-        List<TagDTO> tagDTOs = recipe.getTags() != null
-                ? recipe.getTags().stream().map(tagMapper::toDTO).collect(Collectors.toList())
-                : List.of();
-
-        return RecipeDTO.builder()
+        return RecipeResponse.builder()
                 .id(recipe.getId())
                 .title(recipe.getTitle())
                 .description(recipe.getDescription())
@@ -53,41 +26,47 @@ public class RecipeMapper {
                 .ownerId(recipe.getOwner() != null ? recipe.getOwner().getId() : null)
                 .createdAt(recipe.getCreatedAt())
                 .updatedAt(recipe.getUpdatedAt())
-                .ingredients(ingredientDTOs)
-                .steps(recipeStepDTOs)
-                .tags(tagDTOs)
+                .ingredients(recipe.getIngredients() != null 
+                    ? recipe.getIngredients().stream().map(i -> i.getName()).toList() 
+                    : null)
+                .steps(recipe.getSteps() != null 
+                    ? recipe.getSteps().stream().map(s -> s.getInstruction()).toList() 
+                    : null)
+                .tags(recipe.getTags() != null 
+                    ? recipe.getTags().stream().map(t -> t.getName()).toList() 
+                    : null)
                 .build();
     }
 
-    public Recipe toEntity(RecipeDTO recipeDTO) {
-        if (recipeDTO == null) {
+    public Recipe toEntity(RecipeCreateRequest request) {
+        if (request == null) {
             return null;
         }
-        List<Ingredient> ingredients = recipeDTO.getIngredients() != null
-                ? recipeDTO.getIngredients().stream().map(ingredientMapper::toEntity).collect(Collectors.toList())
-                : List.of();
-        List<RecipeStep> steps = recipeDTO.getSteps() != null
-                ? recipeDTO.getSteps().stream().map(recipeStepMapper::toEntity).collect(Collectors.toList())
-                : List.of();
-        List<Tag> tags = recipeDTO.getTags() != null
-                ? recipeDTO.getTags().stream().map(tagMapper::toEntity).collect(Collectors.toList())
-                : List.of();
-
         return Recipe.builder()
-                .id(recipeDTO.getId())
-                .title(recipeDTO.getTitle())
-                .description(recipeDTO.getDescription())
-                .preparationTime(recipeDTO.getPreparationTime())
-                .cookingTime(recipeDTO.getCookingTime())
-                .servings(recipeDTO.getServings())
-                .imagePath(recipeDTO.getImagePath())
-                .source(recipeDTO.getSource())
-                .mealType(recipeDTO.getMealType())
-                .createdAt(recipeDTO.getCreatedAt())
-                .updatedAt(recipeDTO.getUpdatedAt())
-                .ingredients(ingredients)
-                .steps(steps)
-                .tags(tags)
+                .title(request.getTitle())
+                .description(request.getDescription())
+                .preparationTime(request.getPreparationTime())
+                .cookingTime(request.getCookingTime())
+                .servings(request.getServings())
+                .imagePath(request.getImagePath())
+                .source(request.getSource())
+                .mealType(request.getMealType())
+                .build();
+    }
+
+    public Recipe toEntity(RecipeUpdateRequest request) {
+        if (request == null) {
+            return null;
+        }
+        return Recipe.builder()
+                .title(request.getTitle())
+                .description(request.getDescription())
+                .preparationTime(request.getPreparationTime())
+                .cookingTime(request.getCookingTime())
+                .servings(request.getServings())
+                .imagePath(request.getImagePath())
+                .source(request.getSource())
+                .mealType(request.getMealType())
                 .build();
     }
 }

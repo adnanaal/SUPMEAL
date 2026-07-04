@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import supmeal_backend.dto.RecipeDTO;
+import supmeal_backend.dto.request.RecipeCreateRequest;
+import supmeal_backend.dto.request.RecipeUpdateRequest;
+import supmeal_backend.dto.response.RecipeResponse;
 import supmeal_backend.entity.Recipe;
 import supmeal_backend.exception.ResourceNotFoundException;
 import supmeal_backend.mapper.RecipeMapper;
@@ -24,68 +26,67 @@ public class RecipeController {
     private final RecipeMapper recipeMapper;
 
     @PostMapping
-    public ResponseEntity<RecipeDTO> createRecipe(@Valid @RequestBody RecipeDTO recipeDTO) {
-        Recipe recipe = recipeMapper.toEntity(recipeDTO);
+    public ResponseEntity<RecipeResponse> createRecipe(@Valid @RequestBody RecipeCreateRequest request) {
+        Recipe recipe = recipeMapper.toEntity(request);
         Recipe savedRecipe = recipeService.save(recipe);
-        return new ResponseEntity<>(recipeMapper.toDTO(savedRecipe), HttpStatus.CREATED);
+        return new ResponseEntity<>(recipeMapper.toResponse(savedRecipe), HttpStatus.CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<List<RecipeDTO>> getAllRecipes() {
+    public ResponseEntity<List<RecipeResponse>> getAllRecipes() {
         List<Recipe> recipes = recipeService.findAll();
-        List<RecipeDTO> recipeDTOs = recipes.stream()
-                .map(recipeMapper::toDTO)
+        List<RecipeResponse> responses = recipes.stream()
+                .map(recipeMapper::toResponse)
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(recipeDTOs);
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<RecipeDTO> getRecipeById(@PathVariable Long id) {
+    public ResponseEntity<RecipeResponse> getRecipeById(@PathVariable Long id) {
         Recipe recipe = recipeService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Recipe", id));
-        return ResponseEntity.ok(recipeMapper.toDTO(recipe));
+        return ResponseEntity.ok(recipeMapper.toResponse(recipe));
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<RecipeDTO>> searchRecipes(@RequestParam String title) {
+    public ResponseEntity<List<RecipeResponse>> searchRecipes(@RequestParam String title) {
         List<Recipe> recipes = recipeService.findByTitleContainingIgnoreCase(title);
-        List<RecipeDTO> recipeDTOs = recipes.stream()
-                .map(recipeMapper::toDTO)
+        List<RecipeResponse> responses = recipes.stream()
+                .map(recipeMapper::toResponse)
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(recipeDTOs);
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/owner/{ownerId}")
-    public ResponseEntity<List<RecipeDTO>> getRecipesByOwner(@PathVariable Long ownerId) {
-        // Note: This would need User entity, simplified for now
+    public ResponseEntity<List<RecipeResponse>> getRecipesByOwner(@PathVariable Long ownerId) {
         List<Recipe> recipes = recipeService.findAll();
-        List<RecipeDTO> recipeDTOs = recipes.stream()
+        List<RecipeResponse> responses = recipes.stream()
                 .filter(r -> r.getOwner() != null && r.getOwner().getId().equals(ownerId))
-                .map(recipeMapper::toDTO)
+                .map(recipeMapper::toResponse)
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(recipeDTOs);
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/meal-type/{mealType}")
-    public ResponseEntity<List<RecipeDTO>> getRecipesByMealType(@PathVariable String mealType) {
+    public ResponseEntity<List<RecipeResponse>> getRecipesByMealType(@PathVariable String mealType) {
         List<Recipe> recipes = recipeService.findByMealType(
                 supmeal_backend.entity.enums.MealType.valueOf(mealType.toUpperCase())
         );
-        List<RecipeDTO> recipeDTOs = recipes.stream()
-                .map(recipeMapper::toDTO)
+        List<RecipeResponse> responses = recipes.stream()
+                .map(recipeMapper::toResponse)
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(recipeDTOs);
+        return ResponseEntity.ok(responses);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<RecipeDTO> updateRecipe(@PathVariable Long id, @Valid @RequestBody RecipeDTO recipeDTO) {
+    public ResponseEntity<RecipeResponse> updateRecipe(@PathVariable Long id, @Valid @RequestBody RecipeUpdateRequest request) {
         Recipe existingRecipe = recipeService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Recipe", id));
         
-        Recipe recipe = recipeMapper.toEntity(recipeDTO);
+        Recipe recipe = recipeMapper.toEntity(request);
         recipe.setId(id);
         Recipe updatedRecipe = recipeService.update(recipe);
-        return ResponseEntity.ok(recipeMapper.toDTO(updatedRecipe));
+        return ResponseEntity.ok(recipeMapper.toResponse(updatedRecipe));
     }
 
     @DeleteMapping("/{id}")

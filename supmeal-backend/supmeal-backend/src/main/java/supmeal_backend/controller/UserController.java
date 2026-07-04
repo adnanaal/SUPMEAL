@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import supmeal_backend.dto.UserDTO;
+import supmeal_backend.dto.request.UserCreateRequest;
+import supmeal_backend.dto.request.UserUpdateRequest;
+import supmeal_backend.dto.response.UserResponse;
 import supmeal_backend.entity.User;
 import supmeal_backend.exception.ResourceNotFoundException;
 import supmeal_backend.mapper.UserMapper;
@@ -24,44 +26,44 @@ public class UserController {
     private final UserMapper userMapper;
 
     @PostMapping
-    public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserDTO userDTO) {
-        User user = userMapper.toEntity(userDTO);
+    public ResponseEntity<UserResponse> createUser(@Valid @RequestBody UserCreateRequest request) {
+        User user = userMapper.toEntity(request);
         User savedUser = userService.save(user);
-        return new ResponseEntity<>(userMapper.toDTO(savedUser), HttpStatus.CREATED);
+        return new ResponseEntity<>(userMapper.toResponse(savedUser), HttpStatus.CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<List<UserDTO>> getAllUsers() {
+    public ResponseEntity<List<UserResponse>> getAllUsers() {
         List<User> users = userService.findAll();
-        List<UserDTO> userDTOs = users.stream()
-                .map(userMapper::toDTO)
+        List<UserResponse> responses = users.stream()
+                .map(userMapper::toResponse)
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(userDTOs);
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
+    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
         User user = userService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User", id));
-        return ResponseEntity.ok(userMapper.toDTO(user));
+        return ResponseEntity.ok(userMapper.toResponse(user));
     }
 
     @GetMapping("/email/{email}")
-    public ResponseEntity<UserDTO> getUserByEmail(@PathVariable String email) {
+    public ResponseEntity<UserResponse> getUserByEmail(@PathVariable String email) {
         User user = userService.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
-        return ResponseEntity.ok(userMapper.toDTO(user));
+        return ResponseEntity.ok(userMapper.toResponse(user));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @Valid @RequestBody UserDTO userDTO) {
+    public ResponseEntity<UserResponse> updateUser(@PathVariable Long id, @Valid @RequestBody UserUpdateRequest request) {
         User existingUser = userService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User", id));
         
-        User user = userMapper.toEntity(userDTO);
+        User user = userMapper.toEntity(request);
         user.setId(id);
         User updatedUser = userService.update(user);
-        return ResponseEntity.ok(userMapper.toDTO(updatedUser));
+        return ResponseEntity.ok(userMapper.toResponse(updatedUser));
     }
 
     @DeleteMapping("/{id}")

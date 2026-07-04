@@ -1,17 +1,18 @@
 package supmeal_backend.mapper;
 
 import org.springframework.stereotype.Component;
-import supmeal_backend.dto.CookbookInvitationDTO;
+import supmeal_backend.dto.request.CookbookInvitationCreateRequest;
+import supmeal_backend.dto.response.CookbookInvitationResponse;
 import supmeal_backend.entity.CookbookInvitation;
 
 @Component
 public class CookbookInvitationMapper {
 
-    public CookbookInvitationDTO toDTO(CookbookInvitation invitation) {
+    public CookbookInvitationResponse toResponse(CookbookInvitation invitation) {
         if (invitation == null) {
             return null;
         }
-        return CookbookInvitationDTO.builder()
+        return CookbookInvitationResponse.builder()
                 .id(invitation.getId())
                 .status(invitation.getStatus())
                 .sentAt(invitation.getSentAt())
@@ -21,14 +22,11 @@ public class CookbookInvitationMapper {
                 .build();
     }
 
-    public CookbookInvitation toEntity(CookbookInvitationDTO invitationDTO) {
-        if (invitationDTO == null) {
+    public CookbookInvitation toEntity(CookbookInvitationCreateRequest request) {
+        if (request == null) {
             return null;
         }
         return CookbookInvitation.builder()
-                .id(invitationDTO.getId())
-                .status(invitationDTO.getStatus())
-                .sentAt(invitationDTO.getSentAt())
                 .build();
     }
 }

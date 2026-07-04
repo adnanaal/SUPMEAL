@@ -1,17 +1,18 @@
 package supmeal_backend.mapper;
 
 import org.springframework.stereotype.Component;
-import supmeal_backend.dto.CookbookMemberDTO;
+import supmeal_backend.dto.request.CookbookMemberCreateRequest;
+import supmeal_backend.dto.response.CookbookMemberResponse;
 import supmeal_backend.entity.CookbookMember;
 
 @Component
 public class CookbookMemberMapper {
 
-    public CookbookMemberDTO toDTO(CookbookMember member) {
+    public CookbookMemberResponse toResponse(CookbookMember member) {
         if (member == null) {
             return null;
         }
-        return CookbookMemberDTO.builder()
+        return CookbookMemberResponse.builder()
                 .id(member.getId())
                 .joinedAt(member.getJoinedAt())
                 .userId(member.getUser() != null ? member.getUser().getId() : null)
@@ -19,13 +20,11 @@ public class CookbookMemberMapper {
                 .build();
     }
 
-    public CookbookMember toEntity(CookbookMemberDTO memberDTO) {
-        if (memberDTO == null) {
+    public CookbookMember toEntity(CookbookMemberCreateRequest request) {
+        if (request == null) {
             return null;
         }
         return CookbookMember.builder()
-                .id(memberDTO.getId())
-                .joinedAt(memberDTO.getJoinedAt())
                 .build();
     }
 }

@@ -1,17 +1,19 @@
 package supmeal_backend.mapper;
 
 import org.springframework.stereotype.Component;
-import supmeal_backend.dto.MealPlanningDTO;
+import supmeal_backend.dto.request.MealPlanningCreateRequest;
+import supmeal_backend.dto.request.MealPlanningUpdateRequest;
+import supmeal_backend.dto.response.MealPlanningResponse;
 import supmeal_backend.entity.MealPlanning;
 
 @Component
 public class MealPlanningMapper {
 
-    public MealPlanningDTO toDTO(MealPlanning mealPlanning) {
+    public MealPlanningResponse toResponse(MealPlanning mealPlanning) {
         if (mealPlanning == null) {
             return null;
         }
-        return MealPlanningDTO.builder()
+        return MealPlanningResponse.builder()
                 .id(mealPlanning.getId())
                 .plannedDate(mealPlanning.getPlannedDate())
                 .mealType(mealPlanning.getMealType())
@@ -21,15 +23,23 @@ public class MealPlanningMapper {
                 .build();
     }
 
-    public MealPlanning toEntity(MealPlanningDTO mealPlanningDTO) {
-        if (mealPlanningDTO == null) {
+    public MealPlanning toEntity(MealPlanningCreateRequest request) {
+        if (request == null) {
             return null;
         }
         return MealPlanning.builder()
-                .id(mealPlanningDTO.getId())
-                .plannedDate(mealPlanningDTO.getPlannedDate())
-                .mealType(mealPlanningDTO.getMealType())
-                .createdAt(mealPlanningDTO.getCreatedAt())
+                .plannedDate(request.getPlannedDate())
+                .mealType(request.getMealType())
+                .build();
+    }
+
+    public MealPlanning toEntity(MealPlanningUpdateRequest request) {
+        if (request == null) {
+            return null;
+        }
+        return MealPlanning.builder()
+                .plannedDate(request.getPlannedDate())
+                .mealType(request.getMealType())
                 .build();
     }
 }

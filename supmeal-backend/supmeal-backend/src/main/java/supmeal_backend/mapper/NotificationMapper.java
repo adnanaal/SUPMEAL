@@ -1,36 +1,33 @@
 package supmeal_backend.mapper;
 
 import org.springframework.stereotype.Component;
-import supmeal_backend.dto.NotificationDTO;
+import supmeal_backend.dto.request.NotificationCreateRequest;
+import supmeal_backend.dto.response.NotificationResponse;
 import supmeal_backend.entity.Notification;
 
 @Component
 public class NotificationMapper {
 
-    public NotificationDTO toDTO(Notification notification) {
+    public NotificationResponse toResponse(Notification notification) {
         if (notification == null) {
             return null;
         }
-        return NotificationDTO.builder()
+        return NotificationResponse.builder()
                 .id(notification.getId())
                 .title(notification.getTitle())
                 .message(notification.getMessage())
                 .isRead(notification.getIsRead())
                 .createdAt(notification.getCreatedAt())
-                .userId(notification.getUser() != null ? notification.getUser().getId() : null)
                 .build();
     }
 
-    public Notification toEntity(NotificationDTO notificationDTO) {
-        if (notificationDTO == null) {
+    public Notification toEntity(NotificationCreateRequest request) {
+        if (request == null) {
             return null;
         }
         return Notification.builder()
-                .id(notificationDTO.getId())
-                .title(notificationDTO.getTitle())
-                .message(notificationDTO.getMessage())
-                .isRead(notificationDTO.getIsRead())
-                .createdAt(notificationDTO.getCreatedAt())
+                .title(request.getTitle())
+                .message(request.getMessage())
                 .build();
     }
 }

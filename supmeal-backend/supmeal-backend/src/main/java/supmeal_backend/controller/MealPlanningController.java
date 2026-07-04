@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import supmeal_backend.dto.MealPlanningDTO;
+import supmeal_backend.dto.request.MealPlanningCreateRequest;
+import supmeal_backend.dto.request.MealPlanningUpdateRequest;
+import supmeal_backend.dto.response.MealPlanningResponse;
 import supmeal_backend.entity.MealPlanning;
 import supmeal_backend.exception.ResourceNotFoundException;
 import supmeal_backend.mapper.MealPlanningMapper;
@@ -25,60 +27,60 @@ public class MealPlanningController {
     private final MealPlanningMapper mealPlanningMapper;
 
     @PostMapping
-    public ResponseEntity<MealPlanningDTO> createMealPlanning(@Valid @RequestBody MealPlanningDTO mealPlanningDTO) {
-        MealPlanning mealPlanning = mealPlanningMapper.toEntity(mealPlanningDTO);
+    public ResponseEntity<MealPlanningResponse> createMealPlanning(@Valid @RequestBody MealPlanningCreateRequest request) {
+        MealPlanning mealPlanning = mealPlanningMapper.toEntity(request);
         MealPlanning savedMealPlanning = mealPlanningService.save(mealPlanning);
-        return new ResponseEntity<>(mealPlanningMapper.toDTO(savedMealPlanning), HttpStatus.CREATED);
+        return new ResponseEntity<>(mealPlanningMapper.toResponse(savedMealPlanning), HttpStatus.CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<List<MealPlanningDTO>> getAllMealPlannings() {
+    public ResponseEntity<List<MealPlanningResponse>> getAllMealPlannings() {
         List<MealPlanning> mealPlannings = mealPlanningService.findAll();
-        List<MealPlanningDTO> mealPlanningDTOs = mealPlannings.stream()
-                .map(mealPlanningMapper::toDTO)
+        List<MealPlanningResponse> responses = mealPlannings.stream()
+                .map(mealPlanningMapper::toResponse)
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(mealPlanningDTOs);
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<MealPlanningDTO> getMealPlanningById(@PathVariable Long id) {
+    public ResponseEntity<MealPlanningResponse> getMealPlanningById(@PathVariable Long id) {
         MealPlanning mealPlanning = mealPlanningService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("MealPlanning", id));
-        return ResponseEntity.ok(mealPlanningMapper.toDTO(mealPlanning));
+        return ResponseEntity.ok(mealPlanningMapper.toResponse(mealPlanning));
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<MealPlanningDTO>> getMealPlanningsByUser(@PathVariable Long userId) {
+    public ResponseEntity<List<MealPlanningResponse>> getMealPlanningsByUser(@PathVariable Long userId) {
         List<MealPlanning> mealPlannings = mealPlanningService.findAll();
-        List<MealPlanningDTO> mealPlanningDTOs = mealPlannings.stream()
+        List<MealPlanningResponse> responses = mealPlannings.stream()
                 .filter(m -> m.getUser() != null && m.getUser().getId().equals(userId))
-                .map(mealPlanningMapper::toDTO)
+                .map(mealPlanningMapper::toResponse)
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(mealPlanningDTOs);
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/user/{userId}/date/{date}")
-    public ResponseEntity<List<MealPlanningDTO>> getMealPlanningsByUserAndDate(
+    public ResponseEntity<List<MealPlanningResponse>> getMealPlanningsByUserAndDate(
             @PathVariable Long userId,
             @PathVariable LocalDate date) {
         List<MealPlanning> mealPlannings = mealPlanningService.findAll();
-        List<MealPlanningDTO> mealPlanningDTOs = mealPlannings.stream()
+        List<MealPlanningResponse> responses = mealPlannings.stream()
                 .filter(m -> m.getUser() != null && m.getUser().getId().equals(userId))
                 .filter(m -> m.getPlannedDate().equals(date))
-                .map(mealPlanningMapper::toDTO)
+                .map(mealPlanningMapper::toResponse)
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(mealPlanningDTOs);
+        return ResponseEntity.ok(responses);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MealPlanningDTO> updateMealPlanning(@PathVariable Long id, @Valid @RequestBody MealPlanningDTO mealPlanningDTO) {
+    public ResponseEntity<MealPlanningResponse> updateMealPlanning(@PathVariable Long id, @Valid @RequestBody MealPlanningUpdateRequest request) {
         MealPlanning existingMealPlanning = mealPlanningService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("MealPlanning", id));
         
-        MealPlanning mealPlanning = mealPlanningMapper.toEntity(mealPlanningDTO);
+        MealPlanning mealPlanning = mealPlanningMapper.toEntity(request);
         mealPlanning.setId(id);
         MealPlanning updatedMealPlanning = mealPlanningService.update(mealPlanning);
-        return ResponseEntity.ok(mealPlanningMapper.toDTO(updatedMealPlanning));
+        return ResponseEntity.ok(mealPlanningMapper.toResponse(updatedMealPlanning));
     }
 
     @DeleteMapping("/{id}")

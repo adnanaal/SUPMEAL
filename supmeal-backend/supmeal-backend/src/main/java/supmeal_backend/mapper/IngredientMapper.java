@@ -1,17 +1,19 @@
 package supmeal_backend.mapper;
 
 import org.springframework.stereotype.Component;
-import supmeal_backend.dto.IngredientDTO;
+import supmeal_backend.dto.request.IngredientCreateRequest;
+import supmeal_backend.dto.request.IngredientUpdateRequest;
+import supmeal_backend.dto.response.IngredientResponse;
 import supmeal_backend.entity.Ingredient;
 
 @Component
 public class IngredientMapper {
 
-    public IngredientDTO toDTO(Ingredient ingredient) {
+    public IngredientResponse toResponse(Ingredient ingredient) {
         if (ingredient == null) {
             return null;
         }
-        return IngredientDTO.builder()
+        return IngredientResponse.builder()
                 .id(ingredient.getId())
                 .name(ingredient.getName())
                 .quantity(ingredient.getQuantity())
@@ -20,15 +22,25 @@ public class IngredientMapper {
                 .build();
     }
 
-    public Ingredient toEntity(IngredientDTO ingredientDTO) {
-        if (ingredientDTO == null) {
+    public Ingredient toEntity(IngredientCreateRequest request) {
+        if (request == null) {
             return null;
         }
         return Ingredient.builder()
-                .id(ingredientDTO.getId())
-                .name(ingredientDTO.getName())
-                .quantity(ingredientDTO.getQuantity())
-                .unit(ingredientDTO.getUnit())
+                .name(request.getName())
+                .quantity(request.getQuantity())
+                .unit(request.getUnit())
+                .build();
+    }
+
+    public Ingredient toEntity(IngredientUpdateRequest request) {
+        if (request == null) {
+            return null;
+        }
+        return Ingredient.builder()
+                .name(request.getName())
+                .quantity(request.getQuantity())
+                .unit(request.getUnit())
                 .build();
     }
 }

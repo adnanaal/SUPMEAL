@@ -1,17 +1,19 @@
 package supmeal_backend.mapper;
 
 import org.springframework.stereotype.Component;
-import supmeal_backend.dto.CommentDTO;
+import supmeal_backend.dto.request.CommentCreateRequest;
+import supmeal_backend.dto.request.CommentUpdateRequest;
+import supmeal_backend.dto.response.CommentResponse;
 import supmeal_backend.entity.Comment;
 
 @Component
 public class CommentMapper {
 
-    public CommentDTO toDTO(Comment comment) {
+    public CommentResponse toResponse(Comment comment) {
         if (comment == null) {
             return null;
         }
-        return CommentDTO.builder()
+        return CommentResponse.builder()
                 .id(comment.getId())
                 .content(comment.getContent())
                 .createdAt(comment.getCreatedAt())
@@ -20,14 +22,21 @@ public class CommentMapper {
                 .build();
     }
 
-    public Comment toEntity(CommentDTO commentDTO) {
-        if (commentDTO == null) {
+    public Comment toEntity(CommentCreateRequest request) {
+        if (request == null) {
             return null;
         }
         return Comment.builder()
-                .id(commentDTO.getId())
-                .content(commentDTO.getContent())
-                .createdAt(commentDTO.getCreatedAt())
+                .content(request.getContent())
+                .build();
+    }
+
+    public Comment toEntity(CommentUpdateRequest request) {
+        if (request == null) {
+            return null;
+        }
+        return Comment.builder()
+                .content(request.getContent())
                 .build();
     }
 }

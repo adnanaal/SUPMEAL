@@ -1,17 +1,18 @@
 package supmeal_backend.mapper;
 
 import org.springframework.stereotype.Component;
-import supmeal_backend.dto.MessageDTO;
+import supmeal_backend.dto.request.MessageCreateRequest;
+import supmeal_backend.dto.response.MessageResponse;
 import supmeal_backend.entity.Message;
 
 @Component
 public class MessageMapper {
 
-    public MessageDTO toDTO(Message message) {
+    public MessageResponse toResponse(Message message) {
         if (message == null) {
             return null;
         }
-        return MessageDTO.builder()
+        return MessageResponse.builder()
                 .id(message.getId())
                 .content(message.getContent())
                 .createdAt(message.getCreatedAt())
@@ -21,14 +22,12 @@ public class MessageMapper {
                 .build();
     }
 
-    public Message toEntity(MessageDTO messageDTO) {
-        if (messageDTO == null) {
+    public Message toEntity(MessageCreateRequest request) {
+        if (request == null) {
             return null;
         }
         return Message.builder()
-                .id(messageDTO.getId())
-                .content(messageDTO.getContent())
-                .createdAt(messageDTO.getCreatedAt())
+                .content(request.getContent())
                 .build();
     }
 }

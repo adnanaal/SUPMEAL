@@ -1,24 +1,25 @@
 package supmeal_backend.mapper;
 
 import org.springframework.stereotype.Component;
-import supmeal_backend.dto.UserDTO;
+import supmeal_backend.dto.request.RegisterRequest;
+import supmeal_backend.dto.request.UserCreateRequest;
+import supmeal_backend.dto.request.UserUpdateRequest;
+import supmeal_backend.dto.response.UserResponse;
 import supmeal_backend.entity.User;
 
 @Component
 public class UserMapper {
 
-    public UserDTO toDTO(User user) {
+    public UserResponse toResponse(User user) {
         if (user == null) {
             return null;
         }
-        return UserDTO.builder()
+        return UserResponse.builder()
                 .id(user.getId())
                 .firstname(user.getFirstname())
                 .lastname(user.getLastname())
                 .email(user.getEmail())
                 .avatar(user.getAvatar())
-                .oauthProvider(user.getOauthProvider())
-                .providerId(user.getProviderId())
                 .isVerified(user.getIsVerified())
                 .dietaryPreferences(user.getDietaryPreferences())
                 .allergies(user.getAllergies())
@@ -29,25 +30,53 @@ public class UserMapper {
                 .build();
     }
 
-    public User toEntity(UserDTO userDTO) {
-        if (userDTO == null) {
+    public User toEntity(UserCreateRequest request) {
+        if (request == null) {
             return null;
         }
         return User.builder()
-                .id(userDTO.getId())
-                .firstname(userDTO.getFirstname())
-                .lastname(userDTO.getLastname())
-                .email(userDTO.getEmail())
-                .avatar(userDTO.getAvatar())
-                .oauthProvider(userDTO.getOauthProvider())
-                .providerId(userDTO.getProviderId())
-                .isVerified(userDTO.getIsVerified())
-                .dietaryPreferences(userDTO.getDietaryPreferences())
-                .allergies(userDTO.getAllergies())
-                .favoriteCuisine(userDTO.getFavoriteCuisine())
-                .defaultServings(userDTO.getDefaultServings())
-                .createdAt(userDTO.getCreatedAt())
-                .updatedAt(userDTO.getUpdatedAt())
+                .firstname(request.getFirstname())
+                .lastname(request.getLastname())
+                .email(request.getEmail())
+                .password(request.getPassword())
+                .avatar(request.getAvatar())
+                .dietaryPreferences(request.getDietaryPreferences())
+                .allergies(request.getAllergies())
+                .favoriteCuisine(request.getFavoriteCuisine())
+                .defaultServings(request.getDefaultServings())
+                .build();
+    }
+
+    public User toEntity(UserUpdateRequest request) {
+        if (request == null) {
+            return null;
+        }
+        return User.builder()
+                .firstname(request.getFirstname())
+                .lastname(request.getLastname())
+                .password(request.getPassword())
+                .avatar(request.getAvatar())
+                .dietaryPreferences(request.getDietaryPreferences())
+                .allergies(request.getAllergies())
+                .favoriteCuisine(request.getFavoriteCuisine())
+                .defaultServings(request.getDefaultServings())
+                .build();
+    }
+
+    public User toEntity(RegisterRequest request) {
+        if (request == null) {
+            return null;
+        }
+        return User.builder()
+                .firstname(request.getFirstname())
+                .lastname(request.getLastname())
+                .email(request.getEmail())
+                .password(request.getPassword())
+                .avatar(request.getAvatar())
+                .dietaryPreferences(request.getDietaryPreferences())
+                .allergies(request.getAllergies())
+                .favoriteCuisine(request.getFavoriteCuisine())
+                .defaultServings(request.getDefaultServings())
                 .build();
     }
 }
