@@ -44,7 +44,7 @@ public class RecipeController {
     @GetMapping("/{id}")
     public ResponseEntity<RecipeResponse> getRecipeById(@PathVariable Long id) {
         Recipe recipe = recipeService.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Recipe", id));
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("Recipe not found with id: %d", id)));
         return ResponseEntity.ok(recipeMapper.toResponse(recipe));
     }
 
@@ -81,7 +81,7 @@ public class RecipeController {
     @PutMapping("/{id}")
     public ResponseEntity<RecipeResponse> updateRecipe(@PathVariable Long id, @Valid @RequestBody RecipeUpdateRequest request) {
         Recipe existingRecipe = recipeService.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Recipe", id));
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("Recipe not found with id: %d", id)));
         
         Recipe recipe = recipeMapper.toEntity(request);
         recipe.setId(id);
@@ -92,7 +92,7 @@ public class RecipeController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRecipe(@PathVariable Long id) {
         Recipe recipe = recipeService.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Recipe", id));
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("Recipe not found with id: %d", id)));
         recipeService.delete(id);
         return ResponseEntity.noContent().build();
     }

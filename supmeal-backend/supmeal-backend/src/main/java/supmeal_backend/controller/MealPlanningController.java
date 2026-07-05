@@ -45,7 +45,7 @@ public class MealPlanningController {
     @GetMapping("/{id}")
     public ResponseEntity<MealPlanningResponse> getMealPlanningById(@PathVariable Long id) {
         MealPlanning mealPlanning = mealPlanningService.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("MealPlanning", id));
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("MealPlanning not found with id: %d", id)));
         return ResponseEntity.ok(mealPlanningMapper.toResponse(mealPlanning));
     }
 
@@ -75,7 +75,7 @@ public class MealPlanningController {
     @PutMapping("/{id}")
     public ResponseEntity<MealPlanningResponse> updateMealPlanning(@PathVariable Long id, @Valid @RequestBody MealPlanningUpdateRequest request) {
         MealPlanning existingMealPlanning = mealPlanningService.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("MealPlanning", id));
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("MealPlanning not found with id: %d", id)));
         
         MealPlanning mealPlanning = mealPlanningMapper.toEntity(request);
         mealPlanning.setId(id);
@@ -86,7 +86,7 @@ public class MealPlanningController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMealPlanning(@PathVariable Long id) {
         MealPlanning mealPlanning = mealPlanningService.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("MealPlanning", id));
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("MealPlanning not found with id: %d", id)));
         mealPlanningService.delete(id);
         return ResponseEntity.noContent().build();
     }

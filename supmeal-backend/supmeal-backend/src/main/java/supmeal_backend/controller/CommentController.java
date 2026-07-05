@@ -44,7 +44,7 @@ public class CommentController {
     @GetMapping("/{id}")
     public ResponseEntity<CommentResponse> getCommentById(@PathVariable Long id) {
         Comment comment = commentService.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Comment", id));
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("Comment not found with id: %d", id)));
         return ResponseEntity.ok(commentMapper.toResponse(comment));
     }
 
@@ -61,7 +61,7 @@ public class CommentController {
     @PutMapping("/{id}")
     public ResponseEntity<CommentResponse> updateComment(@PathVariable Long id, @Valid @RequestBody CommentUpdateRequest request) {
         Comment existingComment = commentService.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Comment", id));
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("Comment not found with id: %d", id)));
         
         Comment comment = commentMapper.toEntity(request);
         comment.setId(id);
@@ -72,7 +72,7 @@ public class CommentController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteComment(@PathVariable Long id) {
         Comment comment = commentService.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Comment", id));
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("Comment not found with id: %d", id)));
         commentService.delete(id);
         return ResponseEntity.noContent().build();
     }

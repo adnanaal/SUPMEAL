@@ -44,7 +44,7 @@ public class CookbookController {
     @GetMapping("/{id}")
     public ResponseEntity<CookbookResponse> getCookbookById(@PathVariable Long id) {
         Cookbook cookbook = cookbookService.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Cookbook", id));
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("Cookbook not found with id: %d", id)));
         return ResponseEntity.ok(cookbookMapper.toResponse(cookbook));
     }
 
@@ -61,7 +61,7 @@ public class CookbookController {
     @PutMapping("/{id}")
     public ResponseEntity<CookbookResponse> updateCookbook(@PathVariable Long id, @Valid @RequestBody CookbookUpdateRequest request) {
         Cookbook existingCookbook = cookbookService.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Cookbook", id));
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("Cookbook not found with id: %d", id)));
         
         Cookbook cookbook = cookbookMapper.toEntity(request);
         cookbook.setId(id);
@@ -72,7 +72,7 @@ public class CookbookController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCookbook(@PathVariable Long id) {
         Cookbook cookbook = cookbookService.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Cookbook", id));
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("Cookbook not found with id: %d", id)));
         cookbookService.delete(id);
         return ResponseEntity.noContent().build();
     }

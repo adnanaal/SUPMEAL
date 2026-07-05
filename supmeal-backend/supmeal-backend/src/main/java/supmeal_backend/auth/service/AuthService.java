@@ -11,6 +11,8 @@ import supmeal_backend.dto.request.RegisterRequest;
 import supmeal_backend.dto.response.AuthenticationResponse;
 import supmeal_backend.dto.response.UserResponse;
 import supmeal_backend.entity.User;
+import supmeal_backend.exception.AlreadyExistsException;
+import supmeal_backend.exception.ResourceNotFoundException;
 import supmeal_backend.mapper.UserMapper;
 import supmeal_backend.security.jwt.JwtService;
 import supmeal_backend.security.model.CustomUserDetails;
@@ -28,7 +30,7 @@ public class AuthService {
 
     public UserResponse register(RegisterRequest request) {
         if (userService.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already exists");
+            throw new AlreadyExistsException(String.format("Email already exists: %s", request.getEmail()));
         }
         
         User user = userMapper.toEntity(request);
@@ -43,7 +45,7 @@ public class AuthService {
         );
 
         User user = userService.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with email: %s", request.getEmail())));
         
         UserDetails userDetails = new CustomUserDetails(user);
         String jwtToken = jwtService.generateToken(userDetails);
