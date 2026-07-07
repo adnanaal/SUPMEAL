@@ -3,14 +3,18 @@ package supmeal_backend.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import supmeal_backend.dto.request.CommentCreateRequest;
 import supmeal_backend.dto.request.CommentUpdateRequest;
 import supmeal_backend.dto.response.CommentResponse;
 import supmeal_backend.entity.Comment;
+import supmeal_backend.entity.User;
 import supmeal_backend.exception.ResourceNotFoundException;
 import supmeal_backend.mapper.CommentMapper;
 import supmeal_backend.service.CommentService;
+import supmeal_backend.service.UserService;
 
 import jakarta.validation.Valid;
 import java.util.List;
@@ -24,10 +28,17 @@ public class CommentController {
 
     private final CommentService commentService;
     private final CommentMapper commentMapper;
+    private final UserService userService;
 
     @PostMapping
     public ResponseEntity<CommentResponse> createComment(@Valid @RequestBody CommentCreateRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        User user = userService.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with email: %s", email)));
+        
         Comment comment = commentMapper.toEntity(request);
+        comment.setUser(user);
         Comment savedComment = commentService.save(comment);
         return new ResponseEntity<>(commentMapper.toResponse(savedComment), HttpStatus.CREATED);
     }

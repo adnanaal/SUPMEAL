@@ -3,14 +3,18 @@ package supmeal_backend.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import supmeal_backend.dto.request.MealPlanningCreateRequest;
 import supmeal_backend.dto.request.MealPlanningUpdateRequest;
 import supmeal_backend.dto.response.MealPlanningResponse;
 import supmeal_backend.entity.MealPlanning;
+import supmeal_backend.entity.User;
 import supmeal_backend.exception.ResourceNotFoundException;
 import supmeal_backend.mapper.MealPlanningMapper;
 import supmeal_backend.service.MealPlanningService;
+import supmeal_backend.service.UserService;
 
 import jakarta.validation.Valid;
 import java.time.LocalDate;
@@ -25,10 +29,17 @@ public class MealPlanningController {
 
     private final MealPlanningService mealPlanningService;
     private final MealPlanningMapper mealPlanningMapper;
+    private final UserService userService;
 
     @PostMapping
     public ResponseEntity<MealPlanningResponse> createMealPlanning(@Valid @RequestBody MealPlanningCreateRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        User user = userService.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with email: %s", email)));
+        
         MealPlanning mealPlanning = mealPlanningMapper.toEntity(request);
+        mealPlanning.setUser(user);
         MealPlanning savedMealPlanning = mealPlanningService.save(mealPlanning);
         return new ResponseEntity<>(mealPlanningMapper.toResponse(savedMealPlanning), HttpStatus.CREATED);
     }

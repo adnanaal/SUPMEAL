@@ -3,14 +3,18 @@ package supmeal_backend.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import supmeal_backend.dto.request.RecipeCreateRequest;
 import supmeal_backend.dto.request.RecipeUpdateRequest;
 import supmeal_backend.dto.response.RecipeResponse;
 import supmeal_backend.entity.Recipe;
+import supmeal_backend.entity.User;
 import supmeal_backend.exception.ResourceNotFoundException;
 import supmeal_backend.mapper.RecipeMapper;
 import supmeal_backend.service.RecipeService;
+import supmeal_backend.service.UserService;
 
 import jakarta.validation.Valid;
 import java.util.List;
@@ -24,10 +28,17 @@ public class RecipeController {
 
     private final RecipeService recipeService;
     private final RecipeMapper recipeMapper;
+    private final UserService userService;
 
     @PostMapping
     public ResponseEntity<RecipeResponse> createRecipe(@Valid @RequestBody RecipeCreateRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        User owner = userService.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with email: %s", email)));
+        
         Recipe recipe = recipeMapper.toEntity(request);
+        recipe.setOwner(owner);
         Recipe savedRecipe = recipeService.save(recipe);
         return new ResponseEntity<>(recipeMapper.toResponse(savedRecipe), HttpStatus.CREATED);
     }

@@ -3,14 +3,18 @@ package supmeal_backend.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import supmeal_backend.dto.request.CookbookCreateRequest;
 import supmeal_backend.dto.request.CookbookUpdateRequest;
 import supmeal_backend.dto.response.CookbookResponse;
 import supmeal_backend.entity.Cookbook;
+import supmeal_backend.entity.User;
 import supmeal_backend.exception.ResourceNotFoundException;
 import supmeal_backend.mapper.CookbookMapper;
 import supmeal_backend.service.CookbookService;
+import supmeal_backend.service.UserService;
 
 import jakarta.validation.Valid;
 import java.util.List;
@@ -24,10 +28,17 @@ public class CookbookController {
 
     private final CookbookService cookbookService;
     private final CookbookMapper cookbookMapper;
+    private final UserService userService;
 
     @PostMapping
     public ResponseEntity<CookbookResponse> createCookbook(@Valid @RequestBody CookbookCreateRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        User owner = userService.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with email: %s", email)));
+        
         Cookbook cookbook = cookbookMapper.toEntity(request);
+        cookbook.setOwner(owner);
         Cookbook savedCookbook = cookbookService.save(cookbook);
         return new ResponseEntity<>(cookbookMapper.toResponse(savedCookbook), HttpStatus.CREATED);
     }
