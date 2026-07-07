@@ -32,7 +32,7 @@ public class AuthService {
         if (userService.existsByEmail(request.getEmail())) {
             throw new AlreadyExistsException(String.format("Email already exists: %s", request.getEmail()));
         }
-        
+
         User user = userMapper.toEntity(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         User savedUser = userService.save(user);
@@ -41,15 +41,17 @@ public class AuthService {
 
     public AuthenticationResponse login(LoginRequest request) {
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-        );
+                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
 
         User user = userService.findByEmail(request.getEmail())
-                .orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with email: %s", request.getEmail())));
-        
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        String.format("User not found with email: %s", request.getEmail())));
+
         UserDetails userDetails = new CustomUserDetails(user);
-        String jwtToken = jwtService.generateToken(userDetails);
-        
+
+        // ✅ CORRECTION : passer l'ID utilisateur
+        String jwtToken = jwtService.generateToken(userDetails, user.getId());
+
         return AuthenticationResponse.builder()
                 .token(jwtToken)
                 .type("Bearer")
