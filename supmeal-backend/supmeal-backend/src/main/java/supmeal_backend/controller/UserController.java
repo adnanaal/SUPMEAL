@@ -60,9 +60,32 @@ public class UserController {
         User existingUser = userService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with id: %d", id)));
         
-        User user = userMapper.toEntity(request);
-        user.setId(id);
-        User updatedUser = userService.update(user);
+        if (request.getFirstname() != null) {
+            existingUser.setFirstname(request.getFirstname());
+        }
+        if (request.getLastname() != null) {
+            existingUser.setLastname(request.getLastname());
+        }
+        if (request.getPassword() != null) {
+            existingUser.setPassword(request.getPassword());
+        }
+        if (request.getAvatar() != null) {
+            existingUser.setAvatar(request.getAvatar());
+        }
+        if (request.getDietaryPreferences() != null) {
+            existingUser.setDietaryPreferences(request.getDietaryPreferences());
+        }
+        if (request.getAllergies() != null) {
+            existingUser.setAllergies(request.getAllergies());
+        }
+        if (request.getFavoriteCuisine() != null) {
+            existingUser.setFavoriteCuisine(request.getFavoriteCuisine());
+        }
+        if (request.getDefaultServings() != null) {
+            existingUser.setDefaultServings(request.getDefaultServings());
+        }
+        
+        User updatedUser = userService.update(existingUser);
         return ResponseEntity.ok(userMapper.toResponse(updatedUser));
     }
 

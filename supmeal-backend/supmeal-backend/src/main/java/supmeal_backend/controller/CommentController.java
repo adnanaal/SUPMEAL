@@ -74,9 +74,11 @@ public class CommentController {
         Comment existingComment = commentService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Comment not found with id: %d", id)));
         
-        Comment comment = commentMapper.toEntity(request);
-        comment.setId(id);
-        Comment updatedComment = commentService.update(comment);
+        if (request.getContent() != null) {
+            existingComment.setContent(request.getContent());
+        }
+        
+        Comment updatedComment = commentService.update(existingComment);
         return ResponseEntity.ok(commentMapper.toResponse(updatedComment));
     }
 

@@ -74,9 +74,14 @@ public class CookbookController {
         Cookbook existingCookbook = cookbookService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Cookbook not found with id: %d", id)));
         
-        Cookbook cookbook = cookbookMapper.toEntity(request);
-        cookbook.setId(id);
-        Cookbook updatedCookbook = cookbookService.update(cookbook);
+        if (request.getName() != null) {
+            existingCookbook.setName(request.getName());
+        }
+        if (request.getDescription() != null) {
+            existingCookbook.setDescription(request.getDescription());
+        }
+        
+        Cookbook updatedCookbook = cookbookService.update(existingCookbook);
         return ResponseEntity.ok(cookbookMapper.toResponse(updatedCookbook));
     }
 

@@ -94,9 +94,41 @@ public class RecipeController {
         Recipe existingRecipe = recipeService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Recipe not found with id: %d", id)));
         
-        Recipe recipe = recipeMapper.toEntity(request);
-        recipe.setId(id);
-        Recipe updatedRecipe = recipeService.update(recipe);
+        if (request.getTitle() != null) {
+            existingRecipe.setTitle(request.getTitle());
+        }
+        if (request.getDescription() != null) {
+            existingRecipe.setDescription(request.getDescription());
+        }
+        if (request.getPreparationTime() != null) {
+            existingRecipe.setPreparationTime(request.getPreparationTime());
+        }
+        if (request.getCookingTime() != null) {
+            existingRecipe.setCookingTime(request.getCookingTime());
+        }
+        if (request.getServings() != null) {
+            existingRecipe.setServings(request.getServings());
+        }
+        if (request.getImagePath() != null) {
+            existingRecipe.setImagePath(request.getImagePath());
+        }
+        if (request.getSource() != null) {
+            existingRecipe.setSource(request.getSource());
+        }
+        if (request.getMealType() != null) {
+            existingRecipe.setMealType(request.getMealType());
+        }
+        if (request.getIngredients() != null) {
+            existingRecipe.setIngredients(request.getIngredients());
+        }
+        if (request.getSteps() != null) {
+            existingRecipe.setSteps(request.getSteps());
+        }
+        if (request.getTags() != null) {
+            existingRecipe.setTags(request.getTags());
+        }
+        
+        Recipe updatedRecipe = recipeService.update(existingRecipe);
         return ResponseEntity.ok(recipeMapper.toResponse(updatedRecipe));
     }
 

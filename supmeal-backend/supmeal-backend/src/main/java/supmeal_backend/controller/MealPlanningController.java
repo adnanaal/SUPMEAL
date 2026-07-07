@@ -10,10 +10,12 @@ import supmeal_backend.dto.request.MealPlanningCreateRequest;
 import supmeal_backend.dto.request.MealPlanningUpdateRequest;
 import supmeal_backend.dto.response.MealPlanningResponse;
 import supmeal_backend.entity.MealPlanning;
+import supmeal_backend.entity.Recipe;
 import supmeal_backend.entity.User;
 import supmeal_backend.exception.ResourceNotFoundException;
 import supmeal_backend.mapper.MealPlanningMapper;
 import supmeal_backend.service.MealPlanningService;
+import supmeal_backend.service.RecipeService;
 import supmeal_backend.service.UserService;
 
 import jakarta.validation.Valid;
@@ -30,6 +32,7 @@ public class MealPlanningController {
     private final MealPlanningService mealPlanningService;
     private final MealPlanningMapper mealPlanningMapper;
     private final UserService userService;
+    private final RecipeService recipeService;
 
     @PostMapping
     public ResponseEntity<MealPlanningResponse> createMealPlanning(@Valid @RequestBody MealPlanningCreateRequest request) {
@@ -88,9 +91,19 @@ public class MealPlanningController {
         MealPlanning existingMealPlanning = mealPlanningService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("MealPlanning not found with id: %d", id)));
         
-        MealPlanning mealPlanning = mealPlanningMapper.toEntity(request);
-        mealPlanning.setId(id);
-        MealPlanning updatedMealPlanning = mealPlanningService.update(mealPlanning);
+        if (request.getPlannedDate() != null) {
+            existingMealPlanning.setPlannedDate(request.getPlannedDate());
+        }
+        if (request.getMealType() != null) {
+            existingMealPlanning.setMealType(request.getMealType());
+        }
+        if (request.getRecipeId() != null) {
+            Recipe recipe = recipeService.findById(request.getRecipeId())
+                    .orElseThrow(() -> new ResourceNotFoundException(String.format("Recipe not found with id: %d", request.getRecipeId())));
+            existingMealPlanning.setRecipe(recipe);
+        }
+        
+        MealPlanning updatedMealPlanning = mealPlanningService.update(existingMealPlanning);
         return ResponseEntity.ok(mealPlanningMapper.toResponse(updatedMealPlanning));
     }
 
