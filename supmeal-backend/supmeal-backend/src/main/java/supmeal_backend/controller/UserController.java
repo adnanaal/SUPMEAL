@@ -3,6 +3,7 @@ package supmeal_backend.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import supmeal_backend.dto.request.UserCreateRequest;
 import supmeal_backend.dto.request.UserUpdateRequest;
@@ -25,6 +26,7 @@ public class UserController {
 
     private final UserService userService;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @PostMapping
     public ResponseEntity<UserResponse> createUser(@Valid @RequestBody UserCreateRequest request) {
@@ -32,6 +34,7 @@ public class UserController {
             throw new AlreadyExistsException(String.format("Email already exists: %s", request.getEmail()));
         }
         User user = userMapper.toEntity(request);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         User savedUser = userService.save(user);
         return new ResponseEntity<>(userMapper.toResponse(savedUser), HttpStatus.CREATED);
     }
