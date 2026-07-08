@@ -4,7 +4,13 @@ import org.springframework.stereotype.Component;
 import supmeal_backend.dto.request.RecipeCreateRequest;
 import supmeal_backend.dto.request.RecipeUpdateRequest;
 import supmeal_backend.dto.response.RecipeResponse;
+import supmeal_backend.entity.Ingredient;
 import supmeal_backend.entity.Recipe;
+import supmeal_backend.entity.RecipeStep;
+import supmeal_backend.entity.Tag;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class RecipeMapper {
@@ -42,7 +48,7 @@ public class RecipeMapper {
         if (request == null) {
             return null;
         }
-        return Recipe.builder()
+        Recipe recipe = Recipe.builder()
                 .title(request.getTitle())
                 .description(request.getDescription())
                 .preparationTime(request.getPreparationTime())
@@ -52,6 +58,50 @@ public class RecipeMapper {
                 .source(request.getSource())
                 .mealType(request.getMealType())
                 .build();
+        
+        // Convert ingredients List<String> to List<Ingredient>
+        if (request.getIngredients() != null) {
+            List<Ingredient> ingredients = new ArrayList<>();
+            for (int i = 0; i < request.getIngredients().size(); i++) {
+                Ingredient ingredient = Ingredient.builder()
+                        .name(request.getIngredients().get(i))
+                        .quantity(1.0)
+                        .unit("unit")
+                        .recipe(recipe)
+                        .build();
+                ingredients.add(ingredient);
+            }
+            recipe.setIngredients(ingredients);
+        }
+        
+        // Convert steps List<String> to List<RecipeStep>
+        if (request.getSteps() != null) {
+            List<RecipeStep> steps = new ArrayList<>();
+            for (int i = 0; i < request.getSteps().size(); i++) {
+                RecipeStep step = RecipeStep.builder()
+                        .stepOrder(i + 1)
+                        .instruction(request.getSteps().get(i))
+                        .recipe(recipe)
+                        .build();
+                steps.add(step);
+            }
+            recipe.setSteps(steps);
+        }
+        
+        // Convert tags List<String> to List<Tag>
+        if (request.getTags() != null) {
+            List<Tag> tags = new ArrayList<>();
+            for (String tagName : request.getTags()) {
+                Tag tag = Tag.builder()
+                        .name(tagName)
+                        .recipe(recipe)
+                        .build();
+                tags.add(tag);
+            }
+            recipe.setTags(tags);
+        }
+        
+        return recipe;
     }
 
     public Recipe toEntity(RecipeUpdateRequest request) {

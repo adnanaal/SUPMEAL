@@ -9,7 +9,10 @@ import org.springframework.web.bind.annotation.*;
 import supmeal_backend.dto.request.RecipeCreateRequest;
 import supmeal_backend.dto.request.RecipeUpdateRequest;
 import supmeal_backend.dto.response.RecipeResponse;
+import supmeal_backend.entity.Ingredient;
 import supmeal_backend.entity.Recipe;
+import supmeal_backend.entity.RecipeStep;
+import supmeal_backend.entity.Tag;
 import supmeal_backend.entity.User;
 import supmeal_backend.exception.ResourceNotFoundException;
 import supmeal_backend.mapper.RecipeMapper;
@@ -17,6 +20,7 @@ import supmeal_backend.service.RecipeService;
 import supmeal_backend.service.UserService;
 
 import jakarta.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -119,13 +123,40 @@ public class RecipeController {
             existingRecipe.setMealType(request.getMealType());
         }
         if (request.getIngredients() != null) {
-            existingRecipe.setIngredients(request.getIngredients());
+            List<Ingredient> ingredients = new ArrayList<>();
+            for (int i = 0; i < request.getIngredients().size(); i++) {
+                Ingredient ingredient = Ingredient.builder()
+                        .name(request.getIngredients().get(i))
+                        .quantity(1.0)
+                        .unit("unit")
+                        .recipe(existingRecipe)
+                        .build();
+                ingredients.add(ingredient);
+            }
+            existingRecipe.setIngredients(ingredients);
         }
         if (request.getSteps() != null) {
-            existingRecipe.setSteps(request.getSteps());
+            List<RecipeStep> steps = new ArrayList<>();
+            for (int i = 0; i < request.getSteps().size(); i++) {
+                RecipeStep step = RecipeStep.builder()
+                        .stepOrder(i + 1)
+                        .instruction(request.getSteps().get(i))
+                        .recipe(existingRecipe)
+                        .build();
+                steps.add(step);
+            }
+            existingRecipe.setSteps(steps);
         }
         if (request.getTags() != null) {
-            existingRecipe.setTags(request.getTags());
+            List<Tag> tags = new ArrayList<>();
+            for (String tagName : request.getTags()) {
+                Tag tag = Tag.builder()
+                        .name(tagName)
+                        .recipe(existingRecipe)
+                        .build();
+                tags.add(tag);
+            }
+            existingRecipe.setTags(tags);
         }
         
         Recipe updatedRecipe = recipeService.update(existingRecipe);
