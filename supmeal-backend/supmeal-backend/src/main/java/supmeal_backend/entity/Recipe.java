@@ -58,7 +58,7 @@ public class Recipe {
     @Builder.Default
     private List<RecipeStep> steps = new ArrayList<>();
 
-    @ManyToMany(cascade = CascadeType.PERSIST)
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "recipe_tags", joinColumns = @JoinColumn(name = "recipe_id"), inverseJoinColumns = @JoinColumn(name = "tag_id"))
     @Builder.Default
     private List<Tag> tags = new ArrayList<>();

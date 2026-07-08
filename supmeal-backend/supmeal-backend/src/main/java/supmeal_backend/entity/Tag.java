@@ -23,8 +23,4 @@ public class Tag {
 
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recipe_id", nullable = false)
-    private Recipe recipe;
 }

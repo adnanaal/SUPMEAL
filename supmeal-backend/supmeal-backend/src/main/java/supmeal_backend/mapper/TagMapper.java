@@ -16,7 +16,6 @@ public class TagMapper {
                 .id(tag.getId())
                 .name(tag.getName())
                 .createdAt(tag.getCreatedAt())
-                .recipeId(tag.getRecipe() != null ? tag.getRecipe().getId() : null)
                 .build();
     }
 

@@ -94,7 +94,6 @@ public class RecipeMapper {
             for (String tagName : request.getTags()) {
                 Tag tag = Tag.builder()
                         .name(tagName)
-                        .recipe(recipe)
                         .build();
                 tags.add(tag);
             }
