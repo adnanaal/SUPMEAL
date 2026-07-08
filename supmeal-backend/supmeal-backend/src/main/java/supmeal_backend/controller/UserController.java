@@ -8,6 +8,7 @@ import supmeal_backend.dto.request.UserCreateRequest;
 import supmeal_backend.dto.request.UserUpdateRequest;
 import supmeal_backend.dto.response.UserResponse;
 import supmeal_backend.entity.User;
+import supmeal_backend.exception.AlreadyExistsException;
 import supmeal_backend.exception.ResourceNotFoundException;
 import supmeal_backend.mapper.UserMapper;
 import supmeal_backend.service.UserService;
@@ -27,6 +28,9 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<UserResponse> createUser(@Valid @RequestBody UserCreateRequest request) {
+        if (userService.existsByEmail(request.getEmail())) {
+            throw new AlreadyExistsException(String.format("Email already exists: %s", request.getEmail()));
+        }
         User user = userMapper.toEntity(request);
         User savedUser = userService.save(user);
         return new ResponseEntity<>(userMapper.toResponse(savedUser), HttpStatus.CREATED);
