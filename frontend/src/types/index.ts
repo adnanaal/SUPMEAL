@@ -1,90 +1,107 @@
 // Types TypeScript pour l'application SUPMEAL
 
 export interface User {
-  id: string;
+  id: number;
+  firstname: string;
+  lastname: string;
   email: string;
-  name: string;
   avatar?: string;
-  preferences: UserPreferences;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface UserPreferences {
-  diet?: string;
-  allergies?: string[];
-  preferredCuisine?: string[];
-  defaultPortions?: number;
+  dietaryPreferences?: string;
+  allergies?: string;
+  favoriteCuisine?: string;
+  defaultServings?: number;
+  oauthProvider?: string;
+  providerId?: string;
+  isVerified: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Cookbook {
-  id: string;
+  id: number;
   name: string;
   description?: string;
-  created_by: string;
-  created_at: string;
-  updated_at: string;
-  members?: CookbookMember[];
-}
-
-export interface CookbookMember {
-  user_id: string;
-  role: 'CREATOR' | 'EDITOR' | 'READER' | 'COMMENTATOR';
-  user?: User;
+  ownerId: number;
+  owner?: User;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Recipe {
-  id: string;
+  id: number;
   title: string;
   description?: string;
-  ingredients: Ingredient[];
-  steps: string[];
-  prep_time: number;
-  cook_time: number;
-  portions: number;
-  image?: string;
+  preparationTime?: number;
+  cookingTime?: number;
+  servings?: number;
+  imagePath?: string;
   source?: string;
-  is_favorite?: boolean;
-  cookbook_id?: string;
-  created_by: string;
-  created_at: string;
-  updated_at: string;
+  mealType: MealType;
+  ownerId?: number;
+  owner?: User;
+  ingredients?: Ingredient[];
+  steps?: RecipeStep[];
   tags?: Tag[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Ingredient {
+  id: number;
   name: string;
-  quantity: string;
+  quantity: number;
   unit?: string;
+  recipeId?: number;
+}
+
+export interface RecipeStep {
+  id: number;
+  instruction: string;
+  stepOrder: number;
+  recipeId?: number;
 }
 
 export interface Tag {
-  id: string;
+  id: number;
   name: string;
+  createdAt: string;
 }
 
-export interface Message {
-  id: string;
-  content: string;
-  cookbook_id: string;
-  user_id: string;
+export interface MealPlanning {
+  id: number;
+  plannedDate: string;
+  mealType: MealType;
+  createdAt: string;
+  userId: number;
   user?: User;
-  created_at: string;
+  recipeId: number;
+  recipe?: Recipe;
+}
+
+export enum MealType {
+  BREAKFAST = "BREAKFAST",
+  LUNCH = "LUNCH",
+  DINNER = "DINNER",
+  SNACK = "SNACK"
 }
 
 export interface Comment {
-  id: string;
+  id: number;
   content: string;
-  recipe_id: string;
-  user_id: string;
+  createdAt: string;
+  userId: number;
   user?: User;
-  created_at: string;
+  recipeId: number;
+  recipe?: Recipe;
 }
 
-export interface RecipePlanning {
-  recipe_id: string;
-  user_id: string;
-  planned_date: string;
+export interface FavoriteRecipe {
+  id: number;
+  createdAt: string;
+  userId: number;
+  user?: User;
+  recipeId: number;
+  recipe?: Recipe;
 }
 
 // Types pour les formulaires
@@ -96,7 +113,8 @@ export interface LoginCredentials {
 export interface RegisterCredentials {
   email: string;
   password: string;
-  name: string;
+  firstname: string;
+  lastname: string;
 }
 
 export interface CreateCookbookData {
@@ -107,25 +125,44 @@ export interface CreateCookbookData {
 export interface CreateRecipeData {
   title: string;
   description?: string;
-  ingredients: Ingredient[];
+  ingredients: string[];
   steps: string[];
-  prep_time: number;
-  cook_time: number;
-  portions: number;
-  image?: string;
+  preparationTime?: number;
+  cookingTime?: number;
+  servings?: number;
+  imagePath?: string;
   source?: string;
-  cookbook_id?: string;
+  mealType?: MealType;
   tags?: string[];
+}
+
+export interface UpdateRecipeData {
+  title?: string;
+  description?: string;
+  ingredients?: string[];
+  steps?: string[];
+  preparationTime?: number;
+  cookingTime?: number;
+  servings?: number;
+  imagePath?: string;
+  source?: string;
+  mealType?: MealType;
+  tags?: string[];
+}
+
+export interface CreateMealPlanningData {
+  plannedDate: string;
+  mealType: MealType;
+  recipeId: number;
 }
 
 // Types pour les filtres
 export interface RecipeFilters {
-  cookbook_id?: string;
   tags?: string[];
   ingredients?: string[];
-  max_prep_time?: number;
-  max_cook_time?: number;
-  favorites_only?: boolean;
+  maxPreparationTime?: number;
+  maxCookingTime?: number;
+  mealType?: MealType;
   search?: string;
 }
 

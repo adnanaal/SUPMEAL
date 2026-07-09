@@ -36,8 +36,8 @@ export function Login() {
         localStorage.setItem('user', JSON.stringify(simulatedUser));
         localStorage.setItem('isAuthenticated', 'true');
         
-        // Rediriger vers le dashboard (pour l'instant vers home)
-        router.push('/');
+        // Rediriger vers le dashboard
+        router.push('/dashboard');
       } else {
         setError('Veuillez remplir tous les champs');
       }
