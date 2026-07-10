@@ -14,6 +14,8 @@ import {
   MessageSquare, 
   Settings,
   ChefHat,
+  ShoppingCart,
+  Home,
   LucideIcon
 } from 'lucide-react';
 
@@ -24,8 +26,10 @@ interface MenuItem {
 }
 
 const menuItems: MenuItem[] = [
-  { label: 'Recipes', href: '/dashboard', icon: Utensils },
+  { label: 'Home Page', href: '/dashboard', icon: Home },
+  { label: 'Recipes', href: '/dashboard/recipes', icon: Utensils },
   { label: 'Meal Planner', href: '/dashboard/meal-planner', icon: Calendar },
+  { label: 'Shopping Lists', href: '/dashboard/shopping-lists', icon: ShoppingCart },
   { label: 'Cookbooks', href: '/dashboard/cookbooks', icon: BookOpen },
   { label: 'Favorites', href: '/dashboard/favorites', icon: Heart },
   { label: 'Notifications', href: '/dashboard/notifications', icon: Bell },

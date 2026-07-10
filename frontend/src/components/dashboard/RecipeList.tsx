@@ -1,3 +1,6 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
 import { Recipe } from '@/types';
 import { Clock, Users, ChefHat } from 'lucide-react';
 
@@ -7,6 +10,8 @@ interface RecipeListProps {
 }
 
 export function RecipeList({ recipes, title = 'Recent Recipes' }: RecipeListProps) {
+  const router = useRouter();
+
   if (recipes.length === 0) {
     return (
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
@@ -23,6 +28,7 @@ export function RecipeList({ recipes, title = 'Recent Recipes' }: RecipeListProp
         {recipes.map((recipe) => (
           <div
             key={recipe.id}
+            onClick={() => router.push(`/dashboard/recipes/${recipe.id}`)}
             className="flex items-start space-x-4 p-4 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
           >
             {recipe.imagePath && (
