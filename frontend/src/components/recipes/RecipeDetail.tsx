@@ -6,8 +6,10 @@ import { Recipe, CreateRecipeData } from '@/types';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Navbar } from '@/components/layout/Navbar';
 import { EditRecipeModal } from '@/components/recipes/EditRecipeModal';
+import { AddToShoppingListModal } from '@/components/recipes/AddToShoppingListModal';
+import { AddToMealPlannerModal } from '@/components/recipes/AddToMealPlannerModal';
 import { getLocalRecipeById, updateLocalRecipe } from '@/lib/localRecipes';
-import { ArrowLeft, Clock, Users, Tag, ChefHat, Utensils, Heart, Share2, Edit, Trash2, Check } from 'lucide-react';
+import { ArrowLeft, Clock, Users, Tag, ChefHat, Utensils, Heart, Share2, Edit, Trash2, Check, ShoppingCart, Calendar } from 'lucide-react';
 
 export function RecipeDetail() {
   const params = useParams();
@@ -15,6 +17,8 @@ export function RecipeDetail() {
   const [isFavorite, setIsFavorite] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAddToShoppingListModalOpen, setIsAddToShoppingListModalOpen] = useState(false);
+  const [isAddToMealPlannerModalOpen, setIsAddToMealPlannerModalOpen] = useState(false);
   const [currentRecipe, setCurrentRecipe] = useState<Recipe | null>(null);
   
   // Récupérer l'ID depuis l'URL
@@ -175,6 +179,20 @@ export function RecipeDetail() {
               {shareCopied ? <Check className="w-5 h-5 text-green-600" /> : <Share2 className="w-5 h-5 text-gray-900" />}
             </button>
             <button
+              onClick={() => setIsAddToShoppingListModalOpen(true)}
+              className="p-2 bg-white/90 backdrop-blur-sm rounded-lg hover:bg-white transition-colors"
+              title="Add to shopping list"
+            >
+              <ShoppingCart className="w-5 h-5 text-gray-900" />
+            </button>
+            <button
+              onClick={() => setIsAddToMealPlannerModalOpen(true)}
+              className="p-2 bg-white/90 backdrop-blur-sm rounded-lg hover:bg-white transition-colors"
+              title="Add to meal planner"
+            >
+              <Calendar className="w-5 h-5 text-gray-900" />
+            </button>
+            <button
               onClick={handleEdit}
               className="p-2 bg-white/90 backdrop-blur-sm rounded-lg hover:bg-white transition-colors"
               title="Edit recipe"
@@ -301,6 +319,24 @@ export function RecipeDetail() {
           recipe={recipe}
           onUpdate={handleUpdate}
         />
+
+        {/* Add to Shopping List Modal */}
+        {recipe && (
+          <AddToShoppingListModal
+            isOpen={isAddToShoppingListModalOpen}
+            onClose={() => setIsAddToShoppingListModalOpen(false)}
+            recipe={recipe}
+          />
+        )}
+
+        {/* Add to Meal Planner Modal */}
+        {recipe && (
+          <AddToMealPlannerModal
+            isOpen={isAddToMealPlannerModalOpen}
+            onClose={() => setIsAddToMealPlannerModalOpen(false)}
+            recipe={recipe}
+          />
+        )}
       </div>
     </div>
   );
