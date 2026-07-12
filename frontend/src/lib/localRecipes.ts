@@ -1,4 +1,4 @@
-import { Recipe } from '@/types';
+import { Recipe, MealType } from '@/types';
 
 // Données manuelles temporaires (seront remplacées par l'API)
 let localRecipes: Recipe[] = [
@@ -11,7 +11,7 @@ let localRecipes: Recipe[] = [
     servings: 4,
     imagePath: 'https://images.unsplash.com/photo-1612874742237-6526221588e3?w=800',
     source: 'Italian Cuisine',
-    mealType: 'DINNER' as any,
+    mealType: MealType.DINNER,
     tags: [
       { id: 1, name: 'Italian', createdAt: '2024-01-01' },
       { id: 2, name: 'Quick', createdAt: '2024-01-01' },
@@ -42,7 +42,7 @@ let localRecipes: Recipe[] = [
     servings: 2,
     imagePath: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=800',
     source: 'Asian Cuisine',
-    mealType: 'DINNER' as any,
+    mealType: MealType.DINNER,
     tags: [
       { id: 3, name: 'Asian', createdAt: '2024-01-01' },
       { id: 4, name: 'Healthy', createdAt: '2024-01-01' },
@@ -73,7 +73,7 @@ let localRecipes: Recipe[] = [
     servings: 1,
     imagePath: 'https://images.unsplash.com/photo-1541519227354-08fa5d50c44d?w=800',
     source: 'Healthy Breakfast',
-    mealType: 'BREAKFAST' as any,
+    mealType: MealType.BREAKFAST,
     tags: [
       { id: 5, name: 'Healthy', createdAt: '2024-01-01' },
       { id: 6, name: 'Vegetarian', createdAt: '2024-01-01' },
@@ -116,3 +116,6 @@ export const getLocalRecipes = () => localRecipes;
 export const getLocalRecipeById = (id: number) => {
   return localRecipes.find((r) => r.id === id);
 };
+
+// Re-export Recipe type for use in other components
+export type { Recipe };

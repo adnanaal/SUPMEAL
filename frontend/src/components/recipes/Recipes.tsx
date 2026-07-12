@@ -6,7 +6,6 @@ import { RecipeList } from '@/components/dashboard/RecipeList';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Navbar } from '@/components/layout/Navbar';
 import { SearchBar } from '@/components/layout/SearchBar';
-import { RecipeFilters, RecipeFilterValues } from '@/components/recipes/RecipeFilters';
 import { CreateRecipeButton } from '@/components/recipes/CreateRecipeButton';
 import { ImportFromUrlModal } from '@/components/recipes/ImportFromUrlModal';
 import { CreateRecipeModal } from '@/components/recipes/CreateRecipeModal';
@@ -32,33 +31,6 @@ export function Recipes() {
       recipe.description?.toLowerCase().includes(query.toLowerCase()) ||
       recipe.tags?.some((tag) => tag.name.toLowerCase().includes(query.toLowerCase()))
     );
-    setFilteredRecipes(filtered);
-  };
-
-  const handleFilterChange = (filters: RecipeFilterValues) => {
-    let filtered = [...recipes];
-
-    if (filters.category) {
-      filtered = filtered.filter((recipe) => 
-        recipe.mealType === filters.category!.toUpperCase()
-      );
-    }
-
-    if (filters.tags && filters.tags.length > 0) {
-      filtered = filtered.filter((recipe) =>
-        recipe.tags?.some((tag) => filters.tags!.includes(tag.name))
-      );
-    }
-
-    if (filters.ingredients && filters.ingredients.length > 0) {
-      // Pour l'instant, on filtre par description (sera amélioré avec la base de données)
-      filtered = filtered.filter((recipe) =>
-        filters.ingredients!.some((ingredient) =>
-          recipe.description?.toLowerCase().includes(ingredient.toLowerCase())
-        )
-      );
-    }
-
     setFilteredRecipes(filtered);
   };
 
@@ -207,11 +179,6 @@ export function Recipes() {
               onImportFromUrl={() => setIsImportModalOpen(true)}
               onCreateManual={() => setIsCreateModalOpen(true)}
             />
-          </div>
-
-          {/* Advanced Filters */}
-          <div className="mb-6">
-            <RecipeFilters onFilterChange={handleFilterChange} recipes={recipes} />
           </div>
 
           {/* Recipes List */}

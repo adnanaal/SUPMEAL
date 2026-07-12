@@ -9,12 +9,13 @@ import { EditRecipeModal } from '@/components/recipes/EditRecipeModal';
 import { AddToShoppingListModal } from '@/components/recipes/AddToShoppingListModal';
 import { AddToMealPlannerModal } from '@/components/recipes/AddToMealPlannerModal';
 import { getLocalRecipeById, updateLocalRecipe } from '@/lib/localRecipes';
+import { toggleFavorite, isFavorite } from '@/lib/localFavorites';
 import { ArrowLeft, Clock, Users, Tag, ChefHat, Utensils, Heart, Share2, Edit, Trash2, Check, ShoppingCart, Calendar } from 'lucide-react';
 
 export function RecipeDetail() {
   const params = useParams();
   const router = useRouter();
-  const [isFavorite, setIsFavorite] = useState(false);
+  const [favoriteStatus, setFavoriteStatus] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddToShoppingListModalOpen, setIsAddToShoppingListModalOpen] = useState(false);
@@ -32,17 +33,13 @@ export function RecipeDetail() {
     const foundRecipe = getLocalRecipeById(recipeId);
     if (foundRecipe) {
       setCurrentRecipe(foundRecipe);
+      setFavoriteStatus(isFavorite(foundRecipe.id));
     }
   }, [recipeId]);
 
   const handleFavoriteToggle = () => {
-    setIsFavorite(!isFavorite);
-    // TODO: Quand connecté au backend, appeler l'API pour ajouter/supprimer des favoris
-    // if (isFavorite) {
-    //   await apiClient.delete(`/favorites/${recipeId}`);
-    // } else {
-    //   await apiClient.post('/favorites', { recipeId });
-    // }
+    const newStatus = toggleFavorite(recipeId);
+    setFavoriteStatus(newStatus);
   };
 
   const handleShare = async () => {
@@ -165,11 +162,11 @@ export function RecipeDetail() {
             <button
               onClick={handleFavoriteToggle}
               className={`p-2 rounded-lg backdrop-blur-sm transition-colors ${
-                isFavorite ? 'bg-red-500 text-white' : 'bg-white/90 text-gray-900 hover:bg-white'
+                favoriteStatus ? 'bg-red-500 text-white' : 'bg-white/90 text-gray-900 hover:bg-white'
               }`}
-              title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+              title={favoriteStatus ? 'Remove from favorites' : 'Add to favorites'}
             >
-              <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
+              <Heart className={`w-5 h-5 ${favoriteStatus ? 'fill-current' : ''}`} />
             </button>
             <button
               onClick={handleShare}
