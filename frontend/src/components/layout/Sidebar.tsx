@@ -11,7 +11,6 @@ import {
   BookOpen, 
   Layers, 
   Bell, 
-  MessageSquare, 
   Settings,
   ChefHat,
   ShoppingCart,
@@ -33,7 +32,6 @@ const menuItems: MenuItem[] = [
   { label: 'Cookbooks', href: '/dashboard/cookbooks', icon: BookOpen },
   { label: 'Organizers', href: '/dashboard/organizers', icon: Layers },
   { label: 'Notifications', href: '/dashboard/notifications', icon: Bell },
-  { label: 'Messages', href: '/dashboard/messages', icon: MessageSquare },
   { label: 'Settings', href: '/dashboard/settings', icon: Settings },
 ];
 

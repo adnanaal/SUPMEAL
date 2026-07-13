@@ -17,6 +17,8 @@ import { getLocalRecipes, Recipe } from '@/lib/localRecipes';
 import { InviteMemberModal } from '@/components/cookbooks/InviteMemberModal';
 import { AddRecipeModal } from '@/components/cookbooks/AddRecipeModal';
 import { EditMemberModal } from '@/components/cookbooks/EditMemberModal';
+import { CookbookMessaging } from '@/components/cookbooks/CookbookMessaging';
+import { RecipeComments } from '@/components/cookbooks/RecipeComments';
 
 export function CookbookDetail() {
   const params = useParams();
@@ -30,6 +32,17 @@ export function CookbookDetail() {
   
   const cookbookId = parseInt(params.id as string);
   const currentUserId = 'user1'; // Simuler l'utilisateur connecté
+  
+  // Mock user pour la messagerie
+  const currentUser = {
+    id: 1,
+    firstname: 'John',
+    lastname: 'Doe',
+    email: 'john@example.com',
+    isVerified: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
 
   useEffect(() => {
     const cookbookData = getCookbookById(cookbookId);
@@ -300,33 +313,46 @@ export function CookbookDetail() {
           </div>
         ) : (
           <div className="p-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {recipes.map((recipe) => (
                 <div
                   key={recipe.id}
-                  className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors"
+                  className="bg-gray-50 rounded-lg overflow-hidden"
                 >
                   {recipe.imagePath && (
                     <img
                       src={recipe.imagePath}
                       alt={recipe.title}
-                      className="w-full h-32 object-cover rounded mb-3"
+                      className="w-full h-32 object-cover"
                     />
                   )}
-                  <h3 className="font-medium text-gray-900 mb-2">{recipe.title}</h3>
-                  {canEdit() && (
-                    <button
-                      onClick={() => handleRemoveRecipe(recipe.id)}
-                      className="text-sm text-red-600 hover:text-red-700"
-                    >
-                      Remove
-                    </button>
-                  )}
+                  <div className="p-4">
+                    <h3 className="font-medium text-gray-900 mb-2">{recipe.title}</h3>
+                    {canEdit() && (
+                      <button
+                        onClick={() => handleRemoveRecipe(recipe.id)}
+                        className="text-sm text-red-600 hover:text-red-700 mb-3"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                  <RecipeComments
+                    cookbookId={cookbookId}
+                    recipeId={recipe.id}
+                    recipeTitle={recipe.title}
+                    currentUser={currentUser}
+                  />
                 </div>
               ))}
             </div>
           </div>
         )}
+      </div>
+
+      {/* Cookbook Messaging */}
+      <div className="mt-6">
+        <CookbookMessaging cookbookId={cookbookId} currentUser={currentUser} />
       </div>
 
       {/* Invite Member Modal */}
