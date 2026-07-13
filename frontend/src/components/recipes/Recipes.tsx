@@ -169,21 +169,19 @@ export function Recipes() {
       <Navbar />
       
       <div className="ml-64 pt-16 p-6">
-        <div className="max-w-7xl mx-auto">
-          {/* Header with Search and Create Button */}
-          <div className="flex items-center justify-between mb-6 gap-4">
-            <div className="flex-1">
-              <SearchBar onSearch={handleSearch} placeholder="Search recipes..." />
-            </div>
-            <CreateRecipeButton
-              onImportFromUrl={() => setIsImportModalOpen(true)}
-              onCreateManual={() => setIsCreateModalOpen(true)}
-            />
+        {/* Header with Search and Create Button */}
+        <div className="flex items-center justify-between mb-6 gap-4">
+          <div className="flex-1">
+            <SearchBar onSearch={handleSearch} placeholder="Search recipes..." />
           </div>
-
-          {/* Recipes List */}
-          <RecipeList recipes={filteredRecipes} title="All Recipes" />
+          <CreateRecipeButton
+            onImportFromUrl={() => setIsImportModalOpen(true)}
+            onCreateManual={() => setIsCreateModalOpen(true)}
+          />
         </div>
+
+        {/* Recipes List */}
+        <RecipeList recipes={filteredRecipes} title="All Recipes" />
       </div>
 
       {/* Modals */}

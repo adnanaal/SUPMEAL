@@ -5,11 +5,13 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ChefHat, User, LogOut, Settings, ChevronDown } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export function Navbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const { user, logout } = useAuthStore();
   const router = useRouter();
+  const { t } = useLanguage();
 
   const handleLogout = () => {
     logout();
@@ -18,7 +20,7 @@ export function Navbar() {
   };
 
   const handleProfile = () => {
-    router.push('/dashboard/settings');
+    router.push('/dashboard/profile');
     setIsDropdownOpen(false);
   };
 
@@ -59,7 +61,7 @@ export function Navbar() {
                 className="w-full flex items-center space-x-3 px-4 py-2 text-left hover:bg-gray-50 transition-colors"
               >
                 <Settings className="w-4 h-4 text-gray-500" />
-                <span className="text-gray-700">Account Settings</span>
+                <span className="text-gray-700">{t('profile')}</span>
               </button>
               <div className="border-t border-gray-200 my-2" />
               <button
@@ -67,7 +69,7 @@ export function Navbar() {
                 className="w-full flex items-center space-x-3 px-4 py-2 text-left hover:bg-gray-50 transition-colors text-red-600"
               >
                 <LogOut className="w-4 h-4" />
-                <span>Logout</span>
+                <span>{t('logout')}</span>
               </button>
             </div>
           )}

@@ -15,29 +15,34 @@ import {
   ChefHat,
   ShoppingCart,
   Home,
+  Heart,
   LucideIcon
 } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface MenuItem {
   label: string;
   href: string;
   icon: LucideIcon;
+  translationKey: string;
 }
-
-const menuItems: MenuItem[] = [
-  { label: 'Home Page', href: '/dashboard', icon: Home },
-  { label: 'Recipes', href: '/dashboard/recipes', icon: Utensils },
-  { label: 'Meal Planner', href: '/dashboard/meal-planner', icon: Calendar },
-  { label: 'Shopping Lists', href: '/dashboard/shopping-lists', icon: ShoppingCart },
-  { label: 'Cookbooks', href: '/dashboard/cookbooks', icon: BookOpen },
-  { label: 'Organizers', href: '/dashboard/organizers', icon: Layers },
-  { label: 'Notifications', href: '/dashboard/notifications', icon: Bell },
-  { label: 'Settings', href: '/dashboard/settings', icon: Settings },
-];
 
 export function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const pathname = usePathname();
+  const { t } = useLanguage();
+
+  const menuItems: MenuItem[] = [
+    { label: 'Home Page', href: '/dashboard', icon: Home, translationKey: 'homePage' },
+    { label: 'Recipes', href: '/dashboard/recipes', icon: Utensils, translationKey: 'recipes' },
+    { label: 'Meal Planner', href: '/dashboard/meal-planner', icon: Calendar, translationKey: 'mealPlanner' },
+    { label: 'Shopping Lists', href: '/dashboard/shopping-lists', icon: ShoppingCart, translationKey: 'shoppingLists' },
+    { label: 'Cookbooks', href: '/dashboard/cookbooks', icon: BookOpen, translationKey: 'cookbooks' },
+    { label: 'Organizers', href: '/dashboard/organizers', icon: Layers, translationKey: 'organizers' },
+    { label: 'Notifications', href: '/dashboard/notifications', icon: Bell, translationKey: 'notifications' },
+    { label: 'Preferences', href: '/dashboard/preferences', icon: Heart, translationKey: 'preferences' },
+    { label: 'Settings', href: '/dashboard/settings', icon: Settings, translationKey: 'settings' },
+  ];
 
   return (
     <div 
@@ -86,7 +91,7 @@ export function Sidebar() {
               }`}
             >
               <Icon className={`w-5 h-5 ${isCollapsed ? 'mx-auto' : ''}`} />
-              {!isCollapsed && <span className="font-medium">{item.label}</span>}
+              {!isCollapsed && <span className="font-medium">{t(item.translationKey)}</span>}
             </Link>
           );
         })}
