@@ -9,16 +9,33 @@ import { SearchBar } from '@/components/layout/SearchBar';
 import { CreateRecipeButton } from '@/components/recipes/CreateRecipeButton';
 import { ImportFromUrlModal } from '@/components/recipes/ImportFromUrlModal';
 import { CreateRecipeModal } from '@/components/recipes/CreateRecipeModal';
-import { getLocalRecipes, addLocalRecipe } from '@/lib/localRecipes';
-import { apiClient } from '@/lib/api';
+import { recipeService } from '@/services/recipeService';
 
 export function Recipes() {
-  const [recipes, setRecipes] = useState<Recipe[]>(getLocalRecipes());
-  const [filteredRecipes, setFilteredRecipes] = useState<Recipe[]>(getLocalRecipes());
-  const [loading, setLoading] = useState(false);
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [filteredRecipes, setFilteredRecipes] = useState<Recipe[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  // Charger les recettes depuis l'API au montage
+  useEffect(() => {
+    const loadRecipes = async () => {
+      try {
+        setLoading(true);
+        const data = await recipeService.getAllRecipes();
+        setRecipes(data);
+        setFilteredRecipes(data);
+      } catch (err) {
+        console.error('Failed to load recipes:', err);
+        setError('Failed to load recipes');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadRecipes();
+  }, []);
 
   const handleSearch = (query: string) => {
     if (!query.trim()) {
@@ -36,48 +53,13 @@ export function Recipes() {
 
   const handleImportFromUrl = async (url: string) => {
     try {
-      // Simuler l'import depuis URL (sera remplacé par l'API backend)
-      // Pour l'instant, on crée une recette avec des données basées sur l'URL
-      const importedRecipe: Recipe = {
-        id: Date.now(),
-        title: `Imported Recipe from ${new URL(url).hostname}`,
-        description: 'Recipe imported from URL. Please edit to add details.',
-        preparationTime: 30,
-        cookingTime: 20,
-        servings: 4,
-        imagePath: 'https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=800',
-        source: url,
-        mealType: MealType.DINNER,
-        tags: [
-          { id: Date.now(), name: 'Imported', createdAt: new Date().toISOString() },
-        ],
-        ingredients: [
-          { id: Date.now() + 1, name: 'Ingredient 1', quantity: 1, unit: 'cup' },
-          { id: Date.now() + 2, name: 'Ingredient 2', quantity: 2, unit: 'tbsp' },
-        ],
-        steps: [
-          { id: Date.now() + 3, stepOrder: 1, instruction: 'Step 1: Prepare ingredients.' },
-          { id: Date.now() + 4, stepOrder: 2, instruction: 'Step 2: Cook according to recipe.' },
-          { id: Date.now() + 5, stepOrder: 3, instruction: 'Step 3: Serve and enjoy.' },
-        ],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      // Ajouter la recette aux données locales
-      addLocalRecipe(importedRecipe);
+      const importedRecipe = await recipeService.importFromUrl(url);
       
       // Mettre à jour l'état local
-      setRecipes(getLocalRecipes());
-      setFilteredRecipes(getLocalRecipes());
+      setRecipes([...recipes, importedRecipe]);
+      setFilteredRecipes([...filteredRecipes, importedRecipe]);
 
       console.log('Recipe imported from URL:', url);
-
-      // TODO: Quand connecté au backend, utiliser l'API
-      // const importedRecipe = await apiClient.post('/recipes/import', { url });
-      // addLocalRecipe(importedRecipe);
-      // setRecipes(getLocalRecipes());
-      // setFilteredRecipes(getLocalRecipes());
     } catch (err) {
       console.error('Failed to import recipe:', err);
       throw err;
@@ -86,60 +68,20 @@ export function Recipes() {
 
   const handleCreateManual = async (data: CreateRecipeData & { addToMealPlanning?: boolean; plannedDate?: string; plannedMealType?: MealType }) => {
     try {
-      // Créer la recette manuellement (données locales)
-      const newRecipe: Recipe = {
-        id: Date.now(), // ID temporaire
-        title: data.title,
-        description: data.description || '',
-        preparationTime: data.preparationTime,
-        cookingTime: data.cookingTime,
-        servings: data.servings,
-        imagePath: data.imagePath,
-        source: data.source || '',
-        mealType: data.mealType || MealType.DINNER,
-        tags: (data.tags || []).map((tag, index) => ({
-          id: Date.now() + index,
-          name: tag,
-          createdAt: new Date().toISOString(),
-        })),
-        ingredients: (data.ingredients || []).map((ingredient, index) => ({
-          id: Date.now() + index,
-          name: ingredient,
-          quantity: 1,
-          unit: '',
-          recipeId: Date.now(),
-        })),
-        steps: (data.steps || []).map((step, index) => ({
-          id: Date.now() + index,
-          stepOrder: index + 1,
-          instruction: step,
-          recipeId: Date.now(),
-        })),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      // Ajouter la recette aux données locales
-      addLocalRecipe(newRecipe);
+      const createdRecipe = await recipeService.createRecipe(data);
       
       // Mettre à jour l'état local
-      setRecipes(getLocalRecipes());
-      setFilteredRecipes(getLocalRecipes());
-
-      // TODO: Quand connecté au backend, utiliser l'API
-      // const createdRecipe = await apiClient.post<Recipe>('/recipes', data);
-      // addLocalRecipe(createdRecipe);
-      // setRecipes(getLocalRecipes());
-      // setFilteredRecipes(getLocalRecipes());
+      setRecipes([...recipes, createdRecipe]);
+      setFilteredRecipes([...filteredRecipes, createdRecipe]);
       
       // Ajouter au meal planning si demandé
       if (data.addToMealPlanning && data.plannedDate && data.plannedMealType) {
         console.log('Adding to meal planning:', {
           plannedDate: data.plannedDate,
           mealType: data.plannedMealType,
-          recipeId: newRecipe.id,
+          recipeId: createdRecipe.id,
         });
-        // TODO: await apiClient.post('/meal-planning', { ... });
+        // TODO: Implémenter le service de meal planning
       }
     } catch (err) {
       console.error('Failed to create recipe:', err);

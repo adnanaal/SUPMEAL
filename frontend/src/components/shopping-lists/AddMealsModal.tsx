@@ -6,7 +6,8 @@ import { ShoppingList } from '@/lib/localShoppingLists';
 import { getLocalMealPlans, MealPlan } from '@/lib/localMealPlanning';
 import { updateLocalShoppingList } from '@/lib/localShoppingLists';
 import { addShoppingListItem, ShoppingListItem } from '@/lib/localShoppingLists';
-import { getLocalRecipes } from '@/lib/localRecipes';
+import { recipeService } from '@/services/recipeService';
+import { Recipe } from '@/types';
 
 interface AddMealsModalProps {
   isOpen: boolean;
@@ -46,12 +47,12 @@ export function AddMealsModal({ isOpen, onClose, shoppingList, onMealsAdded }: A
       });
 
       // Ajouter les ingrédients des repas sélectionnés
-      const recipes = getLocalRecipes();
+      const recipes = await recipeService.getAllRecipes();
       
       for (const mealPlanId of selectedMealPlans) {
         const mealPlan = mealPlans.find((mp) => mp.id === mealPlanId);
         if (mealPlan && mealPlan.recipeId) {
-          const recipe = recipes.find((r) => r.id === mealPlan.recipeId);
+          const recipe = recipes.find((r: Recipe) => r.id === mealPlan.recipeId);
           if (recipe && recipe.ingredients) {
             for (const ingredient of recipe.ingredients) {
               const newItem: ShoppingListItem = {

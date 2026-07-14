@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { X, BookOpen, Check } from 'lucide-react';
-import { getLocalRecipes, Recipe } from '@/lib/localRecipes';
-import { addRecipeToCookbook } from '@/lib/localCookbooks';
+import { recipeService } from '@/services/recipeService';
+import { cookbookService } from '@/services/cookbookService';
+import { Recipe } from '@/types';
 
 interface AddRecipeModalProps {
   isOpen: boolean;
@@ -18,7 +19,15 @@ export function AddRecipeModal({ isOpen, onClose, cookbookId, onRecipeAdded }: A
   const [isAdding, setIsAdding] = useState(false);
 
   useEffect(() => {
-    setRecipes(getLocalRecipes());
+    const loadRecipes = async () => {
+      try {
+        const data = await recipeService.getAllRecipes();
+        setRecipes(data);
+      } catch (err) {
+        console.error('Failed to load recipes:', err);
+      }
+    };
+    loadRecipes();
   }, []);
 
   const handleToggleRecipe = (recipeId: number) => {
@@ -37,10 +46,11 @@ export function AddRecipeModal({ isOpen, onClose, cookbookId, onRecipeAdded }: A
 
       // Ajouter les recettes sélectionnées au cookbook
       for (const recipeId of selectedRecipeIds) {
-        addRecipeToCookbook(cookbookId, recipeId);
+        await cookbookService.addRecipeToCookbook(cookbookId, recipeId);
       }
 
       onRecipeAdded();
+      setSelectedRecipeIds(new Set());
     } catch (err) {
       console.error('Failed to add recipes:', err);
     } finally {

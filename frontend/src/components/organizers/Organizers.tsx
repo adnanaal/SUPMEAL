@@ -4,15 +4,18 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, Filter, X, Clock, Heart, BookOpen, Tag, ChefHat, Users, Utensils } from 'lucide-react';
 import { Recipe } from '@/lib/localRecipes';
-import { getLocalRecipes } from '@/lib/localRecipes';
-import { getLocalCookbooks, Cookbook } from '@/lib/localCookbooks';
-import { getLocalFavorites } from '@/lib/localFavorites';
+import { Cookbook } from '@/lib/localCookbooks';
+import { recipeService } from '@/services/recipeService';
+import { cookbookService } from '@/services/cookbookService';
+import { favoriteService } from '@/services/favoriteService';
 import { MealType } from '@/types';
 
 export function Organizers() {
   const router = useRouter();
-  const [recipes, setRecipes] = useState<Recipe[]>(getLocalRecipes());
-  const [cookbooks, setCookbooks] = useState<Cookbook[]>(getLocalCookbooks());
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [cookbooks, setCookbooks] = useState<Cookbook[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCookbook, setSelectedCookbook] = useState<number | null>(null);
   const [selectedMealType, setSelectedMealType] = useState<string>('');
@@ -22,13 +25,41 @@ export function Organizers() {
   const [maxCookTime, setMaxCookTime] = useState<number | null>(null);
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const [favoriteRecipeIds, setFavoriteRecipeIds] = useState<Set<number>>(getLocalFavorites());
+  const [favoriteRecipeIds, setFavoriteRecipeIds] = useState<Set<number>>(new Set());
+
+  // Charger les données au montage
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const [recipesData, cookbooksData, favoritesData] = await Promise.all([
+          recipeService.getAllRecipes(),
+          cookbookService.getAllCookbooks(),
+          favoriteService.getAllFavorites(),
+        ]);
+        setRecipes(recipesData);
+        setCookbooks(cookbooksData);
+        setFavoriteRecipeIds(new Set(favoritesData));
+      } catch (err) {
+        console.error('Failed to load data:', err);
+        setError('Failed to load data');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, []);
 
   // Rafraîchir les favoris quand le composant reçoit le focus
   useEffect(() => {
-    const handleVisibilityChange = () => {
+    const handleVisibilityChange = async () => {
       if (!document.hidden) {
-        setFavoriteRecipeIds(getLocalFavorites());
+        try {
+          const favoritesData = await favoriteService.getAllFavorites();
+          setFavoriteRecipeIds(new Set(favoritesData));
+        } catch (err) {
+          console.error('Failed to refresh favorites:', err);
+        }
       }
     };
 
@@ -169,6 +200,22 @@ export function Organizers() {
     (maxPrepTime ? 1 : 0) +
     (maxCookTime ? 1 : 0) +
     (favoritesOnly ? 1 : 0);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-red-600">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">

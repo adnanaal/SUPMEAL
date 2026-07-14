@@ -8,8 +8,8 @@ import { Navbar } from '@/components/layout/Navbar';
 import { EditRecipeModal } from '@/components/recipes/EditRecipeModal';
 import { AddToShoppingListModal } from '@/components/recipes/AddToShoppingListModal';
 import { AddToMealPlannerModal } from '@/components/recipes/AddToMealPlannerModal';
-import { getLocalRecipeById, updateLocalRecipe } from '@/lib/localRecipes';
-import { toggleFavorite, isFavorite } from '@/lib/localFavorites';
+import { recipeService } from '@/services/recipeService';
+import { favoriteService } from '@/services/favoriteService';
 import { ArrowLeft, Clock, Users, Tag, ChefHat, Utensils, Heart, Share2, Edit, Trash2, Check, ShoppingCart, Calendar } from 'lucide-react';
 
 export function RecipeDetail() {
@@ -21,25 +21,45 @@ export function RecipeDetail() {
   const [isAddToShoppingListModalOpen, setIsAddToShoppingListModalOpen] = useState(false);
   const [isAddToMealPlannerModalOpen, setIsAddToMealPlannerModalOpen] = useState(false);
   const [currentRecipe, setCurrentRecipe] = useState<Recipe | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   // Récupérer l'ID depuis l'URL
   const recipeId = parseInt(params.id as string);
   
-  // Trouver la recette correspondante
-  const recipe = currentRecipe || getLocalRecipeById(recipeId);
-
-  // Mettre à jour la recette courante quand elle change
+  // Charger la recette depuis l'API
   useEffect(() => {
-    const foundRecipe = getLocalRecipeById(recipeId);
-    if (foundRecipe) {
-      setCurrentRecipe(foundRecipe);
-      setFavoriteStatus(isFavorite(foundRecipe.id));
-    }
+    const loadRecipe = async () => {
+      try {
+        setLoading(true);
+        const recipeData = await recipeService.getRecipeById(recipeId);
+        setCurrentRecipe(recipeData);
+        const isFav = await favoriteService.isFavorite(recipeId);
+        setFavoriteStatus(isFav);
+      } catch (err) {
+        console.error('Failed to load recipe:', err);
+        setError('Failed to load recipe');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadRecipe();
   }, [recipeId]);
 
-  const handleFavoriteToggle = () => {
-    const newStatus = toggleFavorite(recipeId);
-    setFavoriteStatus(newStatus);
+  const recipe = currentRecipe;
+
+  const handleFavoriteToggle = async () => {
+    try {
+      if (favoriteStatus) {
+        await favoriteService.removeFavorite(recipeId);
+        setFavoriteStatus(false);
+      } else {
+        await favoriteService.addFavorite(recipeId);
+        setFavoriteStatus(true);
+      }
+    } catch (err) {
+      console.error('Failed to toggle favorite:', err);
+    }
   };
 
   const handleShare = async () => {
@@ -59,45 +79,9 @@ export function RecipeDetail() {
 
   const handleUpdate = async (data: CreateRecipeData) => {
     try {
-      // Créer la recette mise à jour avec les nouvelles données
-      const updatedRecipe: Recipe = {
-        ...recipe!,
-        title: data.title,
-        description: data.description || '',
-        preparationTime: data.preparationTime,
-        cookingTime: data.cookingTime,
-        servings: data.servings,
-        imagePath: data.imagePath,
-        source: data.source || '',
-        mealType: data.mealType || recipe!.mealType,
-        tags: (data.tags || []).map((tag, index) => ({
-          id: Date.now() + index,
-          name: tag,
-          createdAt: new Date().toISOString(),
-        })),
-        ingredients: (data.ingredients || []).map((ingredient, index) => ({
-          id: Date.now() + index,
-          name: ingredient,
-          quantity: 1,
-          unit: '',
-          recipeId: recipe!.id,
-        })),
-        steps: (data.steps || []).map((step, index) => ({
-          id: Date.now() + index,
-          stepOrder: index + 1,
-          instruction: step,
-          recipeId: recipe!.id,
-        })),
-        updatedAt: new Date().toISOString(),
-      };
-
-      // Mettre à jour les données locales
-      updateLocalRecipe(updatedRecipe);
+      const updatedRecipe = await recipeService.updateRecipe(recipeId, data);
       setCurrentRecipe(updatedRecipe);
-
-      // TODO: Quand connecté au backend, utiliser l'API
-      // await apiClient.put(`/recipes/${recipeId}`, data);
-      console.log('Recipe updated locally:', updatedRecipe);
+      setIsEditModalOpen(false);
     } catch (err) {
       console.error('Failed to update recipe:', err);
       throw err;

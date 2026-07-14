@@ -4,9 +4,12 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ChefHat, Mail, Lock, AlertCircle } from 'lucide-react';
+import { authService } from '@/services/authService';
+import { useAuthStore } from '@/stores/authStore';
 
 export function Login() {
   const router = useRouter();
+  const { setUser, setToken } = useAuthStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -17,31 +20,29 @@ export function Login() {
     setError('');
     setIsLoading(true);
 
-    // Simulation - sera remplacé par l'API backend
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const response = await authService.login(email, password);
       
-      // Simulation de connexion réussie
-      if (email && password) {
-        // Stocker l'utilisateur simulé dans localStorage
-        const simulatedUser = {
-          id: '1',
-          email: email,
-          name: email.split('@')[0],
-          avatar: null,
-          preferences: {},
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
-        localStorage.setItem('user', JSON.stringify(simulatedUser));
-        localStorage.setItem('isAuthenticated', 'true');
-        
-        // Rediriger vers le dashboard
-        router.push('/dashboard');
-      } else {
-        setError('Veuillez remplir tous les champs');
-      }
-    }, 1000);
+      // Stocker le token et l'utilisateur dans le store
+      setToken(response.token);
+      setUser({
+        id: response.id,
+        email: response.email,
+        firstname: response.firstname,
+        lastname: response.lastname,
+        isVerified: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+      
+      // Rediriger vers le dashboard
+      router.push('/dashboard');
+    } catch (err: any) {
+      console.error('Login error:', err);
+      setError(err.response?.data?.message || 'Échec de la connexion. Vérifiez vos identifiants.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

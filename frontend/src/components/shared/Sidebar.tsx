@@ -31,7 +31,7 @@ export function Sidebar() {
 
   const handleLogout = () => {
     logout();
-    window.location.href = '/login';
+    window.location.href = '/';
   };
 
   return (
@@ -72,15 +72,15 @@ export function Sidebar() {
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
             {user?.avatar ? (
-              <img src={user.avatar} alt={user.name} className="w-full h-full rounded-full object-cover" />
+              <img src={user.avatar} alt={`${user.firstname} ${user.lastname}`} className="w-full h-full rounded-full object-cover" />
             ) : (
               <span className="text-gray-600 font-medium">
-                {user?.name?.charAt(0).toUpperCase()}
+                {user?.firstname?.charAt(0).toUpperCase()}
               </span>
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-900 truncate">{user?.name}</p>
+            <p className="text-sm font-medium text-gray-900 truncate">{user?.firstname} {user?.lastname}</p>
             <p className="text-xs text-gray-500 truncate">{user?.email}</p>
           </div>
         </div>

@@ -50,7 +50,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return user.getIsVerified();
+        return true;
     }
 
     public Long getUserId() {

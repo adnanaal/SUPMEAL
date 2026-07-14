@@ -3,28 +3,23 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Plus, Users, BookOpen, Settings, UserPlus, Trash2, Edit } from 'lucide-react';
-import { 
-  getCookbookById,
-  Cookbook,
-  CookbookPermission,
-  PERMISSION_LABELS,
-  PERMISSION_COLORS,
-  removeRecipeFromCookbook,
-  removeCookbookMember,
-  updateMemberPermission
-} from '@/lib/localCookbooks';
-import { getLocalRecipes, Recipe } from '@/lib/localRecipes';
+import { Cookbook, CookbookPermission, PERMISSION_LABELS, PERMISSION_COLORS } from '@/lib/localCookbooks';
+import { cookbookService } from '@/services/cookbookService';
+import { recipeService } from '@/services/recipeService';
 import { InviteMemberModal } from '@/components/cookbooks/InviteMemberModal';
 import { AddRecipeModal } from '@/components/cookbooks/AddRecipeModal';
 import { EditMemberModal } from '@/components/cookbooks/EditMemberModal';
 import { CookbookMessaging } from '@/components/cookbooks/CookbookMessaging';
 import { RecipeComments } from '@/components/cookbooks/RecipeComments';
+import { Recipe } from '@/types';
 
 export function CookbookDetail() {
   const params = useParams();
   const router = useRouter();
   const [cookbook, setCookbook] = useState<Cookbook | null>(null);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [isAddRecipeModalOpen, setIsAddRecipeModalOpen] = useState(false);
   const [isEditMemberModalOpen, setIsEditMemberModalOpen] = useState(false);
@@ -45,14 +40,24 @@ export function CookbookDetail() {
   };
 
   useEffect(() => {
-    const cookbookData = getCookbookById(cookbookId);
-    if (cookbookData) {
-      setCookbook(cookbookData);
-      // Charger les recettes du cookbook
-      const allRecipes = getLocalRecipes();
-      const cookbookRecipes = allRecipes.filter((r) => cookbookData.recipeIds.includes(r.id));
-      setRecipes(cookbookRecipes);
-    }
+    const loadCookbookData = async () => {
+      try {
+        setLoading(true);
+        const cookbookData = await cookbookService.getCookbookById(cookbookId);
+        setCookbook(cookbookData);
+        
+        // Charger les recettes du cookbook
+        const allRecipes = await recipeService.getAllRecipes();
+        const cookbookRecipes = allRecipes.filter((r) => cookbookData.recipeIds.includes(r.id));
+        setRecipes(cookbookRecipes);
+      } catch (err) {
+        console.error('Failed to load cookbook:', err);
+        setError('Failed to load cookbook');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadCookbookData();
   }, [cookbookId]);
 
   const getUserPermission = (): CookbookPermission | null => {
@@ -76,26 +81,29 @@ export function CookbookDetail() {
     return permission === CookbookPermission.CREATOR;
   };
 
-  const handleRemoveRecipe = (recipeId: number) => {
+  const handleRemoveRecipe = async (recipeId: number) => {
     if (confirm('Are you sure you want to remove this recipe from the cookbook?')) {
-      removeRecipeFromCookbook(cookbookId, recipeId);
-      // Rafraîchir les recettes
-      const cookbookData = getCookbookById(cookbookId);
-      if (cookbookData) {
+      try {
+        await cookbookService.removeRecipeFromCookbook(cookbookId, recipeId);
+        const cookbookData = await cookbookService.getCookbookById(cookbookId);
         setCookbook(cookbookData);
-        const allRecipes = getLocalRecipes();
-        const cookbookRecipes = allRecipes.filter((r) => cookbookData.recipeIds.includes(r.id));
+        const allRecipes = await recipeService.getAllRecipes();
+        const cookbookRecipes = allRecipes.filter((r: Recipe) => cookbookData.recipeIds.includes(r.id));
         setRecipes(cookbookRecipes);
+      } catch (err) {
+        console.error('Failed to remove recipe:', err);
       }
     }
   };
 
-  const handleRemoveMember = (memberId: number) => {
+  const handleRemoveMember = async (memberId: number) => {
     if (confirm('Are you sure you want to remove this member?')) {
-      removeCookbookMember(cookbookId, memberId);
-      const cookbookData = getCookbookById(cookbookId);
-      if (cookbookData) {
+      try {
+        await cookbookService.removeMember(cookbookId, memberId.toString());
+        const cookbookData = await cookbookService.getCookbookById(cookbookId);
         setCookbook(cookbookData);
+      } catch (err) {
+        console.error('Failed to remove member:', err);
       }
     }
   };
@@ -105,33 +113,55 @@ export function CookbookDetail() {
     setIsEditMemberModalOpen(true);
   };
 
-  const handleMemberUpdate = (memberId: number, permission: CookbookPermission) => {
-    updateMemberPermission(cookbookId, memberId, permission);
-    const cookbookData = getCookbookById(cookbookId);
-    if (cookbookData) {
+  const handleMemberUpdate = async (memberId: number, permission: CookbookPermission) => {
+    try {
+      await cookbookService.updateMemberPermission(cookbookId, memberId.toString(), permission);
+      const cookbookData = await cookbookService.getCookbookById(cookbookId);
       setCookbook(cookbookData);
+      setIsEditMemberModalOpen(false);
+    } catch (err) {
+      console.error('Failed to update member permission:', err);
     }
-    setIsEditMemberModalOpen(false);
   };
 
-  const handleRecipeAdded = () => {
-    const cookbookData = getCookbookById(cookbookId);
-    if (cookbookData) {
+  const handleRecipeAdded = async () => {
+    try {
+      const cookbookData = await cookbookService.getCookbookById(cookbookId);
       setCookbook(cookbookData);
-      const allRecipes = getLocalRecipes();
-      const cookbookRecipes = allRecipes.filter((r) => cookbookData.recipeIds.includes(r.id));
+      const allRecipes = await recipeService.getAllRecipes();
+      const cookbookRecipes = allRecipes.filter((r: Recipe) => cookbookData.recipeIds.includes(r.id));
       setRecipes(cookbookRecipes);
+      setIsAddRecipeModalOpen(false);
+    } catch (err) {
+      console.error('Failed to refresh recipes:', err);
     }
-    setIsAddRecipeModalOpen(false);
   };
 
-  const handleMemberInvited = () => {
-    const cookbookData = getCookbookById(cookbookId);
-    if (cookbookData) {
+  const handleMemberInvited = async () => {
+    try {
+      const cookbookData = await cookbookService.getCookbookById(cookbookId);
       setCookbook(cookbookData);
+      setIsInviteModalOpen(false);
+    } catch (err) {
+      console.error('Failed to refresh cookbook:', err);
     }
-    setIsInviteModalOpen(false);
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-red-600">{error}</div>
+      </div>
+    );
+  }
 
   if (!cookbook) {
     return (

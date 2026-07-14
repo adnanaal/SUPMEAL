@@ -4,10 +4,14 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ChefHat, Mail, Lock, User, AlertCircle } from 'lucide-react';
+import { authService, RegisterRequest } from '@/services/authService';
+import { useAuthStore } from '@/stores/authStore';
 
 export function SignUp() {
   const router = useRouter();
-  const [name, setName] = useState('');
+  const { setUser, setToken } = useAuthStore();
+  const [firstname, setFirstname] = useState('');
+  const [lastname, setLastname] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -23,33 +27,55 @@ export function SignUp() {
       return;
     }
 
+    if (password.length < 8) {
+      setError('Le mot de passe doit contenir au moins 8 caractères');
+      return;
+    }
+
     setIsLoading(true);
 
-    // Simulation - sera remplacé par l'API backend
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const registerData: RegisterRequest = {
+        firstname,
+        lastname,
+        email,
+        password,
+        avatar: undefined,
+        dietaryPreferences: undefined,
+        allergies: undefined,
+        favoriteCuisine: undefined,
+        defaultServings: undefined,
+      };
+
+      console.log('Sending registration data:', registerData);
+      const userResponse = await authService.register(registerData);
+      console.log('Registration response:', userResponse);
       
-      // Simulation d'inscription réussie
-      if (name && email && password) {
-        // Stocker l'utilisateur simulé dans localStorage
-        const simulatedUser = {
-          id: '1',
-          email: email,
-          name: name,
-          avatar: null,
-          preferences: {},
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
-        localStorage.setItem('user', JSON.stringify(simulatedUser));
-        localStorage.setItem('isAuthenticated', 'true');
-        
-        // Rediriger vers le dashboard (pour l'instant vers home)
-        router.push('/');
-      } else {
-        setError('Veuillez remplir tous les champs');
-      }
-    }, 1000);
+      // Après inscription réussie, connecter automatiquement
+      const authResponse = await authService.login(email, password);
+      
+      // Stocker le token et l'utilisateur dans le store
+      setToken(authResponse.token);
+      setUser({
+        id: authResponse.id,
+        email: authResponse.email,
+        firstname: authResponse.firstname,
+        lastname: authResponse.lastname,
+        isVerified: userResponse.isVerified || false,
+        createdAt: userResponse.createdAt || new Date().toISOString(),
+        updatedAt: userResponse.updatedAt || new Date().toISOString(),
+      });
+      
+      // Rediriger vers le dashboard
+      router.push('/dashboard');
+    } catch (err: any) {
+      console.error('Registration error:', err);
+      console.error('Error response:', err.response?.data);
+      console.error('Error status:', err.response?.status);
+      setError(err.response?.data?.message || err.response?.data || 'Échec de l\'inscription. Veuillez réessayer.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -69,18 +95,37 @@ export function SignUp() {
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Nom */}
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                Nom
+              <label htmlFor="firstname" className="block text-sm font-medium text-gray-700 mb-2">
+                Prénom
               </label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type="text"
-                  id="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  id="firstname"
+                  value={firstname}
+                  onChange={(e) => setFirstname(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
-                  placeholder="Votre nom"
+                  placeholder="Votre prénom"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Nom de famille */}
+            <div>
+              <label htmlFor="lastname" className="block text-sm font-medium text-gray-700 mb-2">
+                Nom de famille
+              </label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  id="lastname"
+                  value={lastname}
+                  onChange={(e) => setLastname(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
+                  placeholder="Votre nom de famille"
                   required
                 />
               </div>

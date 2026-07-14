@@ -1,7 +1,8 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
+import { useAuthStore } from '@/stores/authStore';
 
 // Configuration de l'instance Axios
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
 
 class ApiClient {
   private client: AxiosInstance;
@@ -12,17 +13,30 @@ class ApiClient {
       headers: {
         'Content-Type': 'application/json',
       },
-      withCredentials: true, // Pour les cookies HttpOnly
     });
+
+    // Intercepteur de requête pour ajouter le token JWT
+    this.client.interceptors.request.use(
+      (config) => {
+        const token = useAuthStore.getState().token;
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+      },
+      (error) => Promise.reject(error)
+    );
 
     // Intercepteur de réponse pour gérer les erreurs
     this.client.interceptors.response.use(
       (response) => response,
       (error: AxiosError) => {
         if (error.response?.status === 401) {
-          // Token expiré ou invalide, rediriger vers login
+          // Token expiré ou invalide, déconnecter et rediriger vers home
+          const { logout } = useAuthStore.getState();
+          logout();
           if (typeof window !== 'undefined') {
-            window.location.href = '/login';
+            window.location.href = '/';
           }
         }
         return Promise.reject(error);
@@ -37,7 +51,9 @@ class ApiClient {
   }
 
   async post<T>(url: string, data?: any): Promise<T> {
+    console.log(`POST ${url}`, data);
     const response = await this.client.post<T>(url, data);
+    console.log(`Response ${url}`, response.data);
     return response.data;
   }
 

@@ -3,29 +3,44 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, BookOpen, Users, Trash2, Settings } from 'lucide-react';
-import { 
-  getLocalCookbooks, 
-  addLocalCookbook,
-  deleteLocalCookbook,
-  Cookbook 
-} from '@/lib/localCookbooks';
+import { Cookbook } from '@/lib/localCookbooks';
+import { cookbookService } from '@/services/cookbookService';
 import { CreateCookbookModal } from '@/components/cookbooks/CreateCookbookModal';
 
 export function Cookbooks() {
   const router = useRouter();
   const [cookbooks, setCookbooks] = useState<Cookbook[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const currentUserId = 'user1'; // Simuler l'utilisateur connecté
 
   useEffect(() => {
-    setCookbooks(getLocalCookbooks());
+    const loadCookbooks = async () => {
+      try {
+        setLoading(true);
+        const data = await cookbookService.getAllCookbooks();
+        setCookbooks(data);
+      } catch (err) {
+        console.error('Failed to load cookbooks:', err);
+        setError('Failed to load cookbooks');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadCookbooks();
   }, []);
 
   // Rafraîchir quand le composant reçoit le focus
   useEffect(() => {
-    const handleVisibilityChange = () => {
+    const handleVisibilityChange = async () => {
       if (!document.hidden) {
-        setCookbooks(getLocalCookbooks());
+        try {
+          const data = await cookbookService.getAllCookbooks();
+          setCookbooks(data);
+        } catch (err) {
+          console.error('Failed to refresh cookbooks:', err);
+        }
       }
     };
 
@@ -33,16 +48,25 @@ export function Cookbooks() {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
-  const handleCreateCookbook = (cookbook: Cookbook) => {
-    addLocalCookbook(cookbook);
-    setCookbooks(getLocalCookbooks());
-    setIsCreateModalOpen(false);
+  const handleCreateCookbook = async (cookbook: Cookbook) => {
+    try {
+      const createdCookbook = await cookbookService.createCookbook(cookbook);
+      setCookbooks([...cookbooks, createdCookbook]);
+      setIsCreateModalOpen(false);
+    } catch (err) {
+      console.error('Failed to create cookbook:', err);
+      throw err;
+    }
   };
 
-  const handleDeleteCookbook = (id: number) => {
+  const handleDeleteCookbook = async (id: number) => {
     if (confirm('Are you sure you want to delete this cookbook?')) {
-      deleteLocalCookbook(id);
-      setCookbooks(getLocalCookbooks());
+      try {
+        await cookbookService.deleteCookbook(id);
+        setCookbooks(cookbooks.filter(cb => cb.id !== id));
+      } catch (err) {
+        console.error('Failed to delete cookbook:', err);
+      }
     }
   };
 
@@ -59,6 +83,22 @@ export function Cookbooks() {
     const permission = getUserPermissionInCookbook(cookbook);
     return permission === 'CREATOR';
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-red-600">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">
