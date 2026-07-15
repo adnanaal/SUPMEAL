@@ -51,15 +51,15 @@ export function Recipes() {
     setFilteredRecipes(filtered);
   };
 
-  const handleImportFromUrl = async (url: string) => {
+  const handleImportFromUrl = async (data: { url: string; title?: string; mealType?: MealType }) => {
     try {
-      const importedRecipe = await recipeService.importFromUrl(url);
+      const importedRecipe = await recipeService.importFromUrl(data);
       
       // Mettre à jour l'état local
       setRecipes([...recipes, importedRecipe]);
       setFilteredRecipes([...filteredRecipes, importedRecipe]);
 
-      console.log('Recipe imported from URL:', url);
+      console.log('Recipe imported from URL:', data.url);
     } catch (err) {
       console.error('Failed to import recipe:', err);
       throw err;

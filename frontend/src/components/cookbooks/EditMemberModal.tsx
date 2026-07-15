@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { X, Edit, Shield } from 'lucide-react';
-import { CookbookPermission, PERMISSION_LABELS } from '@/lib/localCookbooks';
+import { CookbookPermission, PERMISSION_LABELS } from '@/types';
 
 interface EditMemberModalProps {
   isOpen: boolean;

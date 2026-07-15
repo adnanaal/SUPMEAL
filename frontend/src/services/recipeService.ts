@@ -28,8 +28,8 @@ export const recipeService = {
   },
 
   // Importer une recette depuis une URL
-  async importFromUrl(url: string): Promise<Recipe> {
-    return apiClient.post<Recipe>('/recipes/import', { url });
+  async importFromUrl(data: { url: string; title?: string; mealType?: MealType }): Promise<Recipe> {
+    return apiClient.post<Recipe>('/recipes/import', data);
   },
 
   // Rechercher des recettes

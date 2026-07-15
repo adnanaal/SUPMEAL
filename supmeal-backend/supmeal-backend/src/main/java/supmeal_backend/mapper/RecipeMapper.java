@@ -28,6 +28,7 @@ public class RecipeMapper {
                 .servings(recipe.getServings())
                 .imagePath(recipe.getImagePath())
                 .source(recipe.getSource())
+                .sourceUrl(recipe.getSourceUrl())
                 .mealType(recipe.getMealType())
                 .ownerId(recipe.getOwner() != null ? recipe.getOwner().getId() : null)
                 .createdAt(recipe.getCreatedAt())
@@ -88,17 +89,8 @@ public class RecipeMapper {
             recipe.setSteps(steps);
         }
         
-        // Convert tags List<String> to List<Tag>
-        if (request.getTags() != null) {
-            List<Tag> tags = new ArrayList<>();
-            for (String tagName : request.getTags()) {
-                Tag tag = Tag.builder()
-                        .name(tagName)
-                        .build();
-                tags.add(tag);
-            }
-            recipe.setTags(tags);
-        }
+        // Tags are handled in the controller to avoid duplicate creation
+        // and to properly manage existing tags
         
         return recipe;
     }

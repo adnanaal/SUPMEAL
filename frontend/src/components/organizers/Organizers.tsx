@@ -3,8 +3,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, Filter, X, Clock, Heart, BookOpen, Tag, ChefHat, Users, Utensils } from 'lucide-react';
-import { Recipe } from '@/lib/localRecipes';
-import { Cookbook } from '@/lib/localCookbooks';
+import { Recipe } from '@/types';
+import { Cookbook } from '@/types';
 import { recipeService } from '@/services/recipeService';
 import { cookbookService } from '@/services/cookbookService';
 import { favoriteService } from '@/services/favoriteService';

@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { MessageSquare, Send, Edit2, Trash2, X, ChevronDown, ChevronUp } from 'lucide-react';
-import { RecipeComment } from '@/lib/localMessages';
-import { getRecipeComments, addRecipeComment, updateRecipeComment, deleteRecipeComment } from '@/lib/localMessages';
-import { getCookbookById } from '@/lib/localCookbooks';
-import { createRecipeCommentNotification } from '@/lib/localNotifications';
+import { Comment } from '@/types';
+import { cookbookService } from '@/services/cookbookService';
 import { User } from '@/types';
+
+// TODO: Créer commentService pour synchroniser les commentaires
+// import { commentService } from '@/services/commentService';
 
 interface RecipeCommentsProps {
   cookbookId: number;
@@ -16,237 +17,148 @@ interface RecipeCommentsProps {
 }
 
 export function RecipeComments({ cookbookId, recipeId, recipeTitle, currentUser }: RecipeCommentsProps) {
-  const [comments, setComments] = useState<RecipeComment[]>([]);
+  const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
-  const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
-  const [editContent, setEditContent] = useState('');
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [editingComment, setEditingComment] = useState<number | null>(null);
+  const [updatedComment, setUpdatedComment] = useState('');
 
-  // Charger les commentaires
   useEffect(() => {
-    const loadComments = () => {
-      setComments(getRecipeComments(cookbookId, recipeId));
-    };
+    // TODO: Remplacer par commentService.getCommentsByRecipe(recipeId)
+    // const loadComments = async () => {
+    //   const data = await commentService.getCommentsByRecipe(recipeId);
+    //   setComments(data);
+    // };
+    // loadComments();
+  }, [recipeId]);
 
-    loadComments();
-  }, [cookbookId, recipeId]);
-
-  const handleAddComment = () => {
-    if (newComment.trim()) {
-      const comment = addRecipeComment({
-        content: newComment,
-        cookbookId,
-        recipeId,
-        userId: currentUser.id,
-        user: currentUser,
-      });
-      setComments([...comments, comment]);
-      setNewComment('');
-
-      // Générer une notification pour les autres membres du cookbook
-      const cookbook = getCookbookById(cookbookId);
-      if (cookbook) {
-        cookbook.members.forEach((member) => {
-          if (member.userId !== String(currentUser.id)) {
-            // Simuler l'ID utilisateur (sera remplacé par l'authentification réelle)
-            const memberUserId = parseInt(member.userId);
-            createRecipeCommentNotification(
-              memberUserId,
-              cookbookId,
-              recipeId,
-              recipeTitle,
-              `${currentUser.firstname} ${currentUser.lastname}`,
-              comment.id
-            );
-          }
-        });
-      }
-    }
+  const handleAddComment = async () => {
+    if (!newComment.trim()) return;
+    
+    // TODO: Remplacer par commentService.createComment()
+    // const comment = await commentService.createComment({
+    //   content: newComment,
+    //   recipeId,
+    //   userId: currentUser.id
+    // });
+    // setComments([...comments, comment]);
+    // setNewComment('');
   };
 
-  const handleEditComment = (commentId: number) => {
-    const comment = comments.find((c) => c.id === commentId);
-    if (comment) {
-      setEditingCommentId(commentId);
-      setEditContent(comment.content);
-    }
+  const handleUpdateComment = async (commentId: number) => {
+    if (!updatedComment.trim()) return;
+    
+    // TODO: Remplacer par commentService.updateComment()
+    // const updated = await commentService.updateComment(commentId, {
+    //   content: updatedComment
+    // });
+    // setComments(comments.map(c => c.id === commentId ? updated : c));
+    // setEditingComment(null);
+    // setUpdatedComment('');
   };
 
-  const handleSaveEdit = () => {
-    if (editingCommentId && editContent.trim()) {
-      const updatedComment = updateRecipeComment(editingCommentId, editContent);
-      if (updatedComment) {
-        setComments(comments.map((c) => (c.id === editingCommentId ? updatedComment : c)));
-      }
-      setEditingCommentId(null);
-      setEditContent('');
-    }
+  const handleDeleteComment = async (commentId: number) => {
+    if (!confirm('Are you sure you want to delete this comment?')) return;
+    
+    // TODO: Remplacer par commentService.deleteComment()
+    // await commentService.deleteComment(commentId);
+    // setComments(comments.filter(c => c.id !== commentId));
   };
-
-  const handleCancelEdit = () => {
-    setEditingCommentId(null);
-    setEditContent('');
-  };
-
-  const handleDeleteComment = (commentId: number) => {
-    if (confirm('Are you sure you want to delete this comment?')) {
-      const success = deleteRecipeComment(commentId);
-      if (success) {
-        setComments(comments.filter((c) => c.id !== commentId));
-      }
-    }
-  };
-
-  const formatTime = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
-    return date.toLocaleDateString();
-  };
-
-  const isOwnComment = (comment: RecipeComment) => comment.userId === currentUser.id;
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-      {/* Header */}
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full px-6 py-4 border-b border-gray-100 bg-gray-50 flex items-center justify-between hover:bg-gray-100 transition-colors"
-      >
-        <div className="flex items-center">
-          <MessageSquare className="w-5 h-5 mr-2 text-orange-600" />
-          <h3 className="text-lg font-semibold text-gray-900">Comments</h3>
-          <span className="ml-2 text-sm text-gray-500">({comments.length})</span>
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <div className="flex items-center space-x-3 mb-6">
+        <MessageSquare className="w-6 h-6 text-blue-600" />
+        <h3 className="text-lg font-semibold text-gray-900">Comments</h3>
+        <span className="bg-blue-100 text-blue-800 text-sm px-2 py-1 rounded-full">{comments.length}</span>
+      </div>
+
+      {/* Add Comment */}
+      <div className="mb-6">
+        <div className="flex space-x-3">
+          <input
+            type="text"
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            placeholder="Add a comment..."
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            disabled
+          />
+          <button
+            onClick={handleAddComment}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+            disabled
+          >
+            <Send className="w-5 h-5" />
+          </button>
         </div>
-        {isExpanded ? (
-          <ChevronUp className="w-5 h-5 text-gray-500" />
+      </div>
+
+      {/* Comments List */}
+      <div className="space-y-4">
+        {comments.length === 0 ? (
+          <p className="text-gray-500 text-center py-4">No comments yet. Be the first to comment!</p>
         ) : (
-          <ChevronDown className="w-5 h-5 text-gray-500" />
-        )}
-      </button>
-
-      {/* Comments */}
-      {isExpanded && (
-        <div className="p-4">
-          <div className="space-y-4 mb-4">
-            {comments.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-8 text-gray-500">
-                <MessageSquare className="w-8 h-8 mb-2 text-gray-300" />
-                <p className="text-sm">No comments yet. Be the first to comment!</p>
-              </div>
-            ) : (
-              comments.map((comment) => (
-                <div
-                  key={comment.id}
-                  className={`p-3 rounded-lg ${
-                    isOwnComment(comment) ? 'bg-orange-50 border border-orange-100' : 'bg-gray-50 border border-gray-100'
-                  }`}
-                >
-                  {/* User info */}
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center">
-                      {comment.user?.avatar ? (
-                        <img
-                          src={comment.user.avatar}
-                          alt={comment.user.firstname}
-                          className="w-6 h-6 rounded-full mr-2"
-                        />
-                      ) : (
-                        <div className="w-6 h-6 rounded-full bg-orange-200 flex items-center justify-center mr-2">
-                          <span className="text-xs text-orange-700 font-medium">
-                            {comment.user?.firstname?.[0] || 'U'}
-                          </span>
-                        </div>
-                      )}
-                      <div>
-                        <span className="text-sm font-medium text-gray-900">
-                          {comment.user?.firstname} {comment.user?.lastname}
-                        </span>
-                        <span className="text-xs text-gray-500 ml-2">
-                          {formatTime(comment.createdAt)}
-                        </span>
-                      </div>
-                    </div>
-                    {isOwnComment(comment) && (
-                      <div className="flex gap-1">
-                        <button
-                          onClick={() => handleEditComment(comment.id)}
-                          className="text-xs p-1 hover:bg-gray-200 rounded text-gray-600"
-                        >
-                          <Edit2 className="w-3 h-3" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteComment(comment.id)}
-                          className="text-xs p-1 hover:bg-gray-200 rounded text-gray-600"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </button>
-                      </div>
-                    )}
+          comments.map((comment) => (
+            <div key={comment.id} className="border-b border-gray-100 pb-4">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className="font-medium text-gray-900">
+                      {comment.user?.firstname} {comment.user?.lastname}
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      {new Date(comment.createdAt).toLocaleDateString()}
+                    </span>
                   </div>
-
-                  {/* Comment content */}
-                  {editingCommentId === comment.id ? (
-                    <div className="space-y-2">
-                      <textarea
-                        value={editContent}
-                        onChange={(e) => setEditContent(e.target.value)}
-                        className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
-                        rows={3}
+                  {editingComment === comment.id ? (
+                    <div className="flex space-x-2">
+                      <input
+                        type="text"
+                        value={updatedComment}
+                        onChange={(e) => setUpdatedComment(e.target.value)}
+                        className="flex-1 px-3 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                       />
-                      <div className="flex gap-2">
-                        <button
-                          onClick={handleSaveEdit}
-                          className="text-xs px-3 py-1 bg-orange-500 text-white rounded hover:bg-orange-600"
-                        >
-                          Save
-                        </button>
-                        <button
-                          onClick={handleCancelEdit}
-                          className="text-xs px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
-                        >
-                          Cancel
-                        </button>
-                      </div>
+                      <button
+                        onClick={() => handleUpdateComment(comment.id)}
+                        className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={() => setEditingComment(null)}
+                        className="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                      >
+                        Cancel
+                      </button>
                     </div>
                   ) : (
-                    <p className="text-sm text-gray-700 whitespace-pre-wrap">{comment.content}</p>
+                    <p className="text-gray-700">{comment.content}</p>
                   )}
                 </div>
-              ))
-            )}
-          </div>
-
-          {/* Add comment input */}
-          <div className="border-t border-gray-200 pt-4">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleAddComment()}
-                placeholder="Add a comment..."
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-sm"
-              />
-              <button
-                onClick={handleAddComment}
-                disabled={!newComment.trim()}
-                className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Send className="w-4 h-4" />
-              </button>
+                {comment.userId === currentUser.id && (
+                  <div className="flex space-x-2 ml-4">
+                    <button
+                      onClick={() => {
+                        setEditingComment(comment.id);
+                        setUpdatedComment(comment.content);
+                      }}
+                      className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteComment(comment.id)}
+                      className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          ))
+        )}
+      </div>
     </div>
   );
 }

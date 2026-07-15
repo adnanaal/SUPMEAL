@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import supmeal_backend.dto.request.RecipeCreateRequest;
 import supmeal_backend.dto.request.RecipeUpdateRequest;
@@ -23,6 +24,7 @@ import supmeal_backend.service.UserService;
 import jakarta.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -37,6 +39,7 @@ public class RecipeController {
     private final TagRepository tagRepository;
 
     @PostMapping
+    @Transactional
     public ResponseEntity<RecipeResponse> createRecipe(@Valid @RequestBody RecipeCreateRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
@@ -90,6 +93,52 @@ public class RecipeController {
                 .map(recipeMapper::toResponse)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(responses);
+    }
+
+    @PostMapping("/import")
+    public ResponseEntity<RecipeResponse> importFromUrl(@RequestBody Map<String, Object> request) {
+        String url = (String) request.get("url");
+        String title = (String) request.get("title");
+        String mealTypeStr = (String) request.get("mealType");
+        
+        if (url == null || url.trim().isEmpty()) {
+            throw new IllegalArgumentException("URL is required");
+        }
+        
+        // Pour l'instant, créer une recette avec des données par défaut
+        // TODO: Implémenter un vrai scraper de recettes
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        User owner = userService.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with email: %s", email)));
+        
+        // Image statique pour les recettes importées
+        String staticImportedImage = "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=800&h=600&fit=crop";
+        
+        // Utiliser le titre fourni ou un titre par défaut
+        String recipeTitle = (title != null && !title.trim().isEmpty()) ? title : "Imported Recipe";
+        
+        // Utiliser le mealType fourni ou DINNER par défaut
+        supmeal_backend.entity.enums.MealType recipeMealType = supmeal_backend.entity.enums.MealType.DINNER;
+        if (mealTypeStr != null && !mealTypeStr.trim().isEmpty()) {
+            try {
+                recipeMealType = supmeal_backend.entity.enums.MealType.valueOf(mealTypeStr.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                // Si le mealType est invalide, utiliser DINNER par défaut
+            }
+        }
+        
+        Recipe recipe = Recipe.builder()
+                .title(recipeTitle)
+                .description("Recipe imported from: " + url)
+                .mealType(recipeMealType)
+                .imagePath(staticImportedImage)
+                .sourceUrl(url)
+                .owner(owner)
+                .build();
+        
+        Recipe savedRecipe = recipeService.save(recipe);
+        return new ResponseEntity<>(recipeMapper.toResponse(savedRecipe), HttpStatus.CREATED);
     }
 
     @GetMapping("/owner/{ownerId}")

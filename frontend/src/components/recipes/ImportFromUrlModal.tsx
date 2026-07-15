@@ -2,15 +2,18 @@
 
 import { useState } from 'react';
 import { X, Link, Download, Loader2 } from 'lucide-react';
+import { MealType } from '@/types';
 
 interface ImportFromUrlModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onImport: (url: string) => Promise<void>;
+  onImport: (data: { url: string; title?: string; mealType?: MealType }) => Promise<void>;
 }
 
 export function ImportFromUrlModal({ isOpen, onClose, onImport }: ImportFromUrlModalProps) {
   const [url, setUrl] = useState('');
+  const [title, setTitle] = useState('');
+  const [mealType, setMealType] = useState<MealType>(MealType.DINNER);
   const [isImporting, setIsImporting] = useState(false);
   const [error, setError] = useState('');
 
@@ -24,8 +27,10 @@ export function ImportFromUrlModal({ isOpen, onClose, onImport }: ImportFromUrlM
     try {
       setIsImporting(true);
       setError('');
-      await onImport(url);
+      await onImport({ url, title: title.trim() || undefined, mealType });
       setUrl('');
+      setTitle('');
+      setMealType(MealType.DINNER);
       onClose();
     } catch (err) {
       setError('Failed to import recipe from URL. Please check the URL and try again.');
@@ -36,6 +41,8 @@ export function ImportFromUrlModal({ isOpen, onClose, onImport }: ImportFromUrlM
 
   const handleClose = () => {
     setUrl('');
+    setTitle('');
+    setMealType(MealType.DINNER);
     setError('');
     onClose();
   };
@@ -66,7 +73,7 @@ export function ImportFromUrlModal({ isOpen, onClose, onImport }: ImportFromUrlM
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="url" className="block text-sm font-medium text-gray-700 mb-2">
-              Recipe URL
+              Recipe URL *
             </label>
             <input
               type="url"
@@ -74,13 +81,48 @@ export function ImportFromUrlModal({ isOpen, onClose, onImport }: ImportFromUrlM
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               placeholder="https://example.com/recipe"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
+              disabled={isImporting}
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+              Recipe Name (optional)
+            </label>
+            <input
+              type="text"
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Enter a name for this recipe"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
               disabled={isImporting}
             />
-            <p className="text-sm text-gray-500 mt-2">
-              Paste the URL of a recipe from any website to import it automatically.
-            </p>
           </div>
+
+          <div>
+            <label htmlFor="mealType" className="block text-sm font-medium text-gray-700 mb-2">
+              Meal Type
+            </label>
+            <select
+              id="mealType"
+              value={mealType}
+              onChange={(e) => setMealType(e.target.value as MealType)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
+              disabled={isImporting}
+            >
+              <option value="BREAKFAST">Breakfast</option>
+              <option value="LUNCH">Lunch</option>
+              <option value="DINNER">Dinner</option>
+              <option value="SNACK">Snack</option>
+            </select>
+          </div>
+
+          <p className="text-sm text-gray-500">
+            Paste the URL of a recipe from any website to import it automatically.
+          </p>
 
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-600">

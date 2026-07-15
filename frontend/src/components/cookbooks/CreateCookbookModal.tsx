@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { X, Plus, BookOpen, Upload, X as XIcon } from 'lucide-react';
-import { Cookbook, CookbookPermission } from '@/lib/localCookbooks';
+import { Cookbook, CookbookPermission } from '@/types';
 
 interface CreateCookbookModalProps {
   isOpen: boolean;

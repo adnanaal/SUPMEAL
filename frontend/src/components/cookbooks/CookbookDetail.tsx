@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Plus, Users, BookOpen, Settings, UserPlus, Trash2, Edit } from 'lucide-react';
-import { Cookbook, CookbookPermission, PERMISSION_LABELS, PERMISSION_COLORS } from '@/lib/localCookbooks';
+import { Cookbook, CookbookPermission, PERMISSION_LABELS, PERMISSION_COLORS } from '@/types';
 import { cookbookService } from '@/services/cookbookService';
 import { recipeService } from '@/services/recipeService';
 import { InviteMemberModal } from '@/components/cookbooks/InviteMemberModal';
@@ -48,7 +48,7 @@ export function CookbookDetail() {
         
         // Charger les recettes du cookbook
         const allRecipes = await recipeService.getAllRecipes();
-        const cookbookRecipes = allRecipes.filter((r) => cookbookData.recipeIds.includes(r.id));
+        const cookbookRecipes = allRecipes.filter((r) => cookbookData.recipeIds?.includes(r.id) || false);
         setRecipes(cookbookRecipes);
       } catch (err) {
         console.error('Failed to load cookbook:', err);
@@ -61,8 +61,8 @@ export function CookbookDetail() {
   }, [cookbookId]);
 
   const getUserPermission = (): CookbookPermission | null => {
-    if (!cookbook) return null;
-    const member = cookbook.members.find((m) => m.userId === currentUserId);
+    if (!cookbook || !cookbook.members) return null;
+    const member = cookbook.members.find((m) => m.userId === Number(currentUserId));
     return member ? member.permission : null;
   };
 
@@ -88,7 +88,7 @@ export function CookbookDetail() {
         const cookbookData = await cookbookService.getCookbookById(cookbookId);
         setCookbook(cookbookData);
         const allRecipes = await recipeService.getAllRecipes();
-        const cookbookRecipes = allRecipes.filter((r: Recipe) => cookbookData.recipeIds.includes(r.id));
+        const cookbookRecipes = allRecipes.filter((r: Recipe) => cookbookData.recipeIds?.includes(r.id) || false);
         setRecipes(cookbookRecipes);
       } catch (err) {
         console.error('Failed to remove recipe:', err);
@@ -129,7 +129,7 @@ export function CookbookDetail() {
       const cookbookData = await cookbookService.getCookbookById(cookbookId);
       setCookbook(cookbookData);
       const allRecipes = await recipeService.getAllRecipes();
-      const cookbookRecipes = allRecipes.filter((r: Recipe) => cookbookData.recipeIds.includes(r.id));
+      const cookbookRecipes = allRecipes.filter((r: Recipe) => cookbookData.recipeIds?.includes(r.id) || false);
       setRecipes(cookbookRecipes);
       setIsAddRecipeModalOpen(false);
     } catch (err) {
@@ -253,7 +253,7 @@ export function CookbookDetail() {
             </div>
             <div>
               <p className="text-sm text-gray-500">Members</p>
-              <p className="text-2xl font-bold text-gray-900">{cookbook.members.length}</p>
+              <p className="text-2xl font-bold text-gray-900">{cookbook.members?.length || 0}</p>
             </div>
           </div>
         </div>
@@ -278,18 +278,18 @@ export function CookbookDetail() {
         </div>
         <div className="p-4">
           <div className="space-y-3">
-            {cookbook.members.map((member) => (
+            {cookbook.members?.map((member) => (
               <div
                 key={member.id}
                 className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
               >
                 <div className="flex items-center space-x-4">
                   <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-medium">
-                    {member.userName.charAt(0).toUpperCase()}
+                    {member.userName?.charAt(0).toUpperCase() || 'U'}
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">{member.userName}</p>
-                    <p className="text-sm text-gray-500">{member.userEmail}</p>
+                    <p className="font-medium text-gray-900">{member.userName || 'Unknown User'}</p>
+                    <p className="text-sm text-gray-500">{member.userEmail || 'No email'}</p>
                   </div>
                 </div>
 
@@ -297,7 +297,7 @@ export function CookbookDetail() {
                   <span className={`px-3 py-1 rounded-full text-xs font-medium border ${PERMISSION_COLORS[member.permission]}`}>
                     {PERMISSION_LABELS[member.permission]}
                   </span>
-                  {canManageMembers() && member.userId !== currentUserId && (
+                  {canManageMembers() && member.userId !== Number(currentUserId) && (
                     <>
                       <button
                         onClick={() => handleEditMember(member)}

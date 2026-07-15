@@ -21,7 +21,7 @@ export function CreateRecipeModal({ isOpen, onClose, onCreate }: CreateRecipeMod
     servings: undefined,
     imagePath: '',
     source: '',
-    mealType: undefined,
+    mealType: MealType.BREAKFAST,
     tags: [],
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -112,6 +112,11 @@ export function CreateRecipeModal({ isOpen, onClose, onCreate }: CreateRecipeMod
       return;
     }
 
+    if (!formData.mealType) {
+      setError('Meal type is required');
+      return;
+    }
+
     if (!formData.ingredients || formData.ingredients.length === 0) {
       setError('At least one ingredient is required');
       return;
@@ -149,7 +154,7 @@ export function CreateRecipeModal({ isOpen, onClose, onCreate }: CreateRecipeMod
         servings: undefined,
         imagePath: '',
         source: '',
-        mealType: undefined,
+        mealType: MealType.BREAKFAST,
         tags: [],
       });
       setAddToMealPlanning(false);
@@ -174,7 +179,7 @@ export function CreateRecipeModal({ isOpen, onClose, onCreate }: CreateRecipeMod
       servings: undefined,
       imagePath: '',
       source: '',
-      mealType: undefined,
+      mealType: MealType.BREAKFAST,
       tags: [],
     });
     setAddToMealPlanning(false);
@@ -222,7 +227,7 @@ export function CreateRecipeModal({ isOpen, onClose, onCreate }: CreateRecipeMod
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 placeholder="Recipe title"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
                 disabled={isCreating}
                 required
               />
@@ -238,7 +243,7 @@ export function CreateRecipeModal({ isOpen, onClose, onCreate }: CreateRecipeMod
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Brief description of the recipe"
                 rows={3}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none resize-none"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none resize-none text-gray-900"
                 disabled={isCreating}
               />
             </div>
@@ -254,7 +259,7 @@ export function CreateRecipeModal({ isOpen, onClose, onCreate }: CreateRecipeMod
                   value={formData.preparationTime || ''}
                   onChange={(e) => setFormData({ ...formData, preparationTime: e.target.value ? parseInt(e.target.value) : undefined })}
                   placeholder="20"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
                   disabled={isCreating}
                 />
               </div>
@@ -269,7 +274,7 @@ export function CreateRecipeModal({ isOpen, onClose, onCreate }: CreateRecipeMod
                   value={formData.cookingTime || ''}
                   onChange={(e) => setFormData({ ...formData, cookingTime: e.target.value ? parseInt(e.target.value) : undefined })}
                   placeholder="15"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
                   disabled={isCreating}
                 />
               </div>
@@ -284,7 +289,7 @@ export function CreateRecipeModal({ isOpen, onClose, onCreate }: CreateRecipeMod
                   value={formData.servings || ''}
                   onChange={(e) => setFormData({ ...formData, servings: e.target.value ? parseInt(e.target.value) : undefined })}
                   placeholder="4"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
                   disabled={isCreating}
                 />
               </div>
@@ -299,7 +304,7 @@ export function CreateRecipeModal({ isOpen, onClose, onCreate }: CreateRecipeMod
                   id="mealType"
                   value={formData.mealType || ''}
                   onChange={(e) => setFormData({ ...formData, mealType: e.target.value as MealType })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
                   disabled={isCreating}
                 >
                   <option value="">Select meal type</option>
@@ -361,7 +366,7 @@ export function CreateRecipeModal({ isOpen, onClose, onCreate }: CreateRecipeMod
                 value={formData.source}
                 onChange={(e) => setFormData({ ...formData, source: e.target.value })}
                 placeholder="Recipe source (e.g., Grandma, Website name)"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
                 disabled={isCreating}
               />
             </div>
@@ -377,7 +382,7 @@ export function CreateRecipeModal({ isOpen, onClose, onCreate }: CreateRecipeMod
                 onChange={(e) => setIngredientInput(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addIngredient())}
                 placeholder="Add ingredient (e.g., 2 cups flour)"
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
                 disabled={isCreating}
               />
               <button
@@ -421,7 +426,7 @@ export function CreateRecipeModal({ isOpen, onClose, onCreate }: CreateRecipeMod
                 onChange={(e) => setStepInput(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addStep())}
                 placeholder="Add step (e.g., Mix flour and sugar)"
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
                 disabled={isCreating}
               />
               <button
@@ -470,7 +475,7 @@ export function CreateRecipeModal({ isOpen, onClose, onCreate }: CreateRecipeMod
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
                 placeholder="Add tag (e.g., Italian, Healthy)"
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
                 disabled={isCreating}
               />
               <button
@@ -532,7 +537,7 @@ export function CreateRecipeModal({ isOpen, onClose, onCreate }: CreateRecipeMod
                     id="plannedDate"
                     value={plannedDate}
                     onChange={(e) => setPlannedDate(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
                     disabled={isCreating}
                   />
                 </div>
@@ -545,7 +550,7 @@ export function CreateRecipeModal({ isOpen, onClose, onCreate }: CreateRecipeMod
                     id="plannedMealType"
                     value={plannedMealType || ''}
                     onChange={(e) => setPlannedMealType(e.target.value as MealType)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
                     disabled={isCreating}
                   >
                     <option value="">Select meal type</option>

@@ -1,5 +1,5 @@
 import { apiClient } from '@/lib/api';
-import { Cookbook } from '@/lib/localCookbooks';
+import { Cookbook } from '@/types';
 
 export const cookbookService = {
   // Récupérer tous les cookbooks

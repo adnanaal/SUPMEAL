@@ -23,9 +23,50 @@ export interface Cookbook {
   description?: string;
   ownerId: number;
   owner?: User;
+  coverImage?: string;
+  recipeIds?: number[];
+  members?: CookbookMember[];
   createdAt: string;
   updatedAt: string;
 }
+
+export interface CookbookMember {
+  id: number;
+  userId: number;
+  user?: User;
+  cookbookId: number;
+  permission: CookbookPermission;
+  joinedAt: string;
+  userName?: string;
+  userEmail?: string;
+}
+
+export enum CookbookPermission {
+  OWNER = 'OWNER',
+  EDITOR = 'EDITOR',
+  VIEWER = 'VIEWER',
+  CREATOR = 'CREATOR',
+  COMMENTATOR = 'COMMENTATOR',
+  READER = 'READER'
+}
+
+export const PERMISSION_LABELS: Record<CookbookPermission, string> = {
+  [CookbookPermission.OWNER]: 'Propriétaire',
+  [CookbookPermission.EDITOR]: 'Éditeur',
+  [CookbookPermission.VIEWER]: 'Lecteur',
+  [CookbookPermission.CREATOR]: 'Créateur',
+  [CookbookPermission.COMMENTATOR]: 'Commentateur',
+  [CookbookPermission.READER]: 'Lecteur'
+};
+
+export const PERMISSION_COLORS: Record<CookbookPermission, string> = {
+  [CookbookPermission.OWNER]: 'bg-purple-100 text-purple-800',
+  [CookbookPermission.EDITOR]: 'bg-blue-100 text-blue-800',
+  [CookbookPermission.VIEWER]: 'bg-gray-100 text-gray-800',
+  [CookbookPermission.CREATOR]: 'bg-green-100 text-green-800',
+  [CookbookPermission.COMMENTATOR]: 'bg-yellow-100 text-yellow-800',
+  [CookbookPermission.READER]: 'bg-gray-100 text-gray-800'
+};
 
 export interface Recipe {
   id: number;
@@ -36,6 +77,7 @@ export interface Recipe {
   servings?: number;
   imagePath?: string;
   source?: string;
+  sourceUrl?: string;
   mealType: MealType;
   ownerId?: number;
   owner?: User;
@@ -132,7 +174,7 @@ export interface CreateRecipeData {
   servings?: number;
   imagePath?: string;
   source?: string;
-  mealType?: MealType;
+  mealType: MealType;
   tags?: string[];
 }
 

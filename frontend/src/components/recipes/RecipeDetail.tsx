@@ -10,7 +10,7 @@ import { AddToShoppingListModal } from '@/components/recipes/AddToShoppingListMo
 import { AddToMealPlannerModal } from '@/components/recipes/AddToMealPlannerModal';
 import { recipeService } from '@/services/recipeService';
 import { favoriteService } from '@/services/favoriteService';
-import { ArrowLeft, Clock, Users, Tag, ChefHat, Utensils, Heart, Share2, Edit, Trash2, Check, ShoppingCart, Calendar } from 'lucide-react';
+import { ArrowLeft, Clock, Users, Tag, ChefHat, Utensils, Heart, Share2, Edit, Trash2, Check, ShoppingCart, Calendar, Link as ExternalLink } from 'lucide-react';
 
 export function RecipeDetail() {
   const params = useParams();
@@ -211,14 +211,27 @@ export function RecipeDetail() {
                   <span>{recipe.source}</span>
                 </div>
               )}
+              {recipe.sourceUrl && (
+                <div className="flex items-center space-x-2 text-gray-700">
+                  <ExternalLink className="w-5 h-5 text-orange-500" />
+                  <a
+                    href={recipe.sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800 underline"
+                  >
+                    View Original Recipe
+                  </a>
+                </div>
+              )}
             </div>
 
             {/* Tags */}
             {recipe.tags && recipe.tags.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-4">
-                {recipe.tags.map((tag) => (
+                {recipe.tags.map((tag, index) => (
                   <div
-                    key={tag.id}
+                    key={tag.id || `${tag.name}-${index}`}
                     className="flex items-center space-x-1 px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm"
                   >
                     <Tag className="w-4 h-4" />
@@ -239,9 +252,9 @@ export function RecipeDetail() {
                 </h2>
                 <ul className="space-y-3">
                   {recipe.ingredients && recipe.ingredients.length > 0 ? (
-                    recipe.ingredients.map((ingredient) => (
+                    recipe.ingredients.map((ingredient, index) => (
                       <li
-                        key={ingredient.id}
+                        key={ingredient.id || `${ingredient.name}-${index}`}
                         className="flex items-start space-x-2 text-gray-700"
                       >
                         <span className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0" />
@@ -270,9 +283,9 @@ export function RecipeDetail() {
                 {recipe.steps && recipe.steps.length > 0 ? (
                   recipe.steps
                     .sort((a, b) => a.stepOrder - b.stepOrder)
-                    .map((step) => (
+                    .map((step, index) => (
                       <div
-                        key={step.id}
+                        key={step.id || `step-${index}`}
                         className="bg-white rounded-xl shadow-sm border border-gray-100 p-6"
                       >
                         <div className="flex items-start space-x-4">

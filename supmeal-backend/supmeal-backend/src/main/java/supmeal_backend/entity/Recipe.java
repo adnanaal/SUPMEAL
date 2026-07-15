@@ -33,9 +33,13 @@ public class Recipe {
 
     private Integer servings;
 
+    @Column(columnDefinition = "TEXT")
     private String imagePath;
 
     private String source;
+
+    @Column(columnDefinition = "TEXT")
+    private String sourceUrl;
 
     private LocalDateTime createdAt;
 

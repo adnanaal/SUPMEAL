@@ -67,9 +67,9 @@ export function RecipeList({ recipes, title = 'Recent Recipes' }: RecipeListProp
               </div>
               {recipe.tags && recipe.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {recipe.tags.slice(0, 3).map((tag) => (
+                  {recipe.tags.slice(0, 3).map((tag, index) => (
                     <span
-                      key={tag.id}
+                      key={tag.id || `${tag.name}-${index}`}
                       className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700"
                     >
                       {tag.name}

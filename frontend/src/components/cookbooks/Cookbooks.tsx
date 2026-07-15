@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, BookOpen, Users, Trash2, Settings } from 'lucide-react';
-import { Cookbook } from '@/lib/localCookbooks';
+import { Cookbook } from '@/types';
 import { cookbookService } from '@/services/cookbookService';
 import { CreateCookbookModal } from '@/components/cookbooks/CreateCookbookModal';
 

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { X, UserPlus, Mail } from 'lucide-react';
-import { CookbookPermission } from '@/lib/localCookbooks';
+import { CookbookPermission } from '@/types';
 
 interface InviteMemberModalProps {
   isOpen: boolean;

@@ -32,6 +32,8 @@ public class RecipeResponse {
 
     private String source;
 
+    private String sourceUrl;
+
     private MealType mealType;
 
     private Long ownerId;
