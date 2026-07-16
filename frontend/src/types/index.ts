@@ -81,9 +81,9 @@ export interface Recipe {
   mealType: MealType;
   ownerId?: number;
   owner?: User;
-  ingredients?: Ingredient[];
-  steps?: RecipeStep[];
-  tags?: Tag[];
+  ingredients?: string[];
+  steps?: string[];
+  tags?: string[];
   createdAt: string;
   updatedAt: string;
 }

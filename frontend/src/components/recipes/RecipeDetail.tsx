@@ -231,11 +231,11 @@ export function RecipeDetail() {
               <div className="flex flex-wrap gap-2 mt-4">
                 {recipe.tags.map((tag, index) => (
                   <div
-                    key={tag.id || `${tag.name}-${index}`}
+                    key={`tag-${index}`}
                     className="flex items-center space-x-1 px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm"
                   >
                     <Tag className="w-4 h-4" />
-                    <span>{tag.name}</span>
+                    <span>{tag}</span>
                   </div>
                 ))}
               </div>
@@ -254,16 +254,11 @@ export function RecipeDetail() {
                   {recipe.ingredients && recipe.ingredients.length > 0 ? (
                     recipe.ingredients.map((ingredient, index) => (
                       <li
-                        key={ingredient.id || `${ingredient.name}-${index}`}
+                        key={`ingredient-${index}`}
                         className="flex items-start space-x-2 text-gray-700"
                       >
                         <span className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0" />
-                        <span>
-                          <span className="font-medium">
-                            {ingredient.quantity} {ingredient.unit}
-                          </span>{' '}
-                          {ingredient.name}
-                        </span>
+                        <span>{ingredient}</span>
                       </li>
                     ))
                   ) : (
@@ -281,21 +276,19 @@ export function RecipeDetail() {
               </h2>
               <div className="space-y-4">
                 {recipe.steps && recipe.steps.length > 0 ? (
-                  recipe.steps
-                    .sort((a, b) => a.stepOrder - b.stepOrder)
-                    .map((step, index) => (
-                      <div
-                        key={step.id || `step-${index}`}
-                        className="bg-white rounded-xl shadow-sm border border-gray-100 p-6"
-                      >
-                        <div className="flex items-start space-x-4">
-                          <div className="flex-shrink-0 w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center font-bold">
-                            {step.stepOrder}
-                          </div>
-                          <p className="text-gray-700 flex-1">{step.instruction}</p>
+                  recipe.steps.map((step, index) => (
+                    <div
+                      key={`step-${index}`}
+                      className="bg-white rounded-xl shadow-sm border border-gray-100 p-6"
+                    >
+                      <div className="flex items-start space-x-4">
+                        <div className="flex-shrink-0 w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center font-bold">
+                          {index + 1}
                         </div>
+                        <p className="text-gray-700 flex-1">{step}</p>
                       </div>
-                    ))
+                    </div>
+                  ))
                 ) : (
                   <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-gray-500">
                     No instructions listed

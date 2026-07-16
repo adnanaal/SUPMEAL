@@ -3,7 +3,15 @@
 import { useState } from 'react';
 import { X, Calendar, Save } from 'lucide-react';
 import { MealType } from '@/types';
-import { MealPlan } from '@/lib/localMealPlanning';
+
+interface MealPlan {
+  id: number;
+  date: string;
+  mealType: MealType;
+  recipeId?: number;
+  recipeTitle?: string;
+  recipeImage?: string;
+}
 
 interface EditMealModalProps {
   isOpen: boolean;
@@ -72,7 +80,7 @@ export function EditMealModal({ isOpen, onClose, mealPlan, onUpdate }: EditMealM
               id="date"
               value={newDate}
               onChange={(e) => setNewDate(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
             />
           </div>
 
@@ -85,7 +93,7 @@ export function EditMealModal({ isOpen, onClose, mealPlan, onUpdate }: EditMealM
               id="mealType"
               value={newMealType}
               onChange={(e) => setNewMealType(e.target.value as MealType)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
             >
               {MEAL_TYPES.map((type) => (
                 <option key={type} value={type}>

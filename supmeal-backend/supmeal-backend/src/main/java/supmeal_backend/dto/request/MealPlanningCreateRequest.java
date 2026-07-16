@@ -23,6 +23,5 @@ public class MealPlanningCreateRequest {
     @NotNull(message = "Meal type is required")
     private MealType mealType;
 
-    @NotNull(message = "Recipe ID is required")
     private Long recipeId;
 }

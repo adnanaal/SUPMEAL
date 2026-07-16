@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Calendar, Check } from 'lucide-react';
 import { Recipe, MealType } from '@/types';
-import { addLocalMealPlan, MealPlan } from '@/lib/localMealPlanning';
+import { mealPlanningService } from '@/services/mealPlanningService';
+import { useAuthStore } from '@/stores/authStore';
 
 interface AddToMealPlannerModalProps {
   isOpen: boolean;
@@ -23,31 +24,40 @@ export function AddToMealPlannerModal({ isOpen, onClose, recipe }: AddToMealPlan
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedMealType, setSelectedMealType] = useState<MealType>(MealType.DINNER);
   const [isAdding, setIsAdding] = useState(false);
+  const { user } = useAuthStore();
 
   // Set default date to today
-  useState(() => {
+  useEffect(() => {
     setSelectedDate(new Date().toISOString().split('T')[0]);
-  });
+  }, []);
 
   const handleAddToMealPlanner = async () => {
-    if (!selectedDate) return;
+    if (!selectedDate || !user) return;
+
+    // Validation: empêcher les dates passées
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const selectedDateObj = new Date(selectedDate);
+    selectedDateObj.setHours(0, 0, 0, 0);
+    
+    if (selectedDateObj < today) {
+      alert('Please select today or a future date');
+      return;
+    }
 
     try {
       setIsAdding(true);
 
-      const newMealPlan: MealPlan = {
-        id: Date.now(),
-        date: selectedDate,
+      await mealPlanningService.createMealPlanning({
+        plannedDate: selectedDate,
         mealType: selectedMealType,
         recipeId: recipe.id,
-        recipeTitle: recipe.title,
-        recipeImage: recipe.imagePath,
-      };
+      });
 
-      addLocalMealPlan(newMealPlan);
       onClose();
     } catch (err) {
       console.error('Failed to add to meal planner:', err);
+      alert('Failed to add to meal planner. Please try again.');
     } finally {
       setIsAdding(false);
     }
@@ -99,7 +109,7 @@ export function AddToMealPlannerModal({ isOpen, onClose, recipe }: AddToMealPlan
               id="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
             />
           </div>
 
@@ -111,7 +121,7 @@ export function AddToMealPlannerModal({ isOpen, onClose, recipe }: AddToMealPlan
               id="mealType"
               value={selectedMealType}
               onChange={(e) => setSelectedMealType(e.target.value as MealType)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
             >
               {MEAL_TYPES.map((type) => (
                 <option key={type} value={type}>

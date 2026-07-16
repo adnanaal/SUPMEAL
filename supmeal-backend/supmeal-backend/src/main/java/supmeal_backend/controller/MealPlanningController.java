@@ -97,6 +97,7 @@ public class MealPlanningController {
         if (request.getMealType() != null) {
             existingMealPlanning.setMealType(request.getMealType());
         }
+        // Only update recipe if recipeId is explicitly set in the request
         if (request.getRecipeId() != null) {
             Recipe recipe = recipeService.findById(request.getRecipeId())
                     .orElseThrow(() -> new ResourceNotFoundException(String.format("Recipe not found with id: %d", request.getRecipeId())));

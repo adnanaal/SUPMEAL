@@ -1,8 +1,16 @@
 'use client';
 
 import { X, Clock, Users, Utensils, ChefHat } from 'lucide-react';
-import { MealPlan } from '@/lib/localMealPlanning';
 import { MealType } from '@/types';
+
+interface MealPlan {
+  id: number;
+  date: string;
+  mealType: MealType;
+  recipeId?: number;
+  recipeTitle?: string;
+  recipeImage?: string;
+}
 
 const MEAL_TYPE_LABELS: Record<MealType, string> = {
   [MealType.BREAKFAST]: 'Breakfast',

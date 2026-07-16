@@ -3,11 +3,12 @@
 import { useState, useEffect } from 'react';
 import { X, Check, Utensils, Calendar } from 'lucide-react';
 import { ShoppingList } from '@/lib/localShoppingLists';
-import { getLocalMealPlans, MealPlan } from '@/lib/localMealPlanning';
+import { mealPlanningService, MealPlanning } from '@/services/mealPlanningService';
 import { updateLocalShoppingList } from '@/lib/localShoppingLists';
 import { addShoppingListItem, ShoppingListItem } from '@/lib/localShoppingLists';
 import { recipeService } from '@/services/recipeService';
 import { Recipe } from '@/types';
+import { useAuthStore } from '@/stores/authStore';
 
 interface AddMealsModalProps {
   isOpen: boolean;
@@ -17,15 +18,31 @@ interface AddMealsModalProps {
 }
 
 export function AddMealsModal({ isOpen, onClose, shoppingList, onMealsAdded }: AddMealsModalProps) {
-  const [mealPlans, setMealPlans] = useState<MealPlan[]>([]);
+  const [mealPlans, setMealPlans] = useState<MealPlanning[]>([]);
   const [selectedMealPlans, setSelectedMealPlans] = useState<Set<number>>(new Set());
   const [isAdding, setIsAdding] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuthStore();
 
   useEffect(() => {
-    setMealPlans(getLocalMealPlans());
+    loadMealPlans();
     // Pré-sélectionner les repas déjà inclus
     setSelectedMealPlans(new Set(shoppingList.mealPlanIds));
   }, [shoppingList]);
+
+  const loadMealPlans = async () => {
+    if (!user) return;
+    
+    try {
+      setLoading(true);
+      const plannings = await mealPlanningService.getMealPlanningsByUser(user.id);
+      setMealPlans(plannings);
+    } catch (error) {
+      console.error('Failed to load meal plans:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleToggleMealPlan = (mealPlanId: number) => {
     const newSelected = new Set(selectedMealPlans);
@@ -65,7 +82,7 @@ export function AddMealsModal({ isOpen, onClose, shoppingList, onMealsAdded }: A
                 sourceMealPlanId: mealPlan.id,
                 sourceRecipeTitle: recipe.title,
                 sourceMealType: mealPlan.mealType,
-                sourceDate: mealPlan.date,
+                sourceDate: mealPlan.plannedDate,
               };
               addShoppingListItem(newItem);
             }
@@ -130,7 +147,7 @@ export function AddMealsModal({ isOpen, onClose, shoppingList, onMealsAdded }: A
                       <p className="font-medium text-gray-900">{mealPlan.recipeTitle}</p>
                       <div className="flex items-center space-x-2 text-sm text-gray-500 mt-1">
                         <Calendar className="w-4 h-4" />
-                        <span>{new Date(mealPlan.date).toLocaleDateString()}</span>
+                        <span>{new Date(mealPlan.plannedDate).toLocaleDateString()}</span>
                         <span>•</span>
                         <span>{mealPlan.mealType}</span>
                       </div>

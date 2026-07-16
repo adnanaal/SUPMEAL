@@ -26,6 +26,10 @@ public class MealPlanningResponse {
 
     private Long recipeId;
 
+    private String recipeTitle;
+
+    private String recipeImage;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
 }

@@ -27,6 +27,8 @@ public class MealPlanningMapper {
                 .createdAt(mealPlanning.getCreatedAt())
                 .userId(mealPlanning.getUser() != null ? mealPlanning.getUser().getId() : null)
                 .recipeId(mealPlanning.getRecipe() != null ? mealPlanning.getRecipe().getId() : null)
+                .recipeTitle(mealPlanning.getRecipe() != null ? mealPlanning.getRecipe().getTitle() : null)
+                .recipeImage(mealPlanning.getRecipe() != null ? mealPlanning.getRecipe().getImagePath() : null)
                 .build();
     }
 

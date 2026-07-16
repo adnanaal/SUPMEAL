@@ -2,12 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { MealType } from '@/types';
-import { 
-  getLocalMealPlans, 
-  updateLocalMealPlan, 
-  deleteLocalMealPlan,
-  MealPlan 
-} from '@/lib/localMealPlanning';
+import { mealPlanningService, MealPlanning } from '@/services/mealPlanningService';
+import { useAuthStore } from '@/stores/authStore';
 import { EditMealModal } from '@/components/meal-planning/EditMealModal';
 import { ViewMealModal } from '@/components/meal-planning/ViewMealModal';
 import { 
@@ -36,33 +32,57 @@ const MEAL_TYPE_COLORS: Record<MealType, string> = {
   [MealType.SNACK]: 'bg-purple-100 text-purple-700 border-purple-300',
 };
 
+interface MealPlan {
+  id: number;
+  date: string;
+  mealType: MealType;
+  recipeId?: number;
+  recipeTitle?: string;
+  recipeImage?: string;
+}
+
 export function MealPlanner() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [mealPlans, setMealPlans] = useState<MealPlan[]>([]);
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(() => {
     const now = new Date();
     now.setHours(0, 0, 0, 0);
-    return now; // Start from today instead of Monday
+    return now;
   });
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedMealPlan, setSelectedMealPlan] = useState<MealPlan | null>(null);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuthStore();
 
   useEffect(() => {
-    setMealPlans(getLocalMealPlans());
-  }, []);
+    loadMealPlans();
+  }, [user]);
 
-  // Rafraîchir quand le composant reçoit le focus (pour les mises à jour externes)
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        setMealPlans(getLocalMealPlans());
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, []);
+  const loadMealPlans = async () => {
+    if (!user) return;
+    
+    try {
+      setLoading(true);
+      const plannings = await mealPlanningService.getMealPlanningsByUser(user.id);
+      
+      // Convertir MealPlanning en MealPlan avec les détails de la recette
+      const mealPlans: MealPlan[] = plannings.map(mp => ({
+        id: mp.id,
+        date: mp.plannedDate,
+        mealType: mp.mealType,
+        recipeId: mp.recipeId,
+        recipeTitle: mp.recipeTitle,
+        recipeImage: mp.recipeImage,
+      }));
+      
+      setMealPlans(mealPlans);
+    } catch (error) {
+      console.error('Failed to load meal plans:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getWeekDates = (startDate: Date) => {
     const dates = [];
@@ -81,31 +101,55 @@ export function MealPlanner() {
     return `${year}-${month}-${day}`;
   };
 
-  const getMealPlanForDateAndType = (date: string, mealType: MealType) => {
-    return mealPlans.find((mp) => mp.date === date && mp.mealType === mealType);
+  const getMealPlansForDateAndType = (date: string, mealType: MealType) => {
+    return mealPlans.filter((mp) => mp.date === date && mp.mealType === mealType);
   };
 
   const handlePreviousWeek = () => {
     const newDate = new Date(currentWeekStart);
     newDate.setDate(newDate.getDate() - 7);
+    
+    // Empêcher de naviguer vers des dates passées
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (newDate < today) {
+      return;
+    }
+    
     setCurrentWeekStart(newDate);
   };
 
   const handleNextWeek = () => {
     const newDate = new Date(currentWeekStart);
     newDate.setDate(newDate.getDate() + 7);
+    
+    // Empêcher de naviguer vers des dates passées
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (newDate < today) {
+      return;
+    }
+    
     setCurrentWeekStart(newDate);
   };
 
-  const handleMealTypeChange = (mealPlan: MealPlan, newMealType: MealType) => {
-    updateLocalMealPlan(mealPlan.id, { mealType: newMealType });
-    setMealPlans(getLocalMealPlans());
+  const handleMealTypeChange = async (mealPlan: MealPlan, newMealType: MealType) => {
+    try {
+      await mealPlanningService.updateMealPlanning(mealPlan.id, { mealType: newMealType });
+      await loadMealPlans();
+    } catch (error) {
+      console.error('Failed to update meal type:', error);
+    }
   };
 
-  const handleDeleteMeal = (mealPlanId: number) => {
+  const handleDeleteMeal = async (mealPlanId: number) => {
     if (confirm('Are you sure you want to delete this meal?')) {
-      deleteLocalMealPlan(mealPlanId);
-      setMealPlans(getLocalMealPlans());
+      try {
+        await mealPlanningService.deleteMealPlanning(mealPlanId);
+        await loadMealPlans();
+      } catch (error) {
+        console.error('Failed to delete meal:', error);
+      }
     }
   };
 
@@ -119,9 +163,18 @@ export function MealPlanner() {
     setIsViewModalOpen(true);
   };
 
-  const handleMealUpdate = (id: number, updates: Partial<MealPlan>) => {
-    updateLocalMealPlan(id, updates);
-    setMealPlans(getLocalMealPlans());
+  const handleMealUpdate = async (id: number, updates: Partial<MealPlan>) => {
+    try {
+      const updateData: any = {};
+      if (updates.mealType) updateData.mealType = updates.mealType;
+      if (updates.recipeId) updateData.recipeId = updates.recipeId;
+      if (updates.date) updateData.plannedDate = updates.date;
+      
+      await mealPlanningService.updateMealPlanning(id, updateData);
+      await loadMealPlans();
+    } catch (error) {
+      console.error('Failed to update meal:', error);
+    }
   };
 
   const weekDates = getWeekDates(currentWeekStart);
@@ -213,72 +266,66 @@ export function MealPlanner() {
             {/* Days */}
             {weekDates.map((date) => {
               const dateStr = formatDate(date);
-              const mealPlan = getMealPlanForDateAndType(dateStr, mealType);
+              const mealPlansForCell = getMealPlansForDateAndType(dateStr, mealType);
 
               return (
                 <div
                   key={`${dateStr}-${mealType}`}
                   className="p-2 border-r border-gray-100 last:border-r-0 min-h-[100px]"
                 >
-                  {mealPlan ? (
-                    <div className="relative group">
-                      <div 
-                        onClick={() => isEditMode ? handleEditMeal(mealPlan) : handleViewMeal(mealPlan)}
-                        className="bg-gray-50 rounded-lg p-2 h-full border border-gray-200 hover:border-orange-300 transition-colors cursor-pointer"
-                      >
-                        {mealPlan.recipeImage && (
-                          <img
-                            src={mealPlan.recipeImage}
-                            alt={mealPlan.recipeTitle}
-                            className="w-full h-16 object-cover rounded mb-2"
-                          />
-                        )}
-                        <p className="text-xs font-medium text-gray-900 line-clamp-2">
-                          {mealPlan.recipeTitle}
-                        </p>
+                  {mealPlansForCell.length > 0 && (
+                    <div className="space-y-1">
+                      {mealPlansForCell.map((mealPlan) => (
+                        <div key={mealPlan.id} className="relative group">
+                          <div 
+                            onClick={() => isEditMode ? handleEditMeal(mealPlan) : handleViewMeal(mealPlan)}
+                            className="bg-gray-50 rounded-lg p-2 border border-gray-200 hover:border-orange-300 transition-colors cursor-pointer"
+                          >
+                            {mealPlan.recipeImage && (
+                              <img
+                                src={mealPlan.recipeImage}
+                                alt={mealPlan.recipeTitle}
+                                className="w-full h-12 object-cover rounded mb-1"
+                              />
+                            )}
+                            <p className="text-xs font-medium text-gray-900 line-clamp-1">
+                              {mealPlan.recipeTitle}
+                            </p>
 
-                        {isEditMode && (
-                          <div className="absolute top-1 right-1 flex space-x-1">
-                            {/* Meal Type Dropdown */}
-                            <select
-                              value={mealPlan.mealType}
-                              onChange={(e) => {
-                                e.stopPropagation();
-                                handleMealTypeChange(mealPlan, e.target.value as MealType);
-                              }}
-                              className="text-xs px-2 py-1 bg-white border border-gray-300 rounded hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            >
-                              {MEAL_TYPES.map((type) => (
-                                <option key={type} value={type}>
-                                  {MEAL_TYPE_LABELS[type]}
-                                </option>
-                              ))}
-                            </select>
+                            {isEditMode && (
+                              <div className="absolute top-1 right-1 flex space-x-1">
+                                {/* Meal Type Dropdown */}
+                                <select
+                                  value={mealPlan.mealType}
+                                  onChange={(e) => {
+                                    e.stopPropagation();
+                                    handleMealTypeChange(mealPlan, e.target.value as MealType);
+                                  }}
+                                  className="text-xs px-2 py-1 bg-white border border-gray-300 rounded hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                  {MEAL_TYPES.map((type) => (
+                                    <option key={type} value={type}>
+                                      {MEAL_TYPE_LABELS[type]}
+                                    </option>
+                                  ))}
+                                </select>
 
-                            {/* Delete Button */}
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteMeal(mealPlan.id);
-                              }}
-                              className="p-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-                              title="Delete meal"
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </button>
+                                {/* Delete Button */}
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteMeal(mealPlan.id);
+                                  }}
+                                  className="p-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                                  title="Delete meal"
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </button>
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="h-full flex items-center justify-center">
-                      {isEditMode ? (
-                        <button className="p-2 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-colors">
-                          <Utensils className="w-5 h-5" />
-                        </button>
-                      ) : (
-                        <div className="w-2 h-2 bg-gray-200 rounded-full" />
-                      )}
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>

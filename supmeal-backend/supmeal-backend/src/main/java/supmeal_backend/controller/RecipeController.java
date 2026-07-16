@@ -193,7 +193,11 @@ public class RecipeController {
         }
         
         // Gérer les ingredients : supprimer anciens, recréer nouveaux
-        existingRecipe.getIngredients().clear();
+        if (existingRecipe.getIngredients() != null) {
+            existingRecipe.getIngredients().clear();
+        } else {
+            existingRecipe.setIngredients(new ArrayList<>());
+        }
         if (request.getIngredients() != null && !request.getIngredients().isEmpty()) {
             List<Ingredient> newIngredients = new ArrayList<>();
             for (int i = 0; i < request.getIngredients().size(); i++) {
@@ -209,7 +213,11 @@ public class RecipeController {
         }
         
         // Gérer les steps : supprimer anciens, recréer nouveaux
-        existingRecipe.getSteps().clear();
+        if (existingRecipe.getSteps() != null) {
+            existingRecipe.getSteps().clear();
+        } else {
+            existingRecipe.setSteps(new ArrayList<>());
+        }
         if (request.getSteps() != null && !request.getSteps().isEmpty()) {
             List<RecipeStep> newSteps = new ArrayList<>();
             for (int i = 0; i < request.getSteps().size(); i++) {

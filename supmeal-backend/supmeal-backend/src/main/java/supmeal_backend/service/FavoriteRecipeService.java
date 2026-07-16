@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import supmeal_backend.entity.FavoriteRecipe;
+import supmeal_backend.entity.Recipe;
 import supmeal_backend.entity.User;
 import supmeal_backend.repository.FavoriteRecipeRepository;
 
@@ -31,6 +32,14 @@ public class FavoriteRecipeService {
 
     public List<FavoriteRecipe> findByUser(User user) {
         return favoriteRecipeRepository.findByUser(user);
+    }
+
+    public Optional<FavoriteRecipe> findByUserAndRecipe(User user, Recipe recipe) {
+        return favoriteRecipeRepository.findByUserAndRecipe(user, recipe);
+    }
+
+    public boolean existsByUserAndRecipe(User user, Recipe recipe) {
+        return favoriteRecipeRepository.findByUserAndRecipe(user, recipe).isPresent();
     }
 
     public FavoriteRecipe update(FavoriteRecipe favoriteRecipe) {

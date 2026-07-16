@@ -22,7 +22,7 @@ export function EditRecipeModal({ isOpen, onClose, recipe, onUpdate }: EditRecip
     servings: undefined,
     imagePath: '',
     source: '',
-    mealType: undefined,
+    mealType: MealType.DINNER,
     tags: [],
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -39,15 +39,15 @@ export function EditRecipeModal({ isOpen, onClose, recipe, onUpdate }: EditRecip
       setFormData({
         title: recipe.title,
         description: recipe.description || '',
-        ingredients: recipe.ingredients?.map(ing => ing.name) || [],
-        steps: recipe.steps?.map(step => step.instruction) || [],
+        ingredients: recipe.ingredients || [],
+        steps: recipe.steps || [],
         preparationTime: recipe.preparationTime,
         cookingTime: recipe.cookingTime,
         servings: recipe.servings,
         imagePath: recipe.imagePath || '',
         source: recipe.source || '',
         mealType: recipe.mealType,
-        tags: recipe.tags?.map(tag => tag.name) || [],
+        tags: recipe.tags || [],
       });
       setImagePreview(recipe.imagePath || '');
     }
@@ -203,7 +203,7 @@ export function EditRecipeModal({ isOpen, onClose, recipe, onUpdate }: EditRecip
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 placeholder="Recipe title"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
                 disabled={isUpdating}
                 required
               />
@@ -219,7 +219,7 @@ export function EditRecipeModal({ isOpen, onClose, recipe, onUpdate }: EditRecip
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Brief description of the recipe"
                 rows={3}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none resize-none"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none resize-none text-gray-900"
                 disabled={isUpdating}
               />
             </div>
@@ -235,7 +235,7 @@ export function EditRecipeModal({ isOpen, onClose, recipe, onUpdate }: EditRecip
                   value={formData.preparationTime || ''}
                   onChange={(e) => setFormData({ ...formData, preparationTime: e.target.value ? parseInt(e.target.value) : undefined })}
                   placeholder="20"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
                   disabled={isUpdating}
                 />
               </div>
@@ -250,7 +250,7 @@ export function EditRecipeModal({ isOpen, onClose, recipe, onUpdate }: EditRecip
                   value={formData.cookingTime || ''}
                   onChange={(e) => setFormData({ ...formData, cookingTime: e.target.value ? parseInt(e.target.value) : undefined })}
                   placeholder="15"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
                   disabled={isUpdating}
                 />
               </div>
@@ -265,7 +265,7 @@ export function EditRecipeModal({ isOpen, onClose, recipe, onUpdate }: EditRecip
                   value={formData.servings || ''}
                   onChange={(e) => setFormData({ ...formData, servings: e.target.value ? parseInt(e.target.value) : undefined })}
                   placeholder="4"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
                   disabled={isUpdating}
                 />
               </div>
@@ -280,7 +280,7 @@ export function EditRecipeModal({ isOpen, onClose, recipe, onUpdate }: EditRecip
                   id="mealType"
                   value={formData.mealType || ''}
                   onChange={(e) => setFormData({ ...formData, mealType: e.target.value as MealType })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
                   disabled={isUpdating}
                 >
                   <option value="">Select meal type</option>
@@ -342,7 +342,7 @@ export function EditRecipeModal({ isOpen, onClose, recipe, onUpdate }: EditRecip
                 value={formData.source}
                 onChange={(e) => setFormData({ ...formData, source: e.target.value })}
                 placeholder="Recipe source (e.g., Grandma, Website name)"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
                 disabled={isUpdating}
               />
             </div>
@@ -358,7 +358,7 @@ export function EditRecipeModal({ isOpen, onClose, recipe, onUpdate }: EditRecip
                 onChange={(e) => setIngredientInput(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addIngredient())}
                 placeholder="Add ingredient (e.g., 2 cups flour)"
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
                 disabled={isUpdating}
               />
               <button
@@ -402,7 +402,7 @@ export function EditRecipeModal({ isOpen, onClose, recipe, onUpdate }: EditRecip
                 onChange={(e) => setStepInput(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addStep())}
                 placeholder="Add step (e.g., Mix flour and sugar)"
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
                 disabled={isUpdating}
               />
               <button
@@ -451,7 +451,7 @@ export function EditRecipeModal({ isOpen, onClose, recipe, onUpdate }: EditRecip
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
                 placeholder="Add tag (e.g., Italian, Healthy)"
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
                 disabled={isUpdating}
               />
               <button

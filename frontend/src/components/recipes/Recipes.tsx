@@ -10,6 +10,7 @@ import { CreateRecipeButton } from '@/components/recipes/CreateRecipeButton';
 import { ImportFromUrlModal } from '@/components/recipes/ImportFromUrlModal';
 import { CreateRecipeModal } from '@/components/recipes/CreateRecipeModal';
 import { recipeService } from '@/services/recipeService';
+import { mealPlanningService } from '@/services/mealPlanningService';
 
 export function Recipes() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -81,7 +82,11 @@ export function Recipes() {
           mealType: data.plannedMealType,
           recipeId: createdRecipe.id,
         });
-        // TODO: Implémenter le service de meal planning
+        await mealPlanningService.createMealPlanning({
+          plannedDate: data.plannedDate,
+          mealType: data.plannedMealType,
+          recipeId: createdRecipe.id,
+        });
       }
     } catch (err) {
       console.error('Failed to create recipe:', err);
