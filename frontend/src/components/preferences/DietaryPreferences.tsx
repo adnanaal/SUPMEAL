@@ -175,7 +175,7 @@ export function DietaryPreferences({ preferences, onSave }: DietaryPreferencesPr
               onChange={(e) => setCustomAllergy(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && addCustomAllergy()}
               placeholder="Add custom allergy..."
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-sm"
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-sm text-gray-900"
             />
             <button
               onClick={addCustomAllergy}
@@ -239,7 +239,7 @@ export function DietaryPreferences({ preferences, onSave }: DietaryPreferencesPr
               onChange={(e) => setCustomCuisine(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && addCustomCuisine()}
               placeholder="Add custom cuisine type..."
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-sm"
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-sm text-gray-900"
             />
             <button
               onClick={addCustomCuisine}

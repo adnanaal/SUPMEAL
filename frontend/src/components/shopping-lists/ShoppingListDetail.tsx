@@ -4,13 +4,10 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Plus, Check, Edit, Trash2, Info, Utensils, Calendar } from 'lucide-react';
 import { 
-  getShoppingListById, 
-  getShoppingListItems,
-  updateShoppingListItem,
-  deleteShoppingListItem,
+  shoppingListService, 
   ShoppingList,
   ShoppingListItem 
-} from '@/lib/localShoppingLists';
+} from '@/services/shoppingListService';
 import { AddMealsModal } from '@/components/shopping-lists/AddMealsModal';
 import { EditIngredientModal } from '@/components/shopping-lists/EditIngredientModal';
 import { IngredientSourceModal } from '@/components/shopping-lists/IngredientSourceModal';
@@ -24,22 +21,39 @@ export function ShoppingListDetail() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSourceModalOpen, setIsSourceModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<ShoppingListItem | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const listId = parseInt(params.id as string);
 
   useEffect(() => {
-    const list = getShoppingListById(listId);
-    if (list) {
-      setShoppingList(list);
-      setItems(getShoppingListItems(listId));
-    }
+    loadShoppingList();
   }, [listId]);
 
-  const handleToggleCheck = (itemId: number) => {
-    const item = items.find((i) => i.id === itemId);
-    if (item) {
-      updateShoppingListItem(itemId, { checked: !item.checked });
-      setItems(getShoppingListItems(listId));
+  const loadShoppingList = async () => {
+    try {
+      setIsLoading(true);
+      const [list, listItems] = await Promise.all([
+        shoppingListService.getShoppingListById(listId),
+        shoppingListService.getShoppingListItemsByShoppingList(listId),
+      ]);
+      setShoppingList(list);
+      setItems(listItems);
+    } catch (error) {
+      console.error('Failed to load shopping list:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleToggleCheck = async (itemId: number) => {
+    try {
+      const item = items.find((i) => i.id === itemId);
+      if (item) {
+        await shoppingListService.updateShoppingListItem(itemId, { checked: !item.checked });
+        await loadShoppingList();
+      }
+    } catch (error) {
+      console.error('Failed to toggle check:', error);
     }
   };
 
@@ -48,15 +62,23 @@ export function ShoppingListDetail() {
     setIsEditModalOpen(true);
   };
 
-  const handleItemUpdate = (itemId: number, updates: Partial<ShoppingListItem>) => {
-    updateShoppingListItem(itemId, updates);
-    setItems(getShoppingListItems(listId));
+  const handleItemUpdate = async (itemId: number, updates: Partial<ShoppingListItem>) => {
+    try {
+      await shoppingListService.updateShoppingListItem(itemId, updates);
+      await loadShoppingList();
+    } catch (error) {
+      console.error('Failed to update item:', error);
+    }
   };
 
-  const handleDeleteItem = (itemId: number) => {
+  const handleDeleteItem = async (itemId: number) => {
     if (confirm('Are you sure you want to delete this ingredient?')) {
-      deleteShoppingListItem(itemId);
-      setItems(getShoppingListItems(listId));
+      try {
+        await shoppingListService.deleteShoppingListItem(itemId);
+        await loadShoppingList();
+      } catch (error) {
+        console.error('Failed to delete item:', error);
+      }
     }
   };
 
@@ -69,10 +91,28 @@ export function ShoppingListDetail() {
     setIsAddMealsModalOpen(true);
   };
 
-  const handleMealsAdded = () => {
-    setItems(getShoppingListItems(listId));
+  const handleMealsAdded = async () => {
+    await loadShoppingList();
     setIsAddMealsModalOpen(false);
   };
+
+  if (isLoading) {
+    return (
+      <div className="p-6">
+        <button
+          onClick={() => router.back()}
+          className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-6"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          <span>Back to Shopping Lists</span>
+        </button>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+          <p className="text-gray-500">Loading shopping list...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!shoppingList) {
     return (

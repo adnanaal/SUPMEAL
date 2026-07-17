@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { X, Save } from 'lucide-react';
-import { ShoppingListItem } from '@/lib/localShoppingLists';
+import { ShoppingListItem } from '@/services/shoppingListService';
 
 interface EditIngredientModalProps {
   isOpen: boolean;
@@ -64,7 +64,7 @@ export function EditIngredientModal({ isOpen, onClose, item, onUpdate }: EditIng
               id="ingredientName"
               value={ingredientName}
               onChange={(e) => setIngredientName(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
             />
           </div>
 
@@ -74,11 +74,11 @@ export function EditIngredientModal({ isOpen, onClose, item, onUpdate }: EditIng
                 Quantity
               </label>
               <input
-                type="number"
+                type="text"
                 id="quantity"
                 value={quantity}
-                onChange={(e) => setQuantity(parseFloat(e.target.value) || 0)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+                onChange={(e) => setQuantity(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
               />
             </div>
 
@@ -92,7 +92,7 @@ export function EditIngredientModal({ isOpen, onClose, item, onUpdate }: EditIng
                 value={unit}
                 onChange={(e) => setUnit(e.target.value)}
                 placeholder="e.g., cups, pieces"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
               />
             </div>
           </div>

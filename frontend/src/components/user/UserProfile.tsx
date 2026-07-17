@@ -161,7 +161,7 @@ export function UserProfile({ user }: UserProfileProps) {
                     type="text"
                     value={firstname}
                     onChange={(e) => setFirstname(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
                   />
                 </div>
                 <div>
@@ -170,7 +170,7 @@ export function UserProfile({ user }: UserProfileProps) {
                     type="text"
                     value={lastname}
                     onChange={(e) => setLastname(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
                   />
                 </div>
               </div>

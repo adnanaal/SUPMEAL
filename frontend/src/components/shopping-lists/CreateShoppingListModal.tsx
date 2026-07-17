@@ -2,12 +2,12 @@
 
 import { useState } from 'react';
 import { X, Plus, ShoppingCart } from 'lucide-react';
-import { ShoppingList } from '@/lib/localShoppingLists';
+import { ShoppingList, ShoppingListCreate, shoppingListService } from '@/services/shoppingListService';
 
 interface CreateShoppingListModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreate: (list: ShoppingList) => void;
+  onCreate: () => void;
 }
 
 export function CreateShoppingListModal({ isOpen, onClose, onCreate }: CreateShoppingListModalProps) {
@@ -15,7 +15,7 @@ export function CreateShoppingListModal({ isOpen, onClose, onCreate }: CreateSho
   const [description, setDescription] = useState('');
   const [isCreating, setIsCreating] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!name.trim()) {
@@ -25,20 +25,17 @@ export function CreateShoppingListModal({ isOpen, onClose, onCreate }: CreateSho
     try {
       setIsCreating(true);
       
-      const newList: ShoppingList = {
-        id: Date.now(),
+      const newList: ShoppingListCreate = {
         name: name.trim(),
         description: description.trim() || undefined,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        mealPlanIds: [], // Sera rempli quand l'utilisateur choisira les repas
       };
 
-      onCreate(newList);
+      await shoppingListService.createShoppingList(newList);
       
       // Reset form
       setName('');
       setDescription('');
+      onCreate();
     } catch (err) {
       console.error('Failed to create shopping list:', err);
     } finally {
@@ -80,7 +77,7 @@ export function CreateShoppingListModal({ isOpen, onClose, onCreate }: CreateSho
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g., Weekly Groceries"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
               disabled={isCreating}
               required
             />
@@ -96,7 +93,7 @@ export function CreateShoppingListModal({ isOpen, onClose, onCreate }: CreateSho
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Brief description of this shopping list"
               rows={3}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none resize-none"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none resize-none text-gray-900"
               disabled={isCreating}
             />
           </div>

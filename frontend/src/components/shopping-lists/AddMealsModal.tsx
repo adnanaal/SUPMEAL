@@ -2,10 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { X, Check, Utensils, Calendar } from 'lucide-react';
-import { ShoppingList } from '@/lib/localShoppingLists';
+import { ShoppingList, ShoppingListItem, ShoppingListItemCreate, shoppingListService } from '@/services/shoppingListService';
 import { mealPlanningService, MealPlanning } from '@/services/mealPlanningService';
-import { updateLocalShoppingList } from '@/lib/localShoppingLists';
-import { addShoppingListItem, ShoppingListItem } from '@/lib/localShoppingLists';
 import { recipeService } from '@/services/recipeService';
 import { Recipe } from '@/types';
 import { useAuthStore } from '@/stores/authStore';
@@ -58,11 +56,6 @@ export function AddMealsModal({ isOpen, onClose, shoppingList, onMealsAdded }: A
     try {
       setIsAdding(true);
 
-      // Mettre à jour la liste avec les nouveaux meal plans
-      updateLocalShoppingList(shoppingList.id, {
-        mealPlanIds: Array.from(selectedMealPlans),
-      });
-
       // Ajouter les ingrédients des repas sélectionnés
       const recipes = await recipeService.getAllRecipes();
       
@@ -72,19 +65,20 @@ export function AddMealsModal({ isOpen, onClose, shoppingList, onMealsAdded }: A
           const recipe = recipes.find((r: Recipe) => r.id === mealPlan.recipeId);
           if (recipe && recipe.ingredients) {
             for (const ingredient of recipe.ingredients) {
-              const newItem: ShoppingListItem = {
-                id: Date.now() + Math.random(),
+              // ingredient is now a string
+              const ingredientName = typeof ingredient === 'string' ? ingredient : String(ingredient);
+              const newItem: ShoppingListItemCreate = {
                 shoppingListId: shoppingList.id,
-                ingredientName: ingredient.name,
-                quantity: ingredient.quantity,
-                unit: ingredient.unit || '',
+                ingredientName: ingredientName,
+                quantity: '1',
+                unit: 'unit',
                 checked: false,
                 sourceMealPlanId: mealPlan.id,
                 sourceRecipeTitle: recipe.title,
                 sourceMealType: mealPlan.mealType,
                 sourceDate: mealPlan.plannedDate,
               };
-              addShoppingListItem(newItem);
+              await shoppingListService.createShoppingListItem(newItem);
             }
           }
         }

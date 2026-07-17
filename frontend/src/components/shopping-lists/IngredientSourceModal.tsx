@@ -1,7 +1,7 @@
 'use client';
 
 import { X, Utensils, Calendar, ChefHat } from 'lucide-react';
-import { ShoppingListItem } from '@/lib/localShoppingLists';
+import { ShoppingListItem } from '@/services/shoppingListService';
 
 interface IngredientSourceModalProps {
   isOpen: boolean;
@@ -12,12 +12,14 @@ interface IngredientSourceModalProps {
 export function IngredientSourceModal({ isOpen, onClose, item }: IngredientSourceModalProps) {
   if (!isOpen) return null;
 
-  const formattedDate = new Date(item.sourceDate).toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  const formattedDate = item.sourceDate 
+    ? new Date(item.sourceDate).toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    : 'Not specified';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">

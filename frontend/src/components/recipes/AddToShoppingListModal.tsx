@@ -3,8 +3,7 @@
 import { useState, useEffect } from 'react';
 import { X, ShoppingCart, Check } from 'lucide-react';
 import { Recipe } from '@/types';
-import { getLocalShoppingLists, ShoppingList, updateLocalShoppingList } from '@/lib/localShoppingLists';
-import { addShoppingListItem, ShoppingListItem } from '@/lib/localShoppingLists';
+import { ShoppingList, ShoppingListItem, ShoppingListItemCreate, shoppingListService } from '@/services/shoppingListService';
 
 interface AddToShoppingListModalProps {
   isOpen: boolean;
@@ -18,7 +17,15 @@ export function AddToShoppingListModal({ isOpen, onClose, recipe }: AddToShoppin
   const [isAdding, setIsAdding] = useState(false);
 
   useEffect(() => {
-    setShoppingLists(getLocalShoppingLists());
+    const loadShoppingLists = async () => {
+      try {
+        const lists = await shoppingListService.getAllShoppingLists();
+        setShoppingLists(lists);
+      } catch (err) {
+        console.error('Failed to load shopping lists:', err);
+      }
+    };
+    loadShoppingLists();
   }, []);
 
   const handleAddToList = async () => {
@@ -27,35 +34,20 @@ export function AddToShoppingListModal({ isOpen, onClose, recipe }: AddToShoppin
     try {
       setIsAdding(true);
 
-      // Récupérer la shopping list actuelle
-      const shoppingLists = getLocalShoppingLists();
-      const targetList = shoppingLists.find((sl) => sl.id === selectedListId);
-      
-      if (targetList) {
-        // Ajouter les ingrédients de la recette à la shopping list
-        if (recipe.ingredients) {
-          for (const ingredient of recipe.ingredients) {
-            const newItem: ShoppingListItem = {
-              id: Date.now() + Math.random(),
-              shoppingListId: selectedListId,
-              ingredientName: ingredient.name,
-              quantity: ingredient.quantity,
-              unit: ingredient.unit || '',
-              checked: false,
-              sourceMealPlanId: 0, // Pas de meal plan spécifique
-              sourceRecipeTitle: recipe.title,
-              sourceMealType: 'MANUAL',
-              sourceDate: new Date().toISOString().split('T')[0],
-            };
-            addShoppingListItem(newItem);
-          }
-        }
-
-        // Mettre à jour mealPlanIds de la shopping list pour inclure cette recette
-        if (!targetList.mealPlanIds.includes(recipe.id)) {
-          updateLocalShoppingList(selectedListId, {
-            mealPlanIds: [...targetList.mealPlanIds, recipe.id],
-          });
+      // Ajouter les ingrédients de la recette à la shopping list
+      if (recipe.ingredients) {
+        for (const ingredient of recipe.ingredients) {
+          const ingredientName = typeof ingredient === 'string' ? ingredient : String(ingredient);
+          const newItem: ShoppingListItemCreate = {
+            shoppingListId: selectedListId,
+            ingredientName: ingredientName,
+            quantity: '1',
+            unit: 'unit',
+            checked: false,
+            sourceRecipeTitle: recipe.title,
+            sourceDate: new Date().toISOString().split('T')[0],
+          };
+          await shoppingListService.createShoppingListItem(newItem);
         }
       }
 

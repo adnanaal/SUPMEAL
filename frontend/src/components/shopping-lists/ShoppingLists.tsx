@@ -3,45 +3,53 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Calendar, ShoppingCart, Trash2, Edit } from 'lucide-react';
-import { 
-  getLocalShoppingLists, 
-  addLocalShoppingList,
-  deleteLocalShoppingList,
-  ShoppingList 
-} from '@/lib/localShoppingLists';
+import { shoppingListService, ShoppingList } from '@/services/shoppingListService';
 import { CreateShoppingListModal } from '@/components/shopping-lists/CreateShoppingListModal';
 
 export function ShoppingLists() {
   const router = useRouter();
   const [shoppingLists, setShoppingLists] = useState<ShoppingList[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setShoppingLists(getLocalShoppingLists());
+    loadShoppingLists();
   }, []);
 
-  // Rafraîchir quand le composant reçoit le focus (pour les mises à jour externes)
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        setShoppingLists(getLocalShoppingLists());
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, []);
-
-  const handleCreateList = (list: ShoppingList) => {
-    addLocalShoppingList(list);
-    setShoppingLists(getLocalShoppingLists());
-    setIsCreateModalOpen(false);
+  const loadShoppingLists = async () => {
+    try {
+      setIsLoading(true);
+      const lists = await shoppingListService.getAllShoppingLists();
+      setShoppingLists(lists);
+    } catch (error) {
+      console.error('Failed to load shopping lists:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleDeleteList = (id: number) => {
+  const handleCreateList = async (list: ShoppingList) => {
+    try {
+      await shoppingListService.createShoppingList({
+        name: list.name,
+        description: list.description,
+        mealPlanIds: list.mealPlanIds,
+      });
+      await loadShoppingLists();
+      setIsCreateModalOpen(false);
+    } catch (error) {
+      console.error('Failed to create shopping list:', error);
+    }
+  };
+
+  const handleDeleteList = async (id: number) => {
     if (confirm('Are you sure you want to delete this shopping list?')) {
-      deleteLocalShoppingList(id);
-      setShoppingLists(getLocalShoppingLists());
+      try {
+        await shoppingListService.deleteShoppingList(id);
+        await loadShoppingLists();
+      } catch (error) {
+        console.error('Failed to delete shopping list:', error);
+      }
     }
   };
 
@@ -70,7 +78,12 @@ export function ShoppingLists() {
       </div>
 
       {/* Shopping Lists Grid */}
-      {shoppingLists.length === 0 ? (
+      {isLoading ? (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+          <p className="text-gray-500">Loading shopping lists...</p>
+        </div>
+      ) : shoppingLists.length === 0 ? (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
           <ShoppingCart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">No shopping lists yet</h3>

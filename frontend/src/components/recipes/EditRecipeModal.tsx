@@ -235,6 +235,7 @@ export function EditRecipeModal({ isOpen, onClose, recipe, onUpdate }: EditRecip
                   value={formData.preparationTime || ''}
                   onChange={(e) => setFormData({ ...formData, preparationTime: e.target.value ? parseInt(e.target.value) : undefined })}
                   placeholder="20"
+                  min="1"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
                   disabled={isUpdating}
                 />
@@ -248,8 +249,19 @@ export function EditRecipeModal({ isOpen, onClose, recipe, onUpdate }: EditRecip
                   type="number"
                   id="cookingTime"
                   value={formData.cookingTime || ''}
-                  onChange={(e) => setFormData({ ...formData, cookingTime: e.target.value ? parseInt(e.target.value) : undefined })}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    const numValue = value ? parseInt(value) : undefined;
+                    if (numValue !== undefined && numValue < 0) {
+                      e.target.value = '0';
+                      setFormData({ ...formData, cookingTime: 0 });
+                    } else {
+                      setFormData({ ...formData, cookingTime: numValue });
+                    }
+                  }}
                   placeholder="15"
+                  min="0"
+                  step="any"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
                   disabled={isUpdating}
                 />
@@ -265,6 +277,7 @@ export function EditRecipeModal({ isOpen, onClose, recipe, onUpdate }: EditRecip
                   value={formData.servings || ''}
                   onChange={(e) => setFormData({ ...formData, servings: e.target.value ? parseInt(e.target.value) : undefined })}
                   placeholder="4"
+                  min="1"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
                   disabled={isUpdating}
                 />
