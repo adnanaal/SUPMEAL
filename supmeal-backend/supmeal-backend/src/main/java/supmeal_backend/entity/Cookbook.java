@@ -26,11 +26,14 @@ public class Cookbook {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(columnDefinition = "TEXT")
+    private String coverImage;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
 
-    @OneToMany(mappedBy = "cookbook", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "cookbook", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @Builder.Default
     private List<CookbookMember> members = new ArrayList<>();
 
@@ -41,6 +44,10 @@ public class Cookbook {
     @OneToMany(mappedBy = "cookbook", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Message> messages = new ArrayList<>();
+
+    @OneToMany(mappedBy = "cookbook", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<CookbookRecipe> cookbookRecipes = new ArrayList<>();
 
     private LocalDateTime createdAt;
 

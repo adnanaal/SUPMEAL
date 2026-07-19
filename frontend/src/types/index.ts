@@ -23,6 +23,8 @@ export interface Cookbook {
   description?: string;
   ownerId: number;
   owner?: User;
+  ownerFirstname?: string;
+  ownerLastname?: string;
   coverImage?: string;
   recipeIds?: number[];
   members?: CookbookMember[];
@@ -35,7 +37,7 @@ export interface CookbookMember {
   userId: number;
   user?: User;
   cookbookId: number;
-  permission: CookbookPermission;
+  permission: string;
   joinedAt: string;
   userName?: string;
   userEmail?: string;
@@ -50,22 +52,22 @@ export enum CookbookPermission {
   READER = 'READER'
 }
 
-export const PERMISSION_LABELS: Record<CookbookPermission, string> = {
-  [CookbookPermission.OWNER]: 'Propriétaire',
-  [CookbookPermission.EDITOR]: 'Éditeur',
-  [CookbookPermission.VIEWER]: 'Lecteur',
-  [CookbookPermission.CREATOR]: 'Créateur',
-  [CookbookPermission.COMMENTATOR]: 'Commentateur',
-  [CookbookPermission.READER]: 'Lecteur'
+export const PERMISSION_LABELS: Record<string, string> = {
+  'OWNER': 'Propriétaire',
+  'EDITOR': 'Éditeur',
+  'VIEWER': 'Lecteur',
+  'CREATOR': 'Créateur',
+  'COMMENTATOR': 'Commentateur',
+  'READER': 'Lecteur'
 };
 
-export const PERMISSION_COLORS: Record<CookbookPermission, string> = {
-  [CookbookPermission.OWNER]: 'bg-purple-100 text-purple-800',
-  [CookbookPermission.EDITOR]: 'bg-blue-100 text-blue-800',
-  [CookbookPermission.VIEWER]: 'bg-gray-100 text-gray-800',
-  [CookbookPermission.CREATOR]: 'bg-green-100 text-green-800',
-  [CookbookPermission.COMMENTATOR]: 'bg-yellow-100 text-yellow-800',
-  [CookbookPermission.READER]: 'bg-gray-100 text-gray-800'
+export const PERMISSION_COLORS: Record<string, string> = {
+  'OWNER': 'bg-purple-100 text-purple-800',
+  'EDITOR': 'bg-blue-100 text-blue-800',
+  'VIEWER': 'bg-gray-100 text-gray-800',
+  'CREATOR': 'bg-green-100 text-green-800',
+  'COMMENTATOR': 'bg-yellow-100 text-yellow-800',
+  'READER': 'bg-gray-100 text-gray-800'
 };
 
 export interface Recipe {

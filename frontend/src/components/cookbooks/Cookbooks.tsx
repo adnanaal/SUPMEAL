@@ -48,10 +48,11 @@ export function Cookbooks() {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
-  const handleCreateCookbook = async (cookbook: Cookbook) => {
+  const handleCreateCookbook = async (data: { name: string; description?: string; coverImage?: string }) => {
     try {
-      const createdCookbook = await cookbookService.createCookbook(cookbook);
-      setCookbooks([...cookbooks, createdCookbook]);
+      await cookbookService.createCookbook(data);
+      const cookbooksData = await cookbookService.getAllCookbooks();
+      setCookbooks(cookbooksData);
       setIsCreateModalOpen(false);
     } catch (err) {
       console.error('Failed to create cookbook:', err);
@@ -75,13 +76,13 @@ export function Cookbooks() {
   };
 
   const getUserPermissionInCookbook = (cookbook: Cookbook): string | null => {
-    const member = cookbook.members.find((m) => m.userId === currentUserId);
+    const member = cookbook.members?.find((m) => m.userId === Number(currentUserId));
     return member ? member.permission : null;
   };
 
   const canDeleteCookbook = (cookbook: Cookbook): boolean => {
     const permission = getUserPermissionInCookbook(cookbook);
-    return permission === 'CREATOR';
+    return permission === 'OWNER' || permission === 'CREATOR' || cookbook.ownerId === Number(currentUserId);
   };
 
   if (loading) {
@@ -177,16 +178,16 @@ export function Cookbooks() {
                 <div className="flex items-center space-x-4 text-sm text-gray-500">
                   <div className="flex items-center space-x-1">
                     <Users className="w-4 h-4" />
-                    <span>{cookbook.members.length} member{cookbook.members.length !== 1 ? 's' : ''}</span>
+                    <span>{cookbook.members?.length || 0} member{cookbook.members?.length !== 1 ? 's' : ''}</span>
                   </div>
                   <div className="flex items-center space-x-1">
                     <BookOpen className="w-4 h-4" />
-                    <span>{cookbook.recipeIds.length} recipe{cookbook.recipeIds.length !== 1 ? 's' : ''}</span>
+                    <span>{cookbook.recipeIds?.length || 0} recipe{cookbook.recipeIds?.length !== 1 ? 's' : ''}</span>
                   </div>
                 </div>
 
                 <div className="mt-3 flex items-center space-x-2">
-                  <span className="text-xs text-gray-400">Created by {cookbook.creatorName}</span>
+                  <span className="text-xs text-gray-400">Created by {cookbook.ownerFirstname && cookbook.ownerLastname ? `${cookbook.ownerFirstname} ${cookbook.ownerLastname}` : cookbook.owner?.firstname || 'Unknown'}</span>
                 </div>
               </div>
             </div>

@@ -8,9 +8,10 @@ import { Navbar } from '@/components/layout/Navbar';
 import { EditRecipeModal } from '@/components/recipes/EditRecipeModal';
 import { AddToShoppingListModal } from '@/components/recipes/AddToShoppingListModal';
 import { AddToMealPlannerModal } from '@/components/recipes/AddToMealPlannerModal';
+import { AddToCookbookModal } from '@/components/recipes/AddToCookbookModal';
 import { recipeService } from '@/services/recipeService';
 import { favoriteService } from '@/services/favoriteService';
-import { ArrowLeft, Clock, Users, Tag, ChefHat, Utensils, Heart, Share2, Edit, Trash2, Check, ShoppingCart, Calendar, Link as ExternalLink } from 'lucide-react';
+import { ArrowLeft, Clock, Users, Tag, ChefHat, Utensils, Heart, Share2, Edit, Trash2, Check, ShoppingCart, Calendar, Link as ExternalLink, BookOpen } from 'lucide-react';
 
 export function RecipeDetail() {
   const params = useParams();
@@ -20,6 +21,7 @@ export function RecipeDetail() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddToShoppingListModalOpen, setIsAddToShoppingListModalOpen] = useState(false);
   const [isAddToMealPlannerModalOpen, setIsAddToMealPlannerModalOpen] = useState(false);
+  const [isAddToCookbookModalOpen, setIsAddToCookbookModalOpen] = useState(false);
   const [currentRecipe, setCurrentRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -174,6 +176,13 @@ export function RecipeDetail() {
               <Calendar className="w-5 h-5 text-gray-900" />
             </button>
             <button
+              onClick={() => setIsAddToCookbookModalOpen(true)}
+              className="p-2 bg-white/90 backdrop-blur-sm rounded-lg hover:bg-white transition-colors"
+              title="Add to cookbook"
+            >
+              <BookOpen className="w-5 h-5 text-gray-900" />
+            </button>
+            <button
               onClick={handleEdit}
               className="p-2 bg-white/90 backdrop-blur-sm rounded-lg hover:bg-white transition-colors"
               title="Edit recipe"
@@ -322,6 +331,16 @@ export function RecipeDetail() {
             isOpen={isAddToMealPlannerModalOpen}
             onClose={() => setIsAddToMealPlannerModalOpen(false)}
             recipe={recipe}
+          />
+        )}
+
+        {/* Add to Cookbook Modal */}
+        {recipe && (
+          <AddToCookbookModal
+            isOpen={isAddToCookbookModalOpen}
+            onClose={() => setIsAddToCookbookModalOpen(false)}
+            recipeId={recipeId}
+            currentUserId="user1"
           />
         )}
       </div>

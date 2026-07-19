@@ -17,6 +17,8 @@ public class MessageMapper {
                 .content(message.getContent())
                 .createdAt(message.getCreatedAt())
                 .senderId(message.getSender() != null ? message.getSender().getId() : null)
+                .senderFirstname(message.getSender() != null ? message.getSender().getFirstname() : null)
+                .senderLastname(message.getSender() != null ? message.getSender().getLastname() : null)
                 .receiverId(message.getReceiver() != null ? message.getReceiver().getId() : null)
                 .cookbookId(message.getCookbook() != null ? message.getCookbook().getId() : null)
                 .build();

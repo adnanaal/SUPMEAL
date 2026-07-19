@@ -16,4 +16,6 @@ public class CookbookCreateRequest {
     private String name;
 
     private String description;
+
+    private String coverImage;
 }

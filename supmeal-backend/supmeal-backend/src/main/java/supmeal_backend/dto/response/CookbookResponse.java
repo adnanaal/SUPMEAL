@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -21,6 +22,16 @@ public class CookbookResponse {
     private String description;
 
     private Long ownerId;
+
+    private String ownerFirstname;
+
+    private String ownerLastname;
+
+    private String coverImage;
+
+    private List<Long> recipeIds;
+
+    private List<CookbookMemberResponse> members;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;

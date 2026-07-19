@@ -18,7 +18,13 @@ public class CookbookMemberResponse {
 
     private Long userId;
 
+    private String userName;
+
+    private String userEmail;
+
     private Long cookbookId;
+
+    private String permission;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime joinedAt;

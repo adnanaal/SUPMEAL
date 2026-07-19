@@ -3,11 +3,12 @@
 import { useState } from 'react';
 import { X, Plus, BookOpen, Upload, X as XIcon } from 'lucide-react';
 import { Cookbook, CookbookPermission } from '@/types';
+import { cookbookService } from '@/services/cookbookService';
 
 interface CreateCookbookModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreate: (cookbook: Cookbook) => void;
+  onCreate: (data: { name: string; description?: string; coverImage?: string }) => void;
   currentUserId: string;
 }
 
@@ -36,7 +37,7 @@ export function CreateCookbookModal({ isOpen, onClose, onCreate, currentUserId }
     setCoverImage('');
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!name.trim()) {
@@ -46,30 +47,11 @@ export function CreateCookbookModal({ isOpen, onClose, onCreate, currentUserId }
     try {
       setIsCreating(true);
       
-      const newCookbook: Cookbook = {
-        id: Date.now(),
+      onCreate({
         name: name.trim(),
         description: description.trim() || undefined,
         coverImage: coverImage || undefined,
-        createdBy: currentUserId,
-        creatorName: 'Current User', // Serait remplacé par le vrai nom de l'utilisateur
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        recipeIds: [],
-        members: [
-          {
-            id: Date.now(),
-            cookbookId: Date.now(),
-            userId: currentUserId,
-            userName: 'Current User',
-            userEmail: 'user@example.com',
-            permission: CookbookPermission.CREATOR,
-            joinedAt: new Date().toISOString(),
-          },
-        ],
-      };
-
-      onCreate(newCookbook);
+      });
       
       // Reset form
       setName('');
@@ -78,6 +60,7 @@ export function CreateCookbookModal({ isOpen, onClose, onCreate, currentUserId }
       setCoverFile(null);
     } catch (err) {
       console.error('Failed to create cookbook:', err);
+      throw err;
     } finally {
       setIsCreating(false);
     }
@@ -117,7 +100,7 @@ export function CreateCookbookModal({ isOpen, onClose, onCreate, currentUserId }
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g., Family Favorites"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
               disabled={isCreating}
               required
             />
@@ -133,7 +116,7 @@ export function CreateCookbookModal({ isOpen, onClose, onCreate, currentUserId }
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Brief description of this cookbook"
               rows={3}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none resize-none"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none resize-none text-gray-900"
               disabled={isCreating}
             />
           </div>

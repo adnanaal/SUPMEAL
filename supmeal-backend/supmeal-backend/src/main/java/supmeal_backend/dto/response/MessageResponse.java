@@ -20,6 +20,10 @@ public class MessageResponse {
 
     private Long senderId;
 
+    private String senderFirstname;
+
+    private String senderLastname;
+
     private Long receiverId;
 
     private Long cookbookId;

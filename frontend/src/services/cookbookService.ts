@@ -13,7 +13,7 @@ export const cookbookService = {
   },
 
   // Créer un nouveau cookbook
-  async createCookbook(data: Omit<Cookbook, 'id'>): Promise<Cookbook> {
+  async createCookbook(data: { name: string; description?: string; coverImage?: string }): Promise<Cookbook> {
     return apiClient.post<Cookbook>('/cookbooks', data);
   },
 

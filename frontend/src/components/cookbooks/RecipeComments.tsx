@@ -3,65 +3,76 @@
 import { useState, useEffect } from 'react';
 import { MessageSquare, Send, Edit2, Trash2, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { Comment } from '@/types';
-import { cookbookService } from '@/services/cookbookService';
+import { commentService } from '@/services/commentService';
 import { User } from '@/types';
-
-// TODO: Créer commentService pour synchroniser les commentaires
-// import { commentService } from '@/services/commentService';
 
 interface RecipeCommentsProps {
   cookbookId: number;
   recipeId: number;
   recipeTitle: string;
   currentUser: User;
+  userPermission?: string;
 }
 
-export function RecipeComments({ cookbookId, recipeId, recipeTitle, currentUser }: RecipeCommentsProps) {
+export function RecipeComments({ cookbookId, recipeId, recipeTitle, currentUser, userPermission }: RecipeCommentsProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [editingComment, setEditingComment] = useState<number | null>(null);
   const [updatedComment, setUpdatedComment] = useState('');
 
+  const canComment = userPermission === 'OWNER' || userPermission === 'EDITOR' || userPermission === 'COMMENTATOR';
+
   useEffect(() => {
-    // TODO: Remplacer par commentService.getCommentsByRecipe(recipeId)
-    // const loadComments = async () => {
-    //   const data = await commentService.getCommentsByRecipe(recipeId);
-    //   setComments(data);
-    // };
-    // loadComments();
+    const loadComments = async () => {
+      try {
+        const data = await commentService.getCommentsByRecipe(recipeId);
+        setComments(data);
+      } catch (err) {
+        console.error('Failed to load comments:', err);
+      }
+    };
+    loadComments();
   }, [recipeId]);
 
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
     
-    // TODO: Remplacer par commentService.createComment()
-    // const comment = await commentService.createComment({
-    //   content: newComment,
-    //   recipeId,
-    //   userId: currentUser.id
-    // });
-    // setComments([...comments, comment]);
-    // setNewComment('');
+    try {
+      const comment = await commentService.createComment({
+        content: newComment,
+        recipeId
+      });
+      setComments([...comments, comment]);
+      setNewComment('');
+    } catch (err) {
+      console.error('Failed to add comment:', err);
+    }
   };
 
   const handleUpdateComment = async (commentId: number) => {
     if (!updatedComment.trim()) return;
     
-    // TODO: Remplacer par commentService.updateComment()
-    // const updated = await commentService.updateComment(commentId, {
-    //   content: updatedComment
-    // });
-    // setComments(comments.map(c => c.id === commentId ? updated : c));
-    // setEditingComment(null);
-    // setUpdatedComment('');
+    try {
+      const updated = await commentService.updateComment(commentId, {
+        content: updatedComment
+      });
+      setComments(comments.map(c => c.id === commentId ? updated : c));
+      setEditingComment(null);
+      setUpdatedComment('');
+    } catch (err) {
+      console.error('Failed to update comment:', err);
+    }
   };
 
   const handleDeleteComment = async (commentId: number) => {
     if (!confirm('Are you sure you want to delete this comment?')) return;
     
-    // TODO: Remplacer par commentService.deleteComment()
-    // await commentService.deleteComment(commentId);
-    // setComments(comments.filter(c => c.id !== commentId));
+    try {
+      await commentService.deleteComment(commentId);
+      setComments(comments.filter(c => c.id !== commentId));
+    } catch (err) {
+      console.error('Failed to delete comment:', err);
+    }
   };
 
   return (
@@ -80,13 +91,13 @@ export function RecipeComments({ cookbookId, recipeId, recipeTitle, currentUser 
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             placeholder="Add a comment..."
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            disabled
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+            disabled={!canComment}
           />
           <button
             onClick={handleAddComment}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
-            disabled
+            disabled={!canComment}
           >
             <Send className="w-5 h-5" />
           </button>
@@ -116,7 +127,7 @@ export function RecipeComments({ cookbookId, recipeId, recipeTitle, currentUser 
                         type="text"
                         value={updatedComment}
                         onChange={(e) => setUpdatedComment(e.target.value)}
-                        className="flex-1 px-3 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        className="flex-1 px-3 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900"
                       />
                       <button
                         onClick={() => handleUpdateComment(comment.id)}
@@ -132,7 +143,7 @@ export function RecipeComments({ cookbookId, recipeId, recipeTitle, currentUser 
                       </button>
                     </div>
                   ) : (
-                    <p className="text-gray-700">{comment.content}</p>
+                    <p className="text-gray-900">{comment.content}</p>
                   )}
                 </div>
                 {comment.userId === currentUser.id && (

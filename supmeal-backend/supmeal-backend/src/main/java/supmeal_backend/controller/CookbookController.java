@@ -1,5 +1,6 @@
 package supmeal_backend.controller;
 
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,9 +11,11 @@ import supmeal_backend.dto.request.CookbookCreateRequest;
 import supmeal_backend.dto.request.CookbookUpdateRequest;
 import supmeal_backend.dto.response.CookbookResponse;
 import supmeal_backend.entity.Cookbook;
+import supmeal_backend.entity.CookbookMember;
 import supmeal_backend.entity.User;
 import supmeal_backend.exception.ResourceNotFoundException;
 import supmeal_backend.mapper.CookbookMapper;
+import supmeal_backend.service.CookbookMemberService;
 import supmeal_backend.service.CookbookService;
 import supmeal_backend.service.UserService;
 
@@ -29,6 +32,7 @@ public class CookbookController {
     private final CookbookService cookbookService;
     private final CookbookMapper cookbookMapper;
     private final UserService userService;
+    private final CookbookMemberService cookbookMemberService;
 
     @PostMapping
     public ResponseEntity<CookbookResponse> createCookbook(@Valid @RequestBody CookbookCreateRequest request) {
@@ -40,7 +44,33 @@ public class CookbookController {
         Cookbook cookbook = cookbookMapper.toEntity(request);
         cookbook.setOwner(owner);
         Cookbook savedCookbook = cookbookService.save(cookbook);
+        
+        // Créer automatiquement le membre owner
+        CookbookMember ownerMember = CookbookMember.builder()
+                .cookbook(savedCookbook)
+                .user(owner)
+                .permission(supmeal_backend.entity.CookbookPermission.OWNER)
+                .joinedAt(java.time.LocalDateTime.now())
+                .build();
+        cookbookMemberService.save(ownerMember);
+        
+        // Recharger le cookbook pour avoir les membres
+        savedCookbook = cookbookService.findById(savedCookbook.getId()).orElse(savedCookbook);
+        
         return new ResponseEntity<>(cookbookMapper.toResponse(savedCookbook), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/{cookbookId}/recipes")
+    public ResponseEntity<Void> addRecipeToCookbook(@PathVariable Long cookbookId, @RequestBody Map<String, Long> request) {
+        Long recipeId = request.get("recipeId");
+        cookbookService.addRecipeToCookbook(cookbookId, recipeId);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{cookbookId}/recipes/{recipeId}")
+    public ResponseEntity<Void> removeRecipeFromCookbook(@PathVariable Long cookbookId, @PathVariable Long recipeId) {
+        cookbookService.removeRecipeFromCookbook(cookbookId, recipeId);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping

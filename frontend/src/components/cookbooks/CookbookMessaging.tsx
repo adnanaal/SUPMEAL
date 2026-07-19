@@ -3,38 +3,75 @@
 import { useState, useEffect, useRef } from 'react';
 import { Send, Edit2, Trash2, MessageSquare, X } from 'lucide-react';
 import { User } from '@/types';
-
-// TODO: Créer messageService pour synchroniser les messages
-// import { messageService } from '@/services/messageService';
+import { messageService, Message } from '@/services/messageService';
 
 interface CookbookMessagingProps {
   cookbookId: number;
   currentUser: User;
+  userPermission?: string;
 }
 
-export function CookbookMessaging({ cookbookId, currentUser }: CookbookMessagingProps) {
-  const [messages, setMessages] = useState<any[]>([]);
+export function CookbookMessaging({ cookbookId, currentUser, userPermission }: CookbookMessagingProps) {
+  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
   const [editContent, setEditContent] = useState('');
 
+  const canSendMessage = userPermission === 'OWNER' || userPermission === 'EDITOR' || userPermission === 'COMMENTATOR';
+
   useEffect(() => {
-    // TODO: Remplacer par messageService.getMessagesByCookbook(cookbookId)
+    const loadMessages = async () => {
+      try {
+        const data = await messageService.getMessagesByCookbook(cookbookId);
+        setMessages(data);
+      } catch (err) {
+        console.error('Failed to load messages:', err);
+      }
+    };
+    loadMessages();
   }, [cookbookId]);
 
   const handleAddMessage = async () => {
     if (!newMessage.trim()) return;
-    // TODO: Remplacer par messageService.createMessage()
+    
+    try {
+      // Pour l'instant, receiverId est optionnel pour les messages de groupe
+      const message = await messageService.createMessage({
+        content: newMessage,
+        receiverId: currentUser.id, // Utiliser l'utilisateur actuel comme receiver par défaut
+        cookbookId
+      });
+      setMessages([...messages, message]);
+      setNewMessage('');
+    } catch (err) {
+      console.error('Failed to add message:', err);
+    }
   };
 
   const handleUpdateMessage = async (messageId: number) => {
     if (!editContent.trim()) return;
-    // TODO: Remplacer par messageService.updateMessage()
+    
+    try {
+      const updated = await messageService.updateMessage(messageId, {
+        content: editContent
+      });
+      setMessages(messages.map(m => m.id === messageId ? updated : m));
+      setEditingMessageId(null);
+      setEditContent('');
+    } catch (err) {
+      console.error('Failed to update message:', err);
+    }
   };
 
   const handleDeleteMessage = async (messageId: number) => {
     if (!confirm('Are you sure you want to delete this message?')) return;
-    // TODO: Remplacer par messageService.deleteMessage()
+    
+    try {
+      await messageService.deleteMessage(messageId);
+      setMessages(messages.filter(m => m.id !== messageId));
+    } catch (err) {
+      console.error('Failed to delete message:', err);
+    }
   };
 
   return (
@@ -52,13 +89,13 @@ export function CookbookMessaging({ cookbookId, currentUser }: CookbookMessaging
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             placeholder="Add a message..."
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            disabled
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+            disabled={!canSendMessage}
           />
           <button
             onClick={handleAddMessage}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
-            disabled
+            disabled={!canSendMessage}
           >
             <Send className="w-5 h-5" />
           </button>
@@ -75,7 +112,7 @@ export function CookbookMessaging({ cookbookId, currentUser }: CookbookMessaging
                 <div className="flex-1">
                   <div className="flex items-center space-x-2 mb-2">
                     <span className="font-medium text-gray-900">
-                      {message.user?.firstname} {message.user?.lastname}
+                      {message.senderFirstname} {message.senderLastname}
                     </span>
                     <span className="text-sm text-gray-500">
                       {new Date(message.createdAt).toLocaleDateString()}
@@ -87,7 +124,7 @@ export function CookbookMessaging({ cookbookId, currentUser }: CookbookMessaging
                         type="text"
                         value={editContent}
                         onChange={(e) => setEditContent(e.target.value)}
-                        className="flex-1 px-3 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        className="flex-1 px-3 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900"
                       />
                       <button
                         onClick={() => handleUpdateMessage(message.id)}
@@ -103,10 +140,10 @@ export function CookbookMessaging({ cookbookId, currentUser }: CookbookMessaging
                       </button>
                     </div>
                   ) : (
-                    <p className="text-gray-700">{message.content}</p>
+                    <p className="text-gray-900">{message.content}</p>
                   )}
                 </div>
-                {message.userId === currentUser.id && (
+                {message.senderId === currentUser.id && (
                   <div className="flex space-x-2 ml-4">
                     <button
                       onClick={() => {

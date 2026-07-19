@@ -26,11 +26,19 @@ export function CookbookDetail() {
   const [selectedMember, setSelectedMember] = useState<any>(null);
   
   const cookbookId = parseInt(params.id as string);
-  const currentUserId = 'user1'; // Simuler l'utilisateur connecté
+  const [currentUserId, setCurrentUserId] = useState('10'); // Valeur par défaut
   
-  // Mock user pour la messagerie
+  useEffect(() => {
+    // Accéder à localStorage seulement côté client
+    const storedUserId = localStorage.getItem('userId');
+    if (storedUserId) {
+      setCurrentUserId(storedUserId);
+    }
+  }, []);
+  
+  // Mock user pour la messagerie - utiliser currentUserId dynamique
   const currentUser = {
-    id: 1,
+    id: parseInt(currentUserId),
     firstname: 'John',
     lastname: 'Doe',
     email: 'john@example.com',
@@ -60,7 +68,7 @@ export function CookbookDetail() {
     loadCookbookData();
   }, [cookbookId]);
 
-  const getUserPermission = (): CookbookPermission | null => {
+  const getUserPermission = (): string | null => {
     if (!cookbook || !cookbook.members) return null;
     const member = cookbook.members.find((m) => m.userId === Number(currentUserId));
     return member ? member.permission : null;
@@ -68,17 +76,17 @@ export function CookbookDetail() {
 
   const canEdit = (): boolean => {
     const permission = getUserPermission();
-    return permission === CookbookPermission.CREATOR || permission === CookbookPermission.EDITOR;
+    return permission === 'OWNER' || permission === 'CREATOR' || permission === 'EDITOR';
   };
 
   const canInvite = (): boolean => {
     const permission = getUserPermission();
-    return permission === CookbookPermission.CREATOR || permission === CookbookPermission.EDITOR;
+    return permission === 'OWNER' || permission === 'CREATOR' || permission === 'EDITOR';
   };
 
   const canManageMembers = (): boolean => {
     const permission = getUserPermission();
-    return permission === CookbookPermission.CREATOR;
+    return permission === 'OWNER' || permission === 'CREATOR';
   };
 
   const handleRemoveRecipe = async (recipeId: number) => {
@@ -104,6 +112,17 @@ export function CookbookDetail() {
         setCookbook(cookbookData);
       } catch (err) {
         console.error('Failed to remove member:', err);
+      }
+    }
+  };
+
+  const handleDeleteCookbook = async () => {
+    if (confirm('Are you sure you want to delete this cookbook? This action cannot be undone.')) {
+      try {
+        await cookbookService.deleteCookbook(cookbookId);
+        router.push('/dashboard/cookbooks');
+      } catch (err) {
+        console.error('Failed to delete cookbook:', err);
       }
     }
   };
@@ -229,6 +248,15 @@ export function CookbookDetail() {
               <span>Add Recipe</span>
             </button>
           )}
+          {getUserPermission() === 'OWNER' && (
+            <button
+              onClick={handleDeleteCookbook}
+              className="flex items-center space-x-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+            >
+              <Trash2 className="w-5 h-5" />
+              <span>Delete</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -265,7 +293,7 @@ export function CookbookDetail() {
             </div>
             <div>
               <p className="text-sm text-gray-500">Your Role</p>
-              <p className="text-lg font-bold text-gray-900">{PERMISSION_LABELS[getUserPermission()!] || 'None'}</p>
+              <p className="text-lg font-bold text-gray-900">{PERMISSION_LABELS[getUserPermission()!] || getUserPermission()! || 'None'}</p>
             </div>
           </div>
         </div>
@@ -294,8 +322,8 @@ export function CookbookDetail() {
                 </div>
 
                 <div className="flex items-center space-x-2">
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium border ${PERMISSION_COLORS[member.permission]}`}>
-                    {PERMISSION_LABELS[member.permission]}
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium border ${PERMISSION_COLORS[member.permission] || 'bg-gray-100 text-gray-800'}`}>
+                    {PERMISSION_LABELS[member.permission] || member.permission || 'None'}
                   </span>
                   {canManageMembers() && member.userId !== Number(currentUserId) && (
                     <>
@@ -372,6 +400,7 @@ export function CookbookDetail() {
                     recipeId={recipe.id}
                     recipeTitle={recipe.title}
                     currentUser={currentUser}
+                    userPermission={getUserPermission() || undefined}
                   />
                 </div>
               ))}
@@ -382,7 +411,11 @@ export function CookbookDetail() {
 
       {/* Cookbook Messaging */}
       <div className="mt-6">
-        <CookbookMessaging cookbookId={cookbookId} currentUser={currentUser} />
+        <CookbookMessaging 
+          cookbookId={cookbookId} 
+          currentUser={currentUser} 
+          userPermission={getUserPermission() || undefined}
+        />
       </div>
 
       {/* Invite Member Modal */}
