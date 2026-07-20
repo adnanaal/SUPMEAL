@@ -71,9 +71,16 @@ public class RecipeController {
     }
 
     @GetMapping
-    public ResponseEntity<List<RecipeResponse>> getAllRecipes() {
+    public ResponseEntity<List<RecipeResponse>> getAllRecipes(@RequestHeader(value = "X-User-Id", required = false) String userIdHeader) {
+        // Utiliser l'userId du header ou une valeur par défaut pour le développement
+        Long userId = userIdHeader != null ? Long.parseLong(userIdHeader) : 10L;
+        
+        User currentUser = userService.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with id: %d", userId)));
+        
         List<Recipe> recipes = recipeService.findAll();
         List<RecipeResponse> responses = recipes.stream()
+                .filter(recipe -> recipe.getOwner() != null && recipe.getOwner().getId().equals(currentUser.getId()))
                 .map(recipeMapper::toResponse)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(responses);

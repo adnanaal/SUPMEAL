@@ -54,6 +54,9 @@ export function SignUp() {
       // Après inscription réussie, connecter automatiquement
       const authResponse = await authService.login(email, password);
       
+      // Stocker l'userId dans localStorage pour le filtrage côté serveur
+      localStorage.setItem('userId', authResponse.id.toString());
+      
       // Stocker le token et l'utilisateur dans le store
       setToken(authResponse.token);
       setUser({

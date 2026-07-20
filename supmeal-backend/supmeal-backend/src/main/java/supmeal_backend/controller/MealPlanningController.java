@@ -35,11 +35,14 @@ public class MealPlanningController {
     private final RecipeService recipeService;
 
     @PostMapping
-    public ResponseEntity<MealPlanningResponse> createMealPlanning(@Valid @RequestBody MealPlanningCreateRequest request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        User user = userService.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with email: %s", email)));
+    public ResponseEntity<MealPlanningResponse> createMealPlanning(
+            @Valid @RequestBody MealPlanningCreateRequest request,
+            @RequestHeader(value = "X-User-Id", required = false) String userIdHeader) {
+        // Utiliser l'userId du header ou une valeur par défaut pour le développement
+        Long userId = userIdHeader != null ? Long.parseLong(userIdHeader) : 10L;
+        
+        User user = userService.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with id: %d", userId)));
         
         MealPlanning mealPlanning = mealPlanningMapper.toEntity(request);
         mealPlanning.setUser(user);
@@ -48,9 +51,13 @@ public class MealPlanningController {
     }
 
     @GetMapping
-    public ResponseEntity<List<MealPlanningResponse>> getAllMealPlannings() {
+    public ResponseEntity<List<MealPlanningResponse>> getAllMealPlannings(@RequestHeader(value = "X-User-Id", required = false) String userIdHeader) {
+        // Utiliser l'userId du header ou une valeur par défaut pour le développement
+        Long userId = userIdHeader != null ? Long.parseLong(userIdHeader) : 10L;
+        
         List<MealPlanning> mealPlannings = mealPlanningService.findAll();
         List<MealPlanningResponse> responses = mealPlannings.stream()
+                .filter(m -> m.getUser() != null && m.getUser().getId().equals(userId))
                 .map(mealPlanningMapper::toResponse)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(responses);

@@ -35,13 +35,13 @@ export function CookbookDetail() {
       setCurrentUserId(storedUserId);
     }
   }, []);
-  
-  // Mock user pour la messagerie - utiliser currentUserId dynamique
+
+  // Créer currentUser dynamique
   const currentUser = {
     id: parseInt(currentUserId),
-    firstname: 'John',
-    lastname: 'Doe',
-    email: 'john@example.com',
+    firstname: 'User',
+    lastname: currentUserId,
+    email: '',
     isVerified: true,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -54,9 +54,8 @@ export function CookbookDetail() {
         const cookbookData = await cookbookService.getCookbookById(cookbookId);
         setCookbook(cookbookData);
         
-        // Charger les recettes du cookbook
-        const allRecipes = await recipeService.getAllRecipes();
-        const cookbookRecipes = allRecipes.filter((r) => cookbookData.recipeIds?.includes(r.id) || false);
+        // Charger les recettes du cookbook via le nouvel endpoint
+        const cookbookRecipes = await cookbookService.getCookbookRecipes(cookbookId);
         setRecipes(cookbookRecipes);
       } catch (err) {
         console.error('Failed to load cookbook:', err);
@@ -134,7 +133,11 @@ export function CookbookDetail() {
 
   const handleMemberUpdate = async (memberId: number, permission: CookbookPermission) => {
     try {
-      await cookbookService.updateMemberPermission(cookbookId, memberId.toString(), permission);
+      // Utiliser userId au lieu de memberId pour l'endpoint backend
+      const member = cookbook?.members?.find(m => m.id === memberId);
+      if (!member) return;
+      
+      await cookbookService.updateMemberPermission(cookbookId, member.userId.toString(), permission);
       const cookbookData = await cookbookService.getCookbookById(cookbookId);
       setCookbook(cookbookData);
       setIsEditMemberModalOpen(false);

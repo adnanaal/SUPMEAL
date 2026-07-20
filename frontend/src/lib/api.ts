@@ -15,13 +15,20 @@ class ApiClient {
       },
     });
 
-    // Intercepteur de requête pour ajouter le token JWT
+    // Intercepteur de requête pour ajouter le token JWT et l'userId
     this.client.interceptors.request.use(
       (config) => {
         const token = useAuthStore.getState().token;
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
+        
+        // Ajouter X-User-Id header pour le filtrage côté serveur
+        const userId = localStorage.getItem('userId');
+        if (userId) {
+          config.headers['X-User-Id'] = userId;
+        }
+        
         return config;
       },
       (error) => Promise.reject(error)

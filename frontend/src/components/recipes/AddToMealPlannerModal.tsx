@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { X, Calendar, Check } from 'lucide-react';
 import { Recipe, MealType } from '@/types';
 import { mealPlanningService } from '@/services/mealPlanningService';
-import { useAuthStore } from '@/stores/authStore';
 
 interface AddToMealPlannerModalProps {
   isOpen: boolean;
@@ -24,7 +23,6 @@ export function AddToMealPlannerModal({ isOpen, onClose, recipe }: AddToMealPlan
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedMealType, setSelectedMealType] = useState<MealType>(MealType.DINNER);
   const [isAdding, setIsAdding] = useState(false);
-  const { user } = useAuthStore();
 
   // Set default date to today
   useEffect(() => {
@@ -32,7 +30,7 @@ export function AddToMealPlannerModal({ isOpen, onClose, recipe }: AddToMealPlan
   }, []);
 
   const handleAddToMealPlanner = async () => {
-    if (!selectedDate || !user) return;
+    if (!selectedDate) return;
 
     // Validation: empêcher les dates passées
     const today = new Date();

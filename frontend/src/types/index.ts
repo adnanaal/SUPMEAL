@@ -46,7 +46,6 @@ export interface CookbookMember {
 export enum CookbookPermission {
   OWNER = 'OWNER',
   EDITOR = 'EDITOR',
-  VIEWER = 'VIEWER',
   CREATOR = 'CREATOR',
   COMMENTATOR = 'COMMENTATOR',
   READER = 'READER'
@@ -55,7 +54,6 @@ export enum CookbookPermission {
 export const PERMISSION_LABELS: Record<string, string> = {
   'OWNER': 'Propriétaire',
   'EDITOR': 'Éditeur',
-  'VIEWER': 'Lecteur',
   'CREATOR': 'Créateur',
   'COMMENTATOR': 'Commentateur',
   'READER': 'Lecteur'
@@ -64,7 +62,6 @@ export const PERMISSION_LABELS: Record<string, string> = {
 export const PERMISSION_COLORS: Record<string, string> = {
   'OWNER': 'bg-purple-100 text-purple-800',
   'EDITOR': 'bg-blue-100 text-blue-800',
-  'VIEWER': 'bg-gray-100 text-gray-800',
   'CREATOR': 'bg-green-100 text-green-800',
   'COMMENTATOR': 'bg-yellow-100 text-yellow-800',
   'READER': 'bg-gray-100 text-gray-800'

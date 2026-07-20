@@ -40,7 +40,11 @@ export function CookbookList({ cookbooks, title = 'My Cookbooks' }: CookbookList
             <div className="flex items-center justify-between text-sm text-gray-500 mt-3">
               <div className="flex items-center">
                 <Users className="w-4 h-4 mr-1" />
-                <span>Owner: {cookbook.owner?.firstname || 'Unknown'}</span>
+                <span>Owner: {cookbook.ownerFirstname && cookbook.ownerLastname 
+                  ? `${cookbook.ownerFirstname} ${cookbook.ownerLastname}` 
+                  : cookbook.owner?.firstname && cookbook.owner?.lastname
+                  ? `${cookbook.owner.firstname} ${cookbook.owner.lastname}`
+                  : 'Unknown'}</span>
               </div>
               <div className="flex items-center">
                 <Calendar className="w-4 h-4 mr-1" />

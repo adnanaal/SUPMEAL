@@ -3,33 +3,32 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Bell, Check, CheckCheck, Trash2, MessageSquare, BookOpen, UserPlus, ChefHat, X } from 'lucide-react';
-import { Notification, NotificationType, getLocalNotifications, getUnreadNotifications, markAsRead, markAllAsRead, deleteNotification } from '@/lib/localNotifications';
 
 export function Notifications() {
   const router = useRouter();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const currentUserId = 1; // Simuler l'utilisateur connecté
 
-  // Charger les notifications
+  // Charger les notifications depuis le backend
   useEffect(() => {
-    const loadNotifications = () => {
-      const allNotifications = getLocalNotifications(currentUserId);
-      const unread = getUnreadNotifications(currentUserId);
-      setNotifications(allNotifications);
-      setUnreadCount(unread.length);
+    const loadNotifications = async () => {
+      try {
+        // TODO: Remplacer par appel API réel
+        // const data = await notificationService.getNotifications(currentUserId);
+        // setNotifications(data);
+        // setUnreadCount(data.filter((n: any) => !n.isRead).length);
+      } catch (err) {
+        console.error('Failed to load notifications:', err);
+      }
     };
 
     loadNotifications();
-
-    // Auto-refresh des notifications
-    const interval = setInterval(loadNotifications, 5000);
-    return () => clearInterval(interval);
   }, [currentUserId]);
 
-  const handleNotificationClick = (notification: Notification) => {
+  const handleNotificationClick = (notification: any) => {
     // Marquer comme lu
-    markAsRead(notification.id);
+    // TODO: Appel API pour marquer comme lu
     setNotifications(notifications.map((n) => (n.id === notification.id ? { ...n, isRead: true } : n)));
     setUnreadCount(Math.max(0, unreadCount - 1));
 
@@ -41,54 +40,54 @@ export function Notifications() {
 
   const handleMarkAsRead = (notificationId: number, e: React.MouseEvent) => {
     e.stopPropagation();
-    markAsRead(notificationId);
+    // TODO: Appel API pour marquer comme lu
     setNotifications(notifications.map((n) => (n.id === notificationId ? { ...n, isRead: true } : n)));
     setUnreadCount(Math.max(0, unreadCount - 1));
   };
 
   const handleMarkAllAsRead = () => {
-    markAllAsRead(currentUserId);
+    // TODO: Appel API pour marquer tout comme lu
     setNotifications(notifications.map((n) => ({ ...n, isRead: true })));
     setUnreadCount(0);
   };
 
   const handleDelete = (notificationId: number, e: React.MouseEvent) => {
     e.stopPropagation();
-    deleteNotification(notificationId);
+    // TODO: Appel API pour supprimer
     setNotifications(notifications.filter((n) => n.id !== notificationId));
     if (notifications.find((n) => n.id === notificationId)?.isRead === false) {
       setUnreadCount(Math.max(0, unreadCount - 1));
     }
   };
 
-  const getNotificationIcon = (type: NotificationType) => {
+  const getNotificationIcon = (type: string) => {
     switch (type) {
-      case NotificationType.COOKBOOK_MESSAGE:
+      case 'COOKBOOK_MESSAGE':
         return <MessageSquare className="w-5 h-5 text-blue-500" />;
-      case NotificationType.RECIPE_COMMENT:
+      case 'RECIPE_COMMENT':
         return <ChefHat className="w-5 h-5 text-orange-500" />;
-      case NotificationType.COOKBOOK_INVITE:
+      case 'COOKBOOK_INVITE':
         return <UserPlus className="w-5 h-5 text-green-500" />;
-      case NotificationType.MEMBER_ADDED:
+      case 'MEMBER_ADDED':
         return <UserPlus className="w-5 h-5 text-purple-500" />;
-      case NotificationType.RECIPE_ADDED:
+      case 'RECIPE_ADDED':
         return <BookOpen className="w-5 h-5 text-pink-500" />;
       default:
         return <Bell className="w-5 h-5 text-gray-500" />;
     }
   };
 
-  const getNotificationColor = (type: NotificationType) => {
+  const getNotificationColor = (type: string) => {
     switch (type) {
-      case NotificationType.COOKBOOK_MESSAGE:
+      case 'COOKBOOK_MESSAGE':
         return 'bg-blue-50 border-blue-200';
-      case NotificationType.RECIPE_COMMENT:
+      case 'RECIPE_COMMENT':
         return 'bg-orange-50 border-orange-200';
-      case NotificationType.COOKBOOK_INVITE:
+      case 'COOKBOOK_INVITE':
         return 'bg-green-50 border-green-200';
-      case NotificationType.MEMBER_ADDED:
+      case 'MEMBER_ADDED':
         return 'bg-purple-50 border-purple-200';
-      case NotificationType.RECIPE_ADDED:
+      case 'RECIPE_ADDED':
         return 'bg-pink-50 border-pink-200';
       default:
         return 'bg-gray-50 border-gray-200';

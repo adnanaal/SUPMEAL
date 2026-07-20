@@ -33,11 +33,12 @@ public class FavoriteRecipeController {
     private final RecipeService recipeService;
 
     @GetMapping
-    public ResponseEntity<List<Long>> getAllFavorites() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        User user = userService.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with email: %s", email)));
+    public ResponseEntity<List<Long>> getAllFavorites(@RequestHeader(value = "X-User-Id", required = false) String userIdHeader) {
+        // Utiliser l'userId du header ou une valeur par défaut pour le développement
+        Long userId = userIdHeader != null ? Long.parseLong(userIdHeader) : 10L;
+        
+        User user = userService.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with id: %d", userId)));
         
         List<FavoriteRecipe> favorites = favoriteRecipeService.findByUser(user);
         List<Long> recipeIds = favorites.stream()
@@ -47,11 +48,14 @@ public class FavoriteRecipeController {
     }
 
     @PostMapping
-    public ResponseEntity<FavoriteRecipeResponse> addFavorite(@Valid @RequestBody FavoriteRecipeCreateRequest request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        User user = userService.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with email: %s", email)));
+    public ResponseEntity<FavoriteRecipeResponse> addFavorite(
+            @Valid @RequestBody FavoriteRecipeCreateRequest request,
+            @RequestHeader(value = "X-User-Id", required = false) String userIdHeader) {
+        // Utiliser l'userId du header ou une valeur par défaut pour le développement
+        Long userId = userIdHeader != null ? Long.parseLong(userIdHeader) : 10L;
+        
+        User user = userService.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with id: %d", userId)));
         
         Recipe recipe = recipeService.findById(request.getRecipeId())
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Recipe not found with id: %d", request.getRecipeId())));
@@ -71,11 +75,14 @@ public class FavoriteRecipeController {
     }
 
     @DeleteMapping("/{recipeId}")
-    public ResponseEntity<Void> removeFavorite(@PathVariable Long recipeId) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        User user = userService.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with email: %s", email)));
+    public ResponseEntity<Void> removeFavorite(
+            @PathVariable Long recipeId,
+            @RequestHeader(value = "X-User-Id", required = false) String userIdHeader) {
+        // Utiliser l'userId du header ou une valeur par défaut pour le développement
+        Long userId = userIdHeader != null ? Long.parseLong(userIdHeader) : 10L;
+        
+        User user = userService.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with id: %d", userId)));
         
         Recipe recipe = recipeService.findById(recipeId)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Recipe not found with id: %d", recipeId)));
@@ -88,11 +95,14 @@ public class FavoriteRecipeController {
     }
 
     @GetMapping("/{recipeId}/check")
-    public ResponseEntity<Boolean> isFavorite(@PathVariable Long recipeId) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        User user = userService.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with email: %s", email)));
+    public ResponseEntity<Boolean> isFavorite(
+            @PathVariable Long recipeId,
+            @RequestHeader(value = "X-User-Id", required = false) String userIdHeader) {
+        // Utiliser l'userId du header ou une valeur par défaut pour le développement
+        Long userId = userIdHeader != null ? Long.parseLong(userIdHeader) : 10L;
+        
+        User user = userService.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with id: %d", userId)));
         
         Recipe recipe = recipeService.findById(recipeId)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Recipe not found with id: %d", recipeId)));

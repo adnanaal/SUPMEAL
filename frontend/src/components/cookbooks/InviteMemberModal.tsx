@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { X, UserPlus, Mail } from 'lucide-react';
-import { CookbookPermission } from '@/types';
+import { cookbookService } from '@/services/cookbookService';
 
 interface InviteMemberModalProps {
   isOpen: boolean;
@@ -13,10 +13,11 @@ interface InviteMemberModalProps {
 
 export function InviteMemberModal({ isOpen, onClose, cookbookId, onInvited }: InviteMemberModalProps) {
   const [email, setEmail] = useState('');
-  const [permission, setPermission] = useState<CookbookPermission>(CookbookPermission.READER);
+  const [permission, setPermission] = useState('READER');
   const [isInviting, setIsInviting] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleInvite = (e: React.FormEvent) => {
+  const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!email.trim()) {
@@ -25,18 +26,24 @@ export function InviteMemberModal({ isOpen, onClose, cookbookId, onInvited }: In
 
     try {
       setIsInviting(true);
+      setError('');
       
-      // Simuler l'invitation (sera remplacé par l'API)
-      console.log('Inviting member:', { email, permission, cookbookId });
-      
-      // Pour l'instant, on pourrait ajouter un membre temporaire
-      // addCookbookMember(cookbookId, { ... });
+      // Appeler l'API pour ajouter le membre directement
+      await cookbookService.inviteMember(cookbookId, email, permission);
       
       onInvited();
       setEmail('');
-      setPermission(CookbookPermission.READER);
-    } catch (err) {
+      setPermission('READER');
+      onClose();
+    } catch (err: any) {
       console.error('Failed to invite member:', err);
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else if (err.message) {
+        setError(err.message);
+      } else {
+        setError('Failed to add member. Please try again.');
+      }
     } finally {
       setIsInviting(false);
     }
@@ -54,7 +61,7 @@ export function InviteMemberModal({ isOpen, onClose, cookbookId, onInvited }: In
             <div className="p-2 bg-blue-100 rounded-lg">
               <UserPlus className="w-5 h-5 text-blue-600" />
             </div>
-            <h2 className="text-xl font-semibold text-gray-900">Invite Member</h2>
+            <h2 className="text-xl font-semibold text-gray-900">Add Member</h2>
           </div>
           <button
             onClick={onClose}
@@ -92,20 +99,26 @@ export function InviteMemberModal({ isOpen, onClose, cookbookId, onInvited }: In
             <select
               id="permission"
               value={permission}
-              onChange={(e) => setPermission(e.target.value as CookbookPermission)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+              onChange={(e) => setPermission(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-gray-900"
               disabled={isInviting}
             >
-              <option value={CookbookPermission.READER}>Reader - Can only view recipes</option>
-              <option value={CookbookPermission.COMMENTATOR}>Commentator - Can view and comment</option>
-              <option value={CookbookPermission.EDITOR}>Editor - Can add/edit recipes</option>
-              <option value={CookbookPermission.CREATOR}>Creator - Full access</option>
+              <option value="READER">Reader - Can only view recipes</option>
+              <option value="COMMENTATOR">Commentator - Can view and comment</option>
+              <option value="EDITOR">Editor - Can add/edit recipes</option>
+              <option value="CREATOR">Creator - Full access</option>
             </select>
           </div>
 
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          )}
+
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <p className="text-sm text-blue-700">
-              <strong>Note:</strong> An invitation email will be sent to the member. They will need to accept the invitation to join the cookbook.
+              <strong>Note:</strong> If the user has an account, they will be added directly to the cookbook with the specified permission.
             </p>
           </div>
 
@@ -125,7 +138,7 @@ export function InviteMemberModal({ isOpen, onClose, cookbookId, onInvited }: In
               className="flex-1 flex items-center justify-center space-x-2 px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <UserPlus className="w-5 h-5" />
-              <span>{isInviting ? 'Inviting...' : 'Send Invite'}</span>
+              <span>{isInviting ? 'Adding...' : 'Add Member'}</span>
             </button>
           </div>
         </form>

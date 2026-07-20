@@ -23,6 +23,9 @@ export function Login() {
     try {
       const response = await authService.login(email, password);
       
+      // Stocker l'userId dans localStorage pour le filtrage côté serveur
+      localStorage.setItem('userId', response.id.toString());
+      
       // Stocker le token et l'utilisateur dans le store
       setToken(response.token);
       setUser({

@@ -34,11 +34,14 @@ public class ShoppingListItemController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<ShoppingListItemResponse> createShoppingListItem(@Valid @RequestBody ShoppingListItemCreateRequest request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        User user = userService.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with email: %s", email)));
+    public ResponseEntity<ShoppingListItemResponse> createShoppingListItem(
+            @Valid @RequestBody ShoppingListItemCreateRequest request,
+            @RequestHeader(value = "X-User-Id", required = false) String userIdHeader) {
+        // Utiliser l'userId du header ou une valeur par défaut pour le développement
+        Long userId = userIdHeader != null ? Long.parseLong(userIdHeader) : 10L;
+        
+        User user = userService.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with id: %d", userId)));
         
         ShoppingList shoppingList = shoppingListService.findByIdAndUser(request.getShoppingListId(), user)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Shopping list not found with id: %d", request.getShoppingListId())));
@@ -49,27 +52,56 @@ public class ShoppingListItemController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ShoppingListItemResponse>> getAllShoppingListItems() {
+    public ResponseEntity<List<ShoppingListItemResponse>> getAllShoppingListItems(@RequestHeader(value = "X-User-Id", required = false) String userIdHeader) {
+        // Utiliser l'userId du header ou une valeur par défaut pour le développement
+        Long userId = userIdHeader != null ? Long.parseLong(userIdHeader) : 10L;
+        
+        User user = userService.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with id: %d", userId)));
+        
         List<ShoppingListItem> shoppingListItems = shoppingListItemService.findAll();
+        // Filtrer par utilisateur via la shopping list
         List<ShoppingListItemResponse> responses = shoppingListItems.stream()
+                .filter(item -> {
+                    ShoppingList list = item.getShoppingList();
+                    return list != null && list.getUser() != null && list.getUser().getId().equals(userId);
+                })
                 .map(shoppingListItemMapper::toResponse)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ShoppingListItemResponse> getShoppingListItemById(@PathVariable Long id) {
+    public ResponseEntity<ShoppingListItemResponse> getShoppingListItemById(
+            @PathVariable Long id,
+            @RequestHeader(value = "X-User-Id", required = false) String userIdHeader) {
+        // Utiliser l'userId du header ou une valeur par défaut pour le développement
+        Long userId = userIdHeader != null ? Long.parseLong(userIdHeader) : 10L;
+        
+        User user = userService.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with id: %d", userId)));
+        
         ShoppingListItem shoppingListItem = shoppingListItemService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Shopping list item not found with id: %d", id)));
+        
+        // Vérifier que l'utilisateur a accès à la shopping list
+        ShoppingList shoppingList = shoppingListItem.getShoppingList();
+        if (shoppingList.getUser() == null || !shoppingList.getUser().getId().equals(userId)) {
+            throw new ResourceNotFoundException("Shopping list item not found");
+        }
+        
         return ResponseEntity.ok(shoppingListItemMapper.toResponse(shoppingListItem));
     }
 
     @GetMapping("/shopping-list/{shoppingListId}")
-    public ResponseEntity<List<ShoppingListItemResponse>> getShoppingListItemsByShoppingList(@PathVariable Long shoppingListId) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        User user = userService.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with email: %s", email)));
+    public ResponseEntity<List<ShoppingListItemResponse>> getShoppingListItemsByShoppingList(
+            @PathVariable Long shoppingListId,
+            @RequestHeader(value = "X-User-Id", required = false) String userIdHeader) {
+        // Utiliser l'userId du header ou une valeur par défaut pour le développement
+        Long userId = userIdHeader != null ? Long.parseLong(userIdHeader) : 10L;
+        
+        User user = userService.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with id: %d", userId)));
         
         ShoppingList shoppingList = shoppingListService.findByIdAndUser(shoppingListId, user)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Shopping list not found with id: %d", shoppingListId)));

@@ -28,17 +28,12 @@ export function ShoppingLists() {
     }
   };
 
-  const handleCreateList = async (list: ShoppingList) => {
+  const handleCreateList = async () => {
     try {
-      await shoppingListService.createShoppingList({
-        name: list.name,
-        description: list.description,
-        mealPlanIds: list.mealPlanIds,
-      });
       await loadShoppingLists();
       setIsCreateModalOpen(false);
     } catch (error) {
-      console.error('Failed to create shopping list:', error);
+      console.error('Failed to load shopping lists:', error);
     }
   };
 

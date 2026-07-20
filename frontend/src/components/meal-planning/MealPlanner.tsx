@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { MealType } from '@/types';
 import { mealPlanningService, MealPlanning } from '@/services/mealPlanningService';
-import { useAuthStore } from '@/stores/authStore';
 import { EditMealModal } from '@/components/meal-planning/EditMealModal';
 import { ViewMealModal } from '@/components/meal-planning/ViewMealModal';
 import { 
@@ -53,18 +52,15 @@ export function MealPlanner() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedMealPlan, setSelectedMealPlan] = useState<MealPlan | null>(null);
   const [loading, setLoading] = useState(true);
-  const { user } = useAuthStore();
 
   useEffect(() => {
     loadMealPlans();
-  }, [user]);
+  }, []);
 
   const loadMealPlans = async () => {
-    if (!user) return;
-    
     try {
       setLoading(true);
-      const plannings = await mealPlanningService.getMealPlanningsByUser(user.id);
+      const plannings = await mealPlanningService.getAllMealPlannings();
       
       // Convertir MealPlanning en MealPlan avec les détails de la recette
       const mealPlans: MealPlan[] = plannings.map(mp => ({
@@ -289,7 +285,7 @@ export function MealPlanner() {
                               />
                             )}
                             <p className="text-xs font-medium text-gray-900 line-clamp-1">
-                              {mealPlan.recipeTitle}
+                              {mealPlan.recipeTitle || 'Recipe not found'}
                             </p>
 
                             {isEditMode && (

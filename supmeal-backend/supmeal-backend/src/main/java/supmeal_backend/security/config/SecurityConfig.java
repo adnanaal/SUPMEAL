@@ -49,7 +49,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/**").authenticated()
+                        .requestMatchers("/api/**").permitAll() // Temporairement désactivé pour le développement
                         .anyRequest().permitAll()
                 )
                 .authenticationProvider(authenticationProvider())

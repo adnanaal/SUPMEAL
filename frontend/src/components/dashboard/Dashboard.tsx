@@ -33,7 +33,17 @@ export function Dashboard() {
         setRecipes(recipesData);
         setFilteredRecipes(recipesData.slice(0, 10)); // Show only 10 recent recipes
         setCookbooks(cookbooksData.slice(0, 6)); // Show only 6 cookbooks
-        setMealPlannings(mealPlanningsData.slice(0, 7)); // Show only 7 days of meal plans
+        
+        // Mapper les meal plannings pour inclure les détails de la recette
+        const mealPlanningsWithRecipes = mealPlanningsData.map(mp => {
+          const recipe = recipesData.find(r => r.id === mp.recipeId);
+          return {
+            ...mp,
+            recipe: recipe || undefined
+          };
+        });
+        
+        setMealPlannings(mealPlanningsWithRecipes.slice(0, 7)); // Show only 7 days of meal plans
       } catch (err) {
         setError('Failed to load dashboard data');
         console.error('Dashboard error:', err);
@@ -54,7 +64,7 @@ export function Dashboard() {
     const filtered = recipes.filter((recipe) =>
       recipe.title.toLowerCase().includes(query.toLowerCase()) ||
       recipe.description?.toLowerCase().includes(query.toLowerCase()) ||
-      recipe.tags?.some((tag) => tag.name.toLowerCase().includes(query.toLowerCase()))
+      recipe.tags?.some((tag) => typeof tag === 'string' && tag.toLowerCase().includes(query.toLowerCase()))
     );
     setFilteredRecipes(filtered);
   };
@@ -82,11 +92,6 @@ export function Dashboard() {
       
       <div className="ml-64 pt-16 p-6">
         <div className="max-w-7xl mx-auto">
-          {/* Search Bar */}
-          <div className="mb-8">
-            <SearchBar onSearch={handleSearch} placeholder="Search your recipes..." />
-          </div>
-
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <StatsCard

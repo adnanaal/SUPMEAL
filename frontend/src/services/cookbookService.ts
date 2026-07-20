@@ -32,6 +32,11 @@ export const cookbookService = {
     return apiClient.post<void>(`/cookbooks/${cookbookId}/recipes`, { recipeId });
   },
 
+  // Récupérer les recettes d'un cookbook
+  async getCookbookRecipes(cookbookId: number): Promise<Recipe[]> {
+    return apiClient.get<Recipe[]>(`/cookbooks/${cookbookId}/recipes`);
+  },
+
   // Supprimer une recette d'un cookbook
   async removeRecipeFromCookbook(cookbookId: number, recipeId: number): Promise<void> {
     return apiClient.delete<void>(`/cookbooks/${cookbookId}/recipes/${recipeId}`);

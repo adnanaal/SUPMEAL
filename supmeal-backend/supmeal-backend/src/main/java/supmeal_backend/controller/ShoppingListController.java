@@ -31,11 +31,14 @@ public class ShoppingListController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<ShoppingListResponse> createShoppingList(@Valid @RequestBody ShoppingListCreateRequest request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        User user = userService.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with email: %s", email)));
+    public ResponseEntity<ShoppingListResponse> createShoppingList(
+            @Valid @RequestBody ShoppingListCreateRequest request,
+            @RequestHeader(value = "X-User-Id", required = false) String userIdHeader) {
+        // Utiliser l'userId du header ou une valeur par défaut pour le développement
+        Long userId = userIdHeader != null ? Long.parseLong(userIdHeader) : 10L;
+        
+        User user = userService.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with id: %d", userId)));
         
         ShoppingList shoppingList = shoppingListMapper.toEntity(request);
         shoppingList.setUser(user);
@@ -44,11 +47,12 @@ public class ShoppingListController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ShoppingListResponse>> getAllShoppingLists() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        User user = userService.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with email: %s", email)));
+    public ResponseEntity<List<ShoppingListResponse>> getAllShoppingLists(@RequestHeader(value = "X-User-Id", required = false) String userIdHeader) {
+        // Utiliser l'userId du header ou une valeur par défaut pour le développement
+        Long userId = userIdHeader != null ? Long.parseLong(userIdHeader) : 10L;
+        
+        User user = userService.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with id: %d", userId)));
         
         List<ShoppingList> shoppingLists = shoppingListService.findByUser(user);
         List<ShoppingListResponse> responses = shoppingLists.stream()
@@ -58,11 +62,14 @@ public class ShoppingListController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ShoppingListResponse> getShoppingListById(@PathVariable Long id) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        User user = userService.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with email: %s", email)));
+    public ResponseEntity<ShoppingListResponse> getShoppingListById(
+            @PathVariable Long id,
+            @RequestHeader(value = "X-User-Id", required = false) String userIdHeader) {
+        // Utiliser l'userId du header ou une valeur par défaut pour le développement
+        Long userId = userIdHeader != null ? Long.parseLong(userIdHeader) : 10L;
+        
+        User user = userService.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with id: %d", userId)));
         
         ShoppingList shoppingList = shoppingListService.findByIdAndUser(id, user)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Shopping list not found with id: %d", id)));
@@ -70,11 +77,15 @@ public class ShoppingListController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ShoppingListResponse> updateShoppingList(@PathVariable Long id, @Valid @RequestBody ShoppingListUpdateRequest request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        User user = userService.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with email: %s", email)));
+    public ResponseEntity<ShoppingListResponse> updateShoppingList(
+            @PathVariable Long id,
+            @Valid @RequestBody ShoppingListUpdateRequest request,
+            @RequestHeader(value = "X-User-Id", required = false) String userIdHeader) {
+        // Utiliser l'userId du header ou une valeur par défaut pour le développement
+        Long userId = userIdHeader != null ? Long.parseLong(userIdHeader) : 10L;
+        
+        User user = userService.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with id: %d", userId)));
         
         ShoppingList existingShoppingList = shoppingListService.findByIdAndUser(id, user)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Shopping list not found with id: %d", id)));
@@ -91,11 +102,14 @@ public class ShoppingListController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteShoppingList(@PathVariable Long id) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        User user = userService.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with email: %s", email)));
+    public ResponseEntity<Void> deleteShoppingList(
+            @PathVariable Long id,
+            @RequestHeader(value = "X-User-Id", required = false) String userIdHeader) {
+        // Utiliser l'userId du header ou une valeur par défaut pour le développement
+        Long userId = userIdHeader != null ? Long.parseLong(userIdHeader) : 10L;
+        
+        User user = userService.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with id: %d", userId)));
         
         ShoppingList shoppingList = shoppingListService.findByIdAndUser(id, user)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Shopping list not found with id: %d", id)));
