@@ -106,7 +106,7 @@ export function CookbookDetail() {
   const handleRemoveMember = async (memberId: number) => {
     if (confirm('Are you sure you want to remove this member?')) {
       try {
-        await cookbookService.removeMember(cookbookId, memberId.toString());
+        await cookbookService.removeMember(cookbookId, memberId);
         const cookbookData = await cookbookService.getCookbookById(cookbookId);
         setCookbook(cookbookData);
       } catch (err) {
@@ -338,7 +338,7 @@ export function CookbookDetail() {
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => handleRemoveMember(member.id)}
+                        onClick={() => handleRemoveMember(member.userId)}
                         className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         title="Remove member"
                       >
@@ -398,13 +398,15 @@ export function CookbookDetail() {
                       </button>
                     )}
                   </div>
-                  <RecipeComments
-                    cookbookId={cookbookId}
-                    recipeId={recipe.id}
-                    recipeTitle={recipe.title}
-                    currentUser={currentUser}
-                    userPermission={getUserPermission() || undefined}
-                  />
+                  <div id={`comments-${recipe.id}`}>
+                    <RecipeComments
+                      cookbookId={cookbookId}
+                      recipeId={recipe.id}
+                      recipeTitle={recipe.title}
+                      currentUser={currentUser}
+                      userPermission={getUserPermission() || undefined}
+                    />
+                  </div>
                 </div>
               ))}
             </div>
@@ -413,7 +415,7 @@ export function CookbookDetail() {
       </div>
 
       {/* Cookbook Messaging */}
-      <div className="mt-6">
+      <div className="mt-6" id="discussion">
         <CookbookMessaging 
           cookbookId={cookbookId} 
           currentUser={currentUser} 

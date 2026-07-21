@@ -43,6 +43,8 @@ public class CookbookMemberService {
     }
 
     public void delete(Long id) {
+        System.out.println("Deleting CookbookMember with id: " + id);
         cookbookMemberRepository.deleteById(id);
+        System.out.println("CookbookMember deleted: " + id);
     }
 }

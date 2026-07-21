@@ -5,11 +5,14 @@ import supmeal_backend.entity.CookbookInvitation;
 import supmeal_backend.entity.User;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface CookbookInvitationRepository extends JpaRepository<CookbookInvitation, Long> {
 
-    List<CookbookInvitation> findByReceiver(User receiver);
+    List<CookbookInvitation> findByReceiverId(Long receiverId);
 
-    List<CookbookInvitation> findBySender(User sender);
+    List<CookbookInvitation> findBySenderId(Long senderId);
+
+    Optional<CookbookInvitation> findByReceiverIdAndCookbookId(Long receiverId, Long cookbookId);
 
 }

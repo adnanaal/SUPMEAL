@@ -2,6 +2,7 @@ package supmeal_backend.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import supmeal_backend.entity.enums.NotificationType;
 
 import java.time.LocalDateTime;
 
@@ -17,6 +18,10 @@ public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private NotificationType type;
 
     @Column(nullable = false)
     private String title;
@@ -35,4 +40,23 @@ public class Notification {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cookbook_id")
+    private Cookbook cookbook;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recipe_id")
+    private Recipe recipe;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "message_id")
+    private Message messageEntity;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "comment_id")
+    private Comment comment;
+
+    @Column(length = 500)
+    private String link;
 }

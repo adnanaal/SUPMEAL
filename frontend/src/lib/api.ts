@@ -1,8 +1,18 @@
-import axios, { AxiosInstance, AxiosError } from 'axios';
+import axios, { AxiosInstance, AxiosError, AxiosResponse } from 'axios';
 import { useAuthStore } from '@/stores/authStore';
 
 // Configuration de l'instance Axios
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
+
+console.log('API_BASE_URL:', API_BASE_URL);
+
+// Type pour standardiser la gestion d'erreurs
+export interface ApiError {
+  message: string;
+  status?: number;
+  code?: string;
+  details?: any;
+}
 
 class ApiClient {
   private client: AxiosInstance;
@@ -36,17 +46,35 @@ class ApiClient {
 
     // Intercepteur de réponse pour gérer les erreurs
     this.client.interceptors.response.use(
-      (response) => response,
+      (response: AxiosResponse) => response,
       (error: AxiosError) => {
-        if (error.response?.status === 401) {
-          // Token expiré ou invalide, déconnecter et rediriger vers home
+        const apiError: ApiError = {
+          message: error.message || 'An error occurred',
+          status: error.response?.status,
+          code: error.code,
+        };
+
+        // Gérer les erreurs 401/403
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          console.error('Authentication error:', apiError);
           const { logout } = useAuthStore.getState();
           logout();
           if (typeof window !== 'undefined') {
             window.location.href = '/';
           }
+          return Promise.reject(apiError);
         }
-        return Promise.reject(error);
+
+        // Log les erreurs 500
+        if (error.response?.status === 500) {
+          console.error('Server error:', apiError);
+          apiError.message = 'Server error occurred. Please try again later.';
+          return Promise.reject(apiError);
+        }
+
+        // Gérer les autres erreurs
+        console.error('API error:', apiError);
+        return Promise.reject(apiError);
       }
     );
   }

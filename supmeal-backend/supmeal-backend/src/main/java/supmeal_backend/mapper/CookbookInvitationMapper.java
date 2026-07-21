@@ -15,10 +15,14 @@ public class CookbookInvitationMapper {
         return CookbookInvitationResponse.builder()
                 .id(invitation.getId())
                 .status(invitation.getStatus())
-                .sentAt(invitation.getSentAt())
+                .permission(invitation.getPermission())
                 .senderId(invitation.getSender() != null ? invitation.getSender().getId() : null)
+                .senderName(invitation.getSender() != null ? invitation.getSender().getFirstname() + " " + invitation.getSender().getLastname() : null)
                 .receiverId(invitation.getReceiver() != null ? invitation.getReceiver().getId() : null)
+                .receiverName(invitation.getReceiver() != null ? invitation.getReceiver().getFirstname() + " " + invitation.getReceiver().getLastname() : null)
                 .cookbookId(invitation.getCookbook() != null ? invitation.getCookbook().getId() : null)
+                .cookbookName(invitation.getCookbook() != null ? invitation.getCookbook().getName() : null)
+                .sentAt(invitation.getSentAt())
                 .build();
     }
 
@@ -27,6 +31,7 @@ public class CookbookInvitationMapper {
             return null;
         }
         return CookbookInvitation.builder()
+                .permission(request.getPermission())
                 .build();
     }
 }

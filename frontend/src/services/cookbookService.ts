@@ -53,7 +53,7 @@ export const cookbookService = {
   },
 
   // Supprimer un membre d'un cookbook
-  async removeMember(cookbookId: number, userId: string): Promise<void> {
+  async removeMember(cookbookId: number, userId: number): Promise<void> {
     return apiClient.delete<void>(`/cookbooks/${cookbookId}/members/${userId}`);
   },
 };

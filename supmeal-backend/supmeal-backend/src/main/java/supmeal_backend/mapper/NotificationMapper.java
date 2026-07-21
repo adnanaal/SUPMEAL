@@ -14,9 +14,17 @@ public class NotificationMapper {
         }
         return NotificationResponse.builder()
                 .id(notification.getId())
+                .type(notification.getType() != null ? notification.getType().name() : null)
                 .title(notification.getTitle())
                 .message(notification.getMessage())
                 .isRead(notification.getIsRead())
+                .cookbookId(notification.getCookbook() != null ? notification.getCookbook().getId() : null)
+                .cookbookName(notification.getCookbook() != null ? notification.getCookbook().getName() : null)
+                .recipeId(notification.getRecipe() != null ? notification.getRecipe().getId() : null)
+                .recipeName(notification.getRecipe() != null ? notification.getRecipe().getTitle() : null)
+                .messageId(notification.getMessageEntity() != null ? notification.getMessageEntity().getId() : null)
+                .commentId(notification.getComment() != null ? notification.getComment().getId() : null)
+                .link(notification.getLink())
                 .createdAt(notification.getCreatedAt())
                 .build();
     }

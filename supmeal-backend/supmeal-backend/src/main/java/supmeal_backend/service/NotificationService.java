@@ -33,6 +33,10 @@ public class NotificationService {
         return notificationRepository.findByUser(user);
     }
 
+    public List<Notification> findByUserOrderByCreatedAtDesc(User user) {
+        return notificationRepository.findByUserOrderByCreatedAtDesc(user);
+    }
+
     public Notification update(Notification notification) {
         return notificationRepository.save(notification);
     }

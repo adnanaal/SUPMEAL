@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import supmeal_backend.entity.CookbookPermission;
 
 @Data
 @Builder
@@ -17,4 +18,7 @@ public class CookbookInvitationCreateRequest {
 
     @NotNull(message = "Cookbook ID is required")
     private Long cookbookId;
+
+    @NotNull(message = "Permission is required")
+    private CookbookPermission permission;
 }

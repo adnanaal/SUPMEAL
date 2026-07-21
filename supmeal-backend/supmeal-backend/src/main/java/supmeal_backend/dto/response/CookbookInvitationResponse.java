@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import supmeal_backend.entity.CookbookPermission;
 import supmeal_backend.entity.enums.InvitationStatus;
 
 import java.time.LocalDateTime;
@@ -19,11 +20,16 @@ public class CookbookInvitationResponse {
 
     private InvitationStatus status;
 
+    private CookbookPermission permission;
+
     private Long senderId;
+    private String senderName;
 
     private Long receiverId;
+    private String receiverName;
 
     private Long cookbookId;
+    private String cookbookName;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime sentAt;

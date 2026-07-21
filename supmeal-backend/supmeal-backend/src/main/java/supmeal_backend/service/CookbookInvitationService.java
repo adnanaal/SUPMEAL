@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import supmeal_backend.entity.CookbookInvitation;
-import supmeal_backend.entity.User;
 import supmeal_backend.repository.CookbookInvitationRepository;
 
 import java.util.List;
@@ -29,12 +28,16 @@ public class CookbookInvitationService {
         return cookbookInvitationRepository.findById(id);
     }
 
-    public List<CookbookInvitation> findByReceiver(User receiver) {
-        return cookbookInvitationRepository.findByReceiver(receiver);
+    public List<CookbookInvitation> findByReceiverId(Long receiverId) {
+        return cookbookInvitationRepository.findByReceiverId(receiverId);
     }
 
-    public List<CookbookInvitation> findBySender(User sender) {
-        return cookbookInvitationRepository.findBySender(sender);
+    public List<CookbookInvitation> findBySenderId(Long senderId) {
+        return cookbookInvitationRepository.findBySenderId(senderId);
+    }
+
+    public Optional<CookbookInvitation> findByReceiverIdAndCookbookId(Long receiverId, Long cookbookId) {
+        return cookbookInvitationRepository.findByReceiverIdAndCookbookId(receiverId, cookbookId);
     }
 
     public CookbookInvitation update(CookbookInvitation invitation) {

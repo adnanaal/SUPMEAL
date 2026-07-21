@@ -2,95 +2,117 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Bell, Check, CheckCheck, Trash2, MessageSquare, BookOpen, UserPlus, ChefHat, X } from 'lucide-react';
+import { Bell, Check, CheckCheck, Trash2, MessageSquare, BookOpen, UserPlus, ChefHat, X, Book } from 'lucide-react';
+import { invitationService, CookbookInvitation } from '@/services/invitationService';
+import { notificationService, Notification } from '@/services/notificationService';
 
 export function Notifications() {
   const router = useRouter();
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [receivedInvitations, setReceivedInvitations] = useState<CookbookInvitation[]>([]);
+  const [sentInvitations, setSentInvitations] = useState<CookbookInvitation[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const currentUserId = 1; // Simuler l'utilisateur connecté
 
-  // Charger les notifications depuis le backend
+  // Charger les invitations et notifications depuis le backend
   useEffect(() => {
-    const loadNotifications = async () => {
+    const loadData = async () => {
       try {
-        // TODO: Remplacer par appel API réel
-        // const data = await notificationService.getNotifications(currentUserId);
-        // setNotifications(data);
-        // setUnreadCount(data.filter((n: any) => !n.isRead).length);
+        const [received, sent, notifs] = await Promise.all([
+          invitationService.getInvitations(),
+          invitationService.getSentInvitations(),
+          notificationService.getNotifications()
+        ]);
+        setReceivedInvitations(received || []);
+        setSentInvitations(sent || []);
+        setNotifications(notifs || []);
+        const pendingInvitations = (received || []).filter(inv => inv.status === 'PENDING').length;
+        const unreadNotifs = (notifs || []).filter(n => !n.isRead).length;
+        setUnreadCount(pendingInvitations + unreadNotifs);
       } catch (err) {
-        console.error('Failed to load notifications:', err);
+        console.error('Failed to load data:', err);
       }
     };
 
-    loadNotifications();
-  }, [currentUserId]);
+    loadData();
+    const interval = setInterval(loadData, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
-  const handleNotificationClick = (notification: any) => {
-    // Marquer comme lu
-    // TODO: Appel API pour marquer comme lu
-    setNotifications(notifications.map((n) => (n.id === notification.id ? { ...n, isRead: true } : n)));
-    setUnreadCount(Math.max(0, unreadCount - 1));
-
-    // Naviguer vers le contenu spécifique
-    if (notification.link) {
-      router.push(notification.link);
+  const handleAcceptInvitation = async (invitationId: number) => {
+    try {
+      await invitationService.acceptInvitation(invitationId);
+      const [received, sent, notifs] = await Promise.all([
+        invitationService.getInvitations(),
+        invitationService.getSentInvitations(),
+        notificationService.getNotifications()
+      ]);
+      setReceivedInvitations(received || []);
+      setSentInvitations(sent || []);
+      setNotifications(notifs || []);
+      const pendingInvitations = (received || []).filter(inv => inv.status === 'PENDING').length;
+      const unreadNotifs = (notifs || []).filter(n => !n.isRead).length;
+      setUnreadCount(pendingInvitations + unreadNotifs);
+    } catch (error) {
+      console.error('Failed to accept invitation:', error);
     }
   };
 
-  const handleMarkAsRead = (notificationId: number, e: React.MouseEvent) => {
-    e.stopPropagation();
-    // TODO: Appel API pour marquer comme lu
-    setNotifications(notifications.map((n) => (n.id === notificationId ? { ...n, isRead: true } : n)));
-    setUnreadCount(Math.max(0, unreadCount - 1));
+  const handleDeclineInvitation = async (invitationId: number) => {
+    try {
+      await invitationService.declineInvitation(invitationId);
+      const [received, sent, notifs] = await Promise.all([
+        invitationService.getInvitations(),
+        invitationService.getSentInvitations(),
+        notificationService.getNotifications()
+      ]);
+      setReceivedInvitations(received || []);
+      setSentInvitations(sent || []);
+      setNotifications(notifs || []);
+      const pendingInvitations = (received || []).filter(inv => inv.status === 'PENDING').length;
+      const unreadNotifs = (notifs || []).filter(n => !n.isRead).length;
+      setUnreadCount(pendingInvitations + unreadNotifs);
+    } catch (error) {
+      console.error('Failed to decline invitation:', error);
+    }
   };
 
-  const handleMarkAllAsRead = () => {
-    // TODO: Appel API pour marquer tout comme lu
-    setNotifications(notifications.map((n) => ({ ...n, isRead: true })));
-    setUnreadCount(0);
+  const handleDeleteInvitation = async (invitationId: number) => {
+    try {
+      await invitationService.deleteInvitation(invitationId);
+      setSentInvitations(sentInvitations.filter(inv => inv.id !== invitationId));
+    } catch (error) {
+      console.error('Failed to delete invitation:', error);
+    }
   };
 
-  const handleDelete = (notificationId: number, e: React.MouseEvent) => {
-    e.stopPropagation();
-    // TODO: Appel API pour supprimer
-    setNotifications(notifications.filter((n) => n.id !== notificationId));
-    if (notifications.find((n) => n.id === notificationId)?.isRead === false) {
+  const handleMarkAsRead = async (notificationId: number) => {
+    try {
+      await notificationService.markAsRead(notificationId);
+      setNotifications(notifications.map(n => 
+        n.id === notificationId ? { ...n, isRead: true } : n
+      ));
       setUnreadCount(Math.max(0, unreadCount - 1));
+    } catch (error) {
+      console.error('Failed to mark as read:', error);
     }
   };
 
-  const getNotificationIcon = (type: string) => {
-    switch (type) {
-      case 'COOKBOOK_MESSAGE':
-        return <MessageSquare className="w-5 h-5 text-blue-500" />;
-      case 'RECIPE_COMMENT':
-        return <ChefHat className="w-5 h-5 text-orange-500" />;
-      case 'COOKBOOK_INVITE':
-        return <UserPlus className="w-5 h-5 text-green-500" />;
-      case 'MEMBER_ADDED':
-        return <UserPlus className="w-5 h-5 text-purple-500" />;
-      case 'RECIPE_ADDED':
-        return <BookOpen className="w-5 h-5 text-pink-500" />;
-      default:
-        return <Bell className="w-5 h-5 text-gray-500" />;
+  const handleDeleteNotification = async (notificationId: number) => {
+    try {
+      await notificationService.deleteNotification(notificationId);
+      setNotifications(notifications.filter(n => n.id !== notificationId));
+      if (notifications.find(n => n.id === notificationId)?.isRead === false) {
+        setUnreadCount(Math.max(0, unreadCount - 1));
+      }
+    } catch (error) {
+      console.error('Failed to delete notification:', error);
     }
   };
 
-  const getNotificationColor = (type: string) => {
-    switch (type) {
-      case 'COOKBOOK_MESSAGE':
-        return 'bg-blue-50 border-blue-200';
-      case 'RECIPE_COMMENT':
-        return 'bg-orange-50 border-orange-200';
-      case 'COOKBOOK_INVITE':
-        return 'bg-green-50 border-green-200';
-      case 'MEMBER_ADDED':
-        return 'bg-purple-50 border-purple-200';
-      case 'RECIPE_ADDED':
-        return 'bg-pink-50 border-pink-200';
-      default:
-        return 'bg-gray-50 border-gray-200';
+  const handleNotificationClick = (notification: Notification) => {
+    if (notification.link) {
+      console.log('Navigating to:', notification.link);
+      router.push(notification.link);
     }
   };
 
@@ -107,6 +129,53 @@ export function Notifications() {
     if (diffHours < 24) return `${diffHours}h ago`;
     if (diffDays < 7) return `${diffDays}d ago`;
     return date.toLocaleDateString();
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'PENDING':
+        return 'bg-yellow-50 border-yellow-200 text-yellow-700';
+      case 'ACCEPTED':
+        return 'bg-green-50 border-green-200 text-green-700';
+      case 'DECLINED':
+        return 'bg-red-50 border-red-200 text-red-700';
+      default:
+        return 'bg-gray-50 border-gray-200 text-gray-700';
+    }
+  };
+
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case 'COOKBOOK_MESSAGE':
+        return <MessageSquare className="w-5 h-5 text-blue-500" />;
+      case 'RECIPE_COMMENT':
+        return <ChefHat className="w-5 h-5 text-orange-500" />;
+      case 'COOKBOOK_INVITATION':
+        return <UserPlus className="w-5 h-5 text-green-500" />;
+      case 'MEMBER_ADDED':
+        return <UserPlus className="w-5 h-5 text-purple-500" />;
+      case 'RECIPE_ADDED':
+        return <BookOpen className="w-5 h-5 text-pink-500" />;
+      default:
+        return <Bell className="w-5 h-5 text-gray-500" />;
+    }
+  };
+
+  const getNotificationColor = (type: string) => {
+    switch (type) {
+      case 'COOKBOOK_MESSAGE':
+        return 'bg-blue-50 border-blue-200';
+      case 'RECIPE_COMMENT':
+        return 'bg-orange-50 border-orange-200';
+      case 'COOKBOOK_INVITATION':
+        return 'bg-green-50 border-green-200';
+      case 'MEMBER_ADDED':
+        return 'bg-purple-50 border-purple-200';
+      case 'RECIPE_ADDED':
+        return 'bg-pink-50 border-pink-200';
+      default:
+        return 'bg-gray-50 border-gray-200';
+    }
   };
 
   return (
@@ -127,76 +196,180 @@ export function Notifications() {
             <p className="text-sm text-gray-500">{unreadCount} unread</p>
           </div>
         </div>
-        {unreadCount > 0 && (
-          <button
-            onClick={handleMarkAllAsRead}
-            className="flex items-center space-x-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
-          >
-            <CheckCheck className="w-4 h-4" />
-            <span>Mark all as read</span>
-          </button>
-        )}
       </div>
 
-      {/* Notifications List */}
-      <div className="space-y-3">
-        {notifications.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
-            <Bell className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No notifications</h3>
-            <p className="text-gray-500">You're all caught up!</p>
-          </div>
-        ) : (
-          notifications.map((notification) => (
-            <div
-              key={notification.id}
-              onClick={() => handleNotificationClick(notification)}
-              className={`bg-white rounded-xl shadow-sm border p-4 cursor-pointer transition-all hover:shadow-md ${
-                notification.isRead ? 'border-gray-100 opacity-70' : 'border-orange-200 border-l-4'
-              }`}
-            >
-              <div className="flex items-start space-x-4">
-                {/* Icon */}
-                <div className={`p-3 rounded-lg ${getNotificationColor(notification.type)}`}>
-                  {getNotificationIcon(notification.type)}
-                </div>
-
-                {/* Content */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h3 className={`font-semibold ${notification.isRead ? 'text-gray-700' : 'text-gray-900'}`}>
-                        {notification.title}
-                      </h3>
-                      <p className="text-sm text-gray-600 mt-1">{notification.content}</p>
-                      <p className="text-xs text-gray-400 mt-2">{formatTime(notification.createdAt)}</p>
+      {/* Received Invitations */}
+      <div className="mb-8">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+          <UserPlus className="w-5 h-5" />
+          <span>Received Invitations</span>
+        </h2>
+        <div className="space-y-3">
+          {receivedInvitations.length === 0 ? (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
+              <UserPlus className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+              <p className="text-gray-500">No pending invitations</p>
+            </div>
+          ) : (
+            receivedInvitations.map((invitation) => (
+              <div
+                key={invitation.id}
+                className={`bg-white rounded-xl shadow-sm border p-4 ${
+                  invitation.status === 'PENDING' ? 'border-orange-200 border-l-4' : 'border-gray-100'
+                }`}
+              >
+                <div className="flex items-start space-x-4">
+                  <div className="p-3 rounded-lg bg-blue-50">
+                    <Book className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-gray-900">
+                      {invitation.senderName} invited you to join <span className="font-semibold">{invitation.cookbookName}</span>
+                    </p>
+                    <p className="text-sm text-gray-600 mt-1">Role: {invitation.permission}</p>
+                    <p className="text-xs text-gray-400 mt-2">{formatTime(invitation.sentAt)}</p>
+                    <div className="mt-3 flex items-center space-x-2">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(invitation.status)}`}>
+                        {invitation.status}
+                      </span>
                     </div>
                   </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex items-center space-x-2">
-                  {!notification.isRead && (
-                    <button
-                      onClick={(e) => handleMarkAsRead(notification.id, e)}
-                      className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                      title="Mark as read"
-                    >
-                      <Check className="w-4 h-4" />
-                    </button>
+                  {invitation.status === 'PENDING' && (
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => handleAcceptInvitation(invitation.id)}
+                        className="flex items-center space-x-1 px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm"
+                      >
+                        <Check className="w-4 h-4" />
+                        <span>Accept</span>
+                      </button>
+                      <button
+                        onClick={() => handleDeclineInvitation(invitation.id)}
+                        className="flex items-center space-x-1 px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm"
+                      >
+                        <X className="w-4 h-4" />
+                        <span>Decline</span>
+                      </button>
+                    </div>
                   )}
-                  <button
-                    onClick={(e) => handleDelete(notification.id, e)}
-                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    title="Delete"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
                 </div>
               </div>
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* Sent Invitations */}
+      <div className="mb-8">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+          <BookOpen className="w-5 h-5" />
+          <span>Sent Invitations</span>
+        </h2>
+        <div className="space-y-3">
+          {sentInvitations.length === 0 ? (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
+              <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+              <p className="text-gray-500">No sent invitations</p>
             </div>
-          ))
-        )}
+          ) : (
+            sentInvitations.map((invitation) => (
+              <div
+                key={invitation.id}
+                className="bg-white rounded-xl shadow-sm border border-gray-100 p-4"
+              >
+                <div className="flex items-start space-x-4">
+                  <div className="p-3 rounded-lg bg-purple-50">
+                    <BookOpen className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-gray-900">
+                      You invited {invitation.receiverName} to join <span className="font-semibold">{invitation.cookbookName}</span>
+                    </p>
+                    <p className="text-sm text-gray-600 mt-1">Role: {invitation.permission}</p>
+                    <p className="text-xs text-gray-400 mt-2">{formatTime(invitation.sentAt)}</p>
+                    <div className="mt-3 flex items-center space-x-2">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(invitation.status)}`}>
+                        {invitation.status}
+                      </span>
+                    </div>
+                  </div>
+                  {invitation.status === 'PENDING' && (
+                    <button
+                      onClick={() => handleDeleteInvitation(invitation.id)}
+                      className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Delete invitation"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* Other Notifications */}
+      <div>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+          <Bell className="w-5 h-5" />
+          <span>Activity Notifications</span>
+        </h2>
+        <div className="space-y-3">
+          {notifications.length === 0 ? (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
+              <Bell className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+              <p className="text-gray-500">No activity notifications</p>
+            </div>
+          ) : (
+            notifications.map((notification) => (
+              <div
+                key={notification.id}
+                onClick={() => handleNotificationClick(notification)}
+                className={`bg-white rounded-xl shadow-sm border p-4 cursor-pointer transition-all hover:shadow-md ${
+                  notification.isRead ? 'border-gray-100 opacity-70' : 'border-orange-200 border-l-4'
+                }`}
+              >
+                <div className="flex items-start space-x-4">
+                  <div className={`p-3 rounded-lg ${getNotificationColor(notification.type)}`}>
+                    {getNotificationIcon(notification.type)}
+                  </div>
+                  <div className="flex-1">
+                    <h3 className={`font-semibold ${notification.isRead ? 'text-gray-700' : 'text-gray-900'}`}>
+                      {notification.title}
+                    </h3>
+                    <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
+                    <p className="text-xs text-gray-400 mt-2">{formatTime(notification.createdAt)}</p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    {!notification.isRead && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleMarkAsRead(notification.id);
+                        }}
+                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        title="Mark as read"
+                      >
+                        <Check className="w-4 h-4" />
+                      </button>
+                    )}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteNotification(notification.id);
+                      }}
+                      className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Delete"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );

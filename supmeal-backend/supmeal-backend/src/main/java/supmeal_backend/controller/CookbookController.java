@@ -18,10 +18,12 @@ import supmeal_backend.entity.User;
 import supmeal_backend.exception.ResourceNotFoundException;
 import supmeal_backend.mapper.CookbookMapper;
 import supmeal_backend.mapper.RecipeMapper;
+import supmeal_backend.service.CookbookInvitationService;
 import supmeal_backend.service.CookbookMemberService;
 import supmeal_backend.service.CookbookService;
 import supmeal_backend.service.RecipeService;
 import supmeal_backend.service.UserService;
+import supmeal_backend.repository.CookbookMemberRepository;
 
 import jakarta.validation.Valid;
 import java.util.List;
@@ -39,6 +41,8 @@ public class CookbookController {
     private final RecipeMapper recipeMapper;
     private final UserService userService;
     private final CookbookMemberService cookbookMemberService;
+    private final CookbookInvitationService cookbookInvitationService;
+    private final CookbookMemberRepository cookbookMemberRepository;
 
     @PostMapping
     public ResponseEntity<CookbookResponse> createCookbook(@Valid @RequestBody CookbookCreateRequest request) {
@@ -87,32 +91,45 @@ public class CookbookController {
     }
 
     @PostMapping("/{cookbookId}/members")
-    public ResponseEntity<Void> addMemberToCookbook(@PathVariable Long cookbookId, @RequestBody Map<String, String> request) {
+    public ResponseEntity<Void> addMemberToCookbook(
+            @PathVariable Long cookbookId, 
+            @RequestBody Map<String, String> request,
+            @RequestHeader(value = "X-User-Id", required = false) String userIdHeader) {
         String email = request.get("email");
         String permission = request.get("permission");
+        
+        // Utiliser l'userId du header ou une valeur par défaut pour le développement
+        Long userId = userIdHeader != null ? Long.parseLong(userIdHeader) : 10L;
+        
+        User sender = userService.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with id: %d", userId)));
         
         Cookbook cookbook = cookbookService.findById(cookbookId)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Cookbook not found with id: %d", cookbookId)));
         
-        User user = userService.findByEmail(email)
+        User receiver = userService.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("User not found with email: %s", email)));
         
         // Vérifier si le membre existe déjà
         boolean memberExists = cookbook.getMembers().stream()
-                .anyMatch(m -> m.getUser().getId().equals(user.getId()));
+                .anyMatch(m -> m.getUser().getId().equals(receiver.getId()));
         
         if (memberExists) {
             throw new RuntimeException("User is already a member of this cookbook");
         }
         
-        CookbookMember member = CookbookMember.builder()
+        // Créer une invitation au lieu d'ajouter directement
+        supmeal_backend.entity.CookbookInvitation invitation = supmeal_backend.entity.CookbookInvitation.builder()
+                .sender(sender)
+                .receiver(receiver)
                 .cookbook(cookbook)
-                .user(user)
                 .permission(supmeal_backend.entity.CookbookPermission.valueOf(permission))
-                .joinedAt(java.time.LocalDateTime.now())
+                .status(supmeal_backend.entity.enums.InvitationStatus.PENDING)
+                .sentAt(java.time.LocalDateTime.now())
                 .build();
         
-        cookbookMemberService.save(member);
+        cookbookInvitationService.save(invitation);
+        
         return ResponseEntity.ok().build();
     }
 
@@ -135,6 +152,37 @@ public class CookbookController {
         cookbookMemberService.update(member);
         
         return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{cookbookId}/members/{userId}")
+    public ResponseEntity<Void> removeMember(
+            @PathVariable Long cookbookId,
+            @PathVariable Long userId) {
+        
+        System.out.println("DELETE member - cookbookId: " + cookbookId + ", userId: " + userId);
+        
+        Cookbook cookbook = cookbookService.findById(cookbookId)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("Cookbook not found with id: %d", cookbookId)));
+        
+        // Charger les membres explicitement pour vérifier existence
+        List<CookbookMember> members = cookbookMemberService.findByCookbook(cookbook);
+        System.out.println("Members loaded: " + members.size());
+        
+        CookbookMember member = members.stream()
+                .filter(m -> m.getUser().getId().equals(userId))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("Member not found with userId: %d", userId)));
+        
+        System.out.println("Member found - CookbookMember ID: " + member.getId() + ", User ID: " + member.getUser().getId());
+        
+        // Supprimer directement par cookbookId et userId
+        cookbookMemberRepository.deleteByCookbookIdAndUserId(cookbookId, userId);
+        
+        // Vérifier que le membre a bien été supprimé
+        List<CookbookMember> remainingMembers = cookbookMemberService.findByCookbook(cookbook);
+        System.out.println("Remaining members after deletion: " + remainingMembers.size());
+        
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{cookbookId}/recipes/{recipeId}")
