@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Moon, Sun, Globe, User, Bell, HelpCircle, ChevronRight, Check, LucideIcon } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import ExportImport from './ExportImport';
 
 interface SettingsItem {
   label: string;
@@ -178,6 +179,7 @@ export function Settings() {
           </div>
         </div>
       ))}
+      <ExportImport />
     </div>
   );
 }

@@ -3,12 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Calendar, ShoppingCart, Trash2, Edit } from 'lucide-react';
-import { shoppingListService, ShoppingList } from '@/services/shoppingListService';
+import { shoppingListService, ShoppingList, ShoppingListItem } from '@/services/shoppingListService';
 import { CreateShoppingListModal } from '@/components/shopping-lists/CreateShoppingListModal';
 
 export function ShoppingLists() {
   const router = useRouter();
   const [shoppingLists, setShoppingLists] = useState<ShoppingList[]>([]);
+  const [shoppingListItems, setShoppingListItems] = useState<Map<number, ShoppingListItem[]>>(new Map());
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -21,11 +22,29 @@ export function ShoppingLists() {
       setIsLoading(true);
       const lists = await shoppingListService.getAllShoppingLists();
       setShoppingLists(lists);
+      
+      // Charger les items pour chaque shopping list
+      const itemsMap = new Map<number, ShoppingListItem[]>();
+      for (const list of lists) {
+        const items = await shoppingListService.getShoppingListItemsByShoppingList(list.id);
+        itemsMap.set(list.id, items);
+      }
+      setShoppingListItems(itemsMap);
     } catch (error) {
       console.error('Failed to load shopping lists:', error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const getMealsCount = (listId: number): number => {
+    const items = shoppingListItems.get(listId) || [];
+    const uniqueRecipes = new Set(
+      items
+        .filter((item) => item.sourceRecipeTitle)
+        .map((item) => item.sourceRecipeTitle)
+    );
+    return uniqueRecipes.size;
   };
 
   const handleCreateList = async () => {
@@ -124,7 +143,7 @@ export function ShoppingLists() {
                 </div>
                 <div className="flex items-center space-x-1">
                   <ShoppingCart className="w-4 h-4" />
-                  <span>{list.mealPlanIds.length} meals</span>
+                  <span>{getMealsCount(list.id)} meals</span>
                 </div>
               </div>
             </div>

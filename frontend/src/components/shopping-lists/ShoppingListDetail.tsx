@@ -133,6 +133,14 @@ export function ShoppingListDetail() {
 
   const checkedItems = items.filter((item) => item.checked);
   const uncheckedItems = items.filter((item) => !item.checked);
+  
+  // Compter le nombre de recettes différentes basées sur sourceRecipeTitle
+  const uniqueRecipes = new Set(
+    items
+      .filter((item) => item.sourceRecipeTitle)
+      .map((item) => item.sourceRecipeTitle)
+  );
+  const mealsIncludedCount = uniqueRecipes.size;
 
   return (
     <div className="p-6">
@@ -195,7 +203,7 @@ export function ShoppingListDetail() {
             </div>
             <div>
               <p className="text-sm text-gray-500">Meals Included</p>
-              <p className="text-2xl font-bold text-gray-900">{shoppingList.mealPlanIds.length}</p>
+              <p className="text-2xl font-bold text-gray-900">{mealsIncludedCount}</p>
             </div>
           </div>
         </div>
