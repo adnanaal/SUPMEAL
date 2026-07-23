@@ -43,6 +43,72 @@ export const translations = {
     error: 'Erreur',
     success: 'Succès',
     logout: 'Déconnexion',
+    
+    // Dietary Preferences
+    dietaryPreferencesTitle: 'Préférences alimentaires',
+    dietaryPreferencesSubtitle: 'Personnalisez vos préférences alimentaires et vos habitudes de cuisine',
+    selectDietaryPreferences: 'Sélectionnez vos préférences alimentaires',
+    allergies: 'Allergies',
+    selectAllergies: 'Sélectionnez vos allergies à éviter dans les recettes',
+    customAllergies: 'Allergies personnalisées',
+    addCustomAllergy: 'Ajouter une allergie personnalisée...',
+    preferredCuisineTypes: 'Types de cuisine préférés',
+    selectFavoriteCuisine: 'Sélectionnez vos types de cuisine préférés',
+    customCuisineTypes: 'Types de cuisine personnalisés',
+    addCustomCuisine: 'Ajouter un type de cuisine personnalisé...',
+    defaultServings: 'Portions par défaut',
+    setDefaultServings: 'Définissez votre nombre de portions par défaut pour les recettes',
+    people: 'personnes',
+    savePreferences: 'Enregistrer les préférences',
+    
+    // Diet Options
+    vegetarian: 'Végétarien',
+    vegan: 'Végétalien',
+    glutenFree: 'Sans gluten',
+    dairyFree: 'Sans produits laitiers',
+    keto: 'Cétogène',
+    paleo: 'Paléo',
+    lowCarb: 'Faible en glucides',
+    mediterranean: 'Méditerranéen',
+    pescatarian: 'Pescétarien',
+    raw: 'Cru',
+    
+    // Common Allergies
+    peanuts: 'Arachides',
+    treeNuts: 'Fruits à coque',
+    dairy: 'Produits laitiers',
+    eggs: 'Œufs',
+    soy: 'Soja',
+    wheat: 'Blé',
+    fish: 'Poisson',
+    shellfish: 'Fruits de mer',
+    sesame: 'Sésame',
+    mustard: 'Moutarde',
+    
+    // Cuisine Types
+    italian: 'Italien',
+    french: 'Français',
+    chinese: 'Chinois',
+    japanese: 'Japonais',
+    indian: 'Indien',
+    mexican: 'Mexicain',
+    thai: 'Thaïlandais',
+    greek: 'Grec',
+    spanish: 'Espagnol',
+    american: 'Américain',
+    middleEastern: 'Moyen-Oriental',
+    korean: 'Coréen',
+    vietnamese: 'Vietnamien',
+    brazilian: 'Brésilien',
+    moroccan: 'Marocain',
+    
+    // Allergy Warning
+    allergyWarningTitle: 'Avertissement d\'allergie',
+    allergyWarningMessage: 'Cette recette contient des ingrédients auxquels vous êtes allergique:',
+    
+    // Custom Preferences
+    customDietaryPreferences: 'Préférences alimentaires personnalisées',
+    addCustomDiet: 'Ajouter une préférence alimentaire personnalisée...',
   },
   en: {
     // Navigation
@@ -88,6 +154,72 @@ export const translations = {
     error: 'Error',
     success: 'Success',
     logout: 'Logout',
+    
+    // Dietary Preferences
+    dietaryPreferencesTitle: 'Dietary Preferences',
+    dietaryPreferencesSubtitle: 'Customize your dietary preferences and cooking habits',
+    selectDietaryPreferences: 'Select your dietary preferences',
+    allergies: 'Allergies',
+    selectAllergies: 'Select your allergies to avoid in recipes',
+    customAllergies: 'Custom Allergies',
+    addCustomAllergy: 'Add custom allergy...',
+    preferredCuisineTypes: 'Preferred Cuisine Types',
+    selectFavoriteCuisine: 'Select your favorite cuisine types',
+    customCuisineTypes: 'Custom Cuisine Types',
+    addCustomCuisine: 'Add custom cuisine type...',
+    defaultServings: 'Default Servings',
+    setDefaultServings: 'Set your default number of servings for recipes',
+    people: 'people',
+    savePreferences: 'Save Preferences',
+    
+    // Diet Options
+    vegetarian: 'Vegetarian',
+    vegan: 'Vegan',
+    glutenFree: 'Gluten-Free',
+    dairyFree: 'Dairy-Free',
+    keto: 'Keto',
+    paleo: 'Paleo',
+    lowCarb: 'Low-Carb',
+    mediterranean: 'Mediterranean',
+    pescatarian: 'Pescatarian',
+    raw: 'Raw',
+    
+    // Common Allergies
+    peanuts: 'Peanuts',
+    treeNuts: 'Tree Nuts',
+    dairy: 'Dairy',
+    eggs: 'Eggs',
+    soy: 'Soy',
+    wheat: 'Wheat',
+    fish: 'Fish',
+    shellfish: 'Shellfish',
+    sesame: 'Sesame',
+    mustard: 'Mustard',
+    
+    // Cuisine Types
+    italian: 'Italian',
+    french: 'French',
+    chinese: 'Chinese',
+    japanese: 'Japanese',
+    indian: 'Indian',
+    mexican: 'Mexican',
+    thai: 'Thai',
+    greek: 'Greek',
+    spanish: 'Spanish',
+    american: 'American',
+    middleEastern: 'Middle Eastern',
+    korean: 'Korean',
+    vietnamese: 'Vietnamese',
+    brazilian: 'Brazilian',
+    moroccan: 'Moroccan',
+    
+    // Allergy Warning
+    allergyWarningTitle: 'Allergy Warning',
+    allergyWarningMessage: 'This recipe contains ingredients you are allergic to:',
+    
+    // Custom Preferences
+    customDietaryPreferences: 'Custom Dietary Preferences',
+    addCustomDiet: 'Add custom dietary preference...',
   },
 };
 

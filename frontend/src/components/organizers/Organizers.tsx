@@ -3,12 +3,15 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, Filter, X, Clock, Heart, BookOpen, Tag, ChefHat, Users, Utensils } from 'lucide-react';
-import { Recipe } from '@/types';
-import { Cookbook } from '@/types';
-import { recipeService } from '@/services/recipeService';
+import { Recipe, Cookbook, Tag as TagType, Ingredient } from '@/types';
 import { cookbookService } from '@/services/cookbookService';
 import { favoriteService } from '@/services/favoriteService';
 import { MealType } from '@/types';
+import { recipeService } from '@/services/recipeService';
+
+// Types d'union pour tags et ingredients
+type TagOrString = string | TagType;
+type IngredientOrString = string | Ingredient;
 
 export function Organizers() {
   const router = useRouter();
@@ -71,7 +74,12 @@ export function Organizers() {
   const allTags = useMemo(() => {
     const tags = new Set<string>();
     recipes.forEach((recipe) => {
-      recipe.tags?.forEach((tag) => tags.add(tag.name));
+      if (recipe.tags) {
+        recipe.tags.forEach((tag) => {
+          const tagName = typeof tag === 'string' ? tag : tag.name;
+          tags.add(tagName);
+        });
+      }
     });
     return Array.from(tags).sort();
   }, [recipes]);
@@ -80,7 +88,12 @@ export function Organizers() {
   const allIngredients = useMemo(() => {
     const ingredients = new Set<string>();
     recipes.forEach((recipe) => {
-      recipe.ingredients?.forEach((ing) => ingredients.add(ing.name));
+      if (recipe.ingredients) {
+        recipe.ingredients.forEach((ing) => {
+          const ingName = typeof ing === 'string' ? ing : ing.name;
+          ingredients.add(ingName);
+        });
+      }
     });
     return Array.from(ingredients).sort();
   }, [recipes]);
@@ -97,15 +110,21 @@ export function Organizers() {
         const matchesSearch =
           recipe.title.toLowerCase().includes(query) ||
           recipe.description?.toLowerCase().includes(query) ||
-          recipe.tags?.some((tag) => tag.name.toLowerCase().includes(query)) ||
-          recipe.ingredients?.some((ing) => ing.name.toLowerCase().includes(query));
+          recipe.tags?.some((tag) => {
+            const tagName = typeof tag === 'string' ? tag : tag.name;
+            return tagName.toLowerCase().includes(query);
+          }) ||
+          recipe.ingredients?.some((ing) => {
+            const ingName = typeof ing === 'string' ? ing : ing.name;
+            return ingName.toLowerCase().includes(query);
+          });
         if (!matchesSearch) return false;
       }
 
       // Filtrage par cookbook
       if (selectedCookbook) {
         const cookbook = cookbooks.find((cb) => cb.id === selectedCookbook);
-        if (!cookbook || !cookbook.recipeIds.includes(recipe.id)) return false;
+        if (!cookbook || !cookbook.recipeIds?.includes(recipe.id)) return false;
       }
 
       // Filtrage par meal type
@@ -116,16 +135,16 @@ export function Organizers() {
 
       // Filtrage par tags
       if (selectedTags.size > 0) {
-        const recipeTagNames = new Set(recipe.tags?.map((tag) => tag.name) || []);
-        const hasAllTags = Array.from(selectedTags).every((tag) => recipeTagNames.has(tag));
+        const recipeTagNames = recipe.tags?.map((tag) => typeof tag === 'string' ? tag : tag.name) || [];
+        const hasAllTags = Array.from(selectedTags).every((tag) => recipeTagNames.includes(tag));
         if (!hasAllTags) return false;
       }
 
       // Filtrage par ingrédients
       if (selectedIngredients.size > 0) {
-        const recipeIngredientNames = new Set(recipe.ingredients?.map((ing) => ing.name) || []);
+        const recipeIngredientNames = recipe.ingredients?.map((ing) => typeof ing === 'string' ? ing : ing.name) || [];
         const hasAllIngredients = Array.from(selectedIngredients).every((ing) =>
-          recipeIngredientNames.has(ing)
+          recipeIngredientNames.includes(ing)
         );
         if (!hasAllIngredients) return false;
       }
@@ -255,12 +274,12 @@ export function Organizers() {
 
       {/* Filters Panel */}
       {showFilters && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Filters</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Filters</h2>
             <button
               onClick={clearFilters}
-              className="text-sm text-orange-600 hover:text-orange-700"
+              className="text-sm text-orange-600 hover:text-orange-700 dark:text-orange-400 dark:hover:text-orange-300"
             >
               Clear All
             </button>
@@ -268,7 +287,7 @@ export function Organizers() {
 
           {/* Ingredients Filter */}
           <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               <ChefHat className="w-4 h-4 inline mr-1" />
               Ingredients
             </label>
@@ -280,7 +299,7 @@ export function Organizers() {
                   className={`px-3 py-1 rounded-full text-sm transition-colors ${
                     selectedIngredients.has(ingredient)
                       ? 'bg-blue-500 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                   }`}
                 >
                   {ingredient}
@@ -291,7 +310,7 @@ export function Organizers() {
 
           {/* Tags Filter */}
           <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               <Tag className="w-4 h-4 inline mr-1" />
               Tags
             </label>
@@ -303,7 +322,7 @@ export function Organizers() {
                   className={`px-3 py-1 rounded-full text-sm transition-colors ${
                     selectedTags.has(tag)
                       ? 'bg-orange-500 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                   }`}
                 >
                   {tag}
@@ -322,22 +341,22 @@ export function Organizers() {
               className="w-5 h-5 text-orange-600 rounded focus:ring-orange-500"
             />
             <label htmlFor="favorites" className="flex items-center space-x-2 cursor-pointer">
-              <Heart className="w-4 h-4 text-gray-600" />
-              <span className="text-sm font-medium text-gray-700">Favorites Only</span>
+              <Heart className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Favorites Only</span>
             </label>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
             {/* Cookbook Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 <BookOpen className="w-4 h-4 inline mr-1" />
                 Cookbook
               </label>
               <select
                 value={selectedCookbook || ''}
                 onChange={(e) => setSelectedCookbook(e.target.value ? parseInt(e.target.value) : null)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
               >
                 <option value="">All Cookbooks</option>
                 {cookbooks.map((cookbook) => (
@@ -350,7 +369,7 @@ export function Organizers() {
 
             {/* Meal Type Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 <Utensils className="w-4 h-4 inline mr-1" />
                 Meal Type
               </label>
@@ -360,7 +379,7 @@ export function Organizers() {
                   console.log('Select onChange value:', e.target.value);
                   setSelectedMealType(e.target.value);
                 }}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
               >
                 <option value="">All Meal Types</option>
                 <option value={MealType.BREAKFAST}>Breakfast</option>
@@ -372,7 +391,7 @@ export function Organizers() {
 
             {/* Preparation Time Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 <Clock className="w-4 h-4 inline mr-1" />
                 Max Preparation Time (min)
               </label>
@@ -381,13 +400,13 @@ export function Organizers() {
                 value={maxPrepTime || ''}
                 onChange={(e) => setMaxPrepTime(e.target.value ? parseInt(e.target.value) : null)}
                 placeholder="Any"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
               />
             </div>
 
             {/* Cooking Time Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 <ChefHat className="w-4 h-4 inline mr-1" />
                 Max Cooking Time (min)
               </label>
@@ -396,7 +415,7 @@ export function Organizers() {
                 value={maxCookTime || ''}
                 onChange={(e) => setMaxCookTime(e.target.value ? parseInt(e.target.value) : null)}
                 placeholder="Any"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
               />
             </div>
           </div>
@@ -468,15 +487,19 @@ export function Organizers() {
                 </div>
                 {recipe.tags && recipe.tags.length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-3">
-                    {recipe.tags.slice(0, 3).map((tag) => (
-                      <span
-                        key={tag.id}
-                        className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700"
-                      >
-                        <Tag className="w-3 h-3 mr-1" />
-                        {tag.name}
-                      </span>
-                    ))}
+                    {recipe.tags.slice(0, 3).map((tag, index) => {
+                      const tagName = typeof tag === 'string' ? tag : tag.name;
+                      const tagKey = typeof tag === 'string' ? tag : tag.id || index;
+                      return (
+                        <span
+                          key={tagKey}
+                          className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
+                        >
+                          <Tag className="w-3 h-3 mr-1" />
+                          {tagName}
+                        </span>
+                      );
+                    })}
                   </div>
                 )}
               </div>

@@ -9,8 +9,10 @@ import { EditRecipeModal } from '@/components/recipes/EditRecipeModal';
 import { AddToShoppingListModal } from '@/components/recipes/AddToShoppingListModal';
 import { AddToMealPlannerModal } from '@/components/recipes/AddToMealPlannerModal';
 import { AddToCookbookModal } from '@/components/recipes/AddToCookbookModal';
+import { AllergyWarning } from '@/components/recipes/AllergyWarning';
 import { recipeService } from '@/services/recipeService';
 import { favoriteService } from '@/services/favoriteService';
+import { preferencesService } from '@/services/preferencesService';
 import { ArrowLeft, Clock, Users, Tag, ChefHat, Utensils, Heart, Share2, Edit, Trash2, Check, ShoppingCart, Calendar, Link as ExternalLink, BookOpen } from 'lucide-react';
 
 export function RecipeDetail() {
@@ -25,6 +27,9 @@ export function RecipeDetail() {
   const [currentRecipe, setCurrentRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userAllergies, setUserAllergies] = useState<string[]>([]);
+  const [detectedAllergens, setDetectedAllergens] = useState<string[]>([]);
+  const [warningDismissed, setWarningDismissed] = useState(false);
   
   // Récupérer l'ID depuis l'URL
   const recipeId = parseInt(params.id as string);
@@ -38,6 +43,24 @@ export function RecipeDetail() {
         setCurrentRecipe(recipeData);
         const isFav = await favoriteService.isFavorite(recipeId);
         setFavoriteStatus(isFav);
+        
+        // Charger les allergies utilisateur et détecter les allergènes
+        const userId = localStorage.getItem('userId');
+        if (userId) {
+          try {
+            const userPrefs = await preferencesService.getUserPreferences(parseInt(userId));
+            console.log('User preferences loaded:', userPrefs);
+            if (userPrefs && userPrefs.allergies) {
+              setUserAllergies(userPrefs.allergies);
+              detectAllergens(recipeData, userPrefs.allergies);
+            } else {
+              setUserAllergies([]);
+            }
+          } catch (err) {
+            console.error('Failed to load user preferences:', err);
+            setUserAllergies([]);
+          }
+        }
       } catch (err) {
         console.error('Failed to load recipe:', err);
         setError('Failed to load recipe');
@@ -47,6 +70,31 @@ export function RecipeDetail() {
     };
     loadRecipe();
   }, [recipeId]);
+
+  // Fonction pour détecter les allergènes dans la recette
+  const detectAllergens = (recipe: Recipe, allergies: string[]) => {
+    const allergensFound: string[] = [];
+    
+    // Vérifier les ingrédients
+    if (recipe.ingredients) {
+      const ingredientNames = recipe.ingredients.map(ing => 
+        typeof ing === 'string' ? ing : ing.name
+      );
+      
+      allergies.forEach(allergy => {
+        const allergyLower = allergy.toLowerCase();
+        ingredientNames.forEach(ingredient => {
+          if (ingredient.toLowerCase().includes(allergyLower)) {
+            if (!allergensFound.includes(allergy)) {
+              allergensFound.push(allergy);
+            }
+          }
+        });
+      });
+    }
+    
+    setDetectedAllergens(allergensFound);
+  };
 
   const recipe = currentRecipe;
 
@@ -193,6 +241,14 @@ export function RecipeDetail() {
         </div>
 
         <div className="max-w-4xl mx-auto px-6 py-8">
+          {/* Allergy Warning */}
+          {!warningDismissed && detectedAllergens.length > 0 && (
+            <AllergyWarning 
+              allergens={detectedAllergens} 
+              onDismiss={() => setWarningDismissed(true)} 
+            />
+          )}
+          
           {/* Title and Basic Info */}
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">{recipe.title}</h1>
@@ -238,15 +294,18 @@ export function RecipeDetail() {
             {/* Tags */}
             {recipe.tags && recipe.tags.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-4">
-                {recipe.tags.map((tag, index) => (
-                  <div
-                    key={`tag-${index}`}
-                    className="flex items-center space-x-1 px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm"
-                  >
-                    <Tag className="w-4 h-4" />
-                    <span>{tag}</span>
-                  </div>
-                ))}
+                {recipe.tags.map((tag, index) => {
+                  const tagName = typeof tag === 'string' ? tag : tag.name;
+                  return (
+                    <div
+                      key={`tag-${index}`}
+                      className="flex items-center space-x-1 px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm"
+                    >
+                      <Tag className="w-4 h-4" />
+                      <span>{tagName}</span>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -261,15 +320,18 @@ export function RecipeDetail() {
                 </h2>
                 <ul className="space-y-3">
                   {recipe.ingredients && recipe.ingredients.length > 0 ? (
-                    recipe.ingredients.map((ingredient, index) => (
-                      <li
-                        key={`ingredient-${index}`}
-                        className="flex items-start space-x-2 text-gray-700"
-                      >
-                        <span className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0" />
-                        <span>{ingredient}</span>
-                      </li>
-                    ))
+                    recipe.ingredients.map((ingredient, index) => {
+                      const ingredientName = typeof ingredient === 'string' ? ingredient : ingredient.name;
+                      return (
+                        <li
+                          key={`ingredient-${index}`}
+                          className="flex items-start space-x-2 text-gray-700"
+                        >
+                          <span className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0" />
+                          <span>{ingredientName}</span>
+                        </li>
+                      );
+                    })
                   ) : (
                     <li className="text-gray-500">No ingredients listed</li>
                   )}
