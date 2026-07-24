@@ -11,8 +11,10 @@ import { ImportFromUrlModal } from '@/components/recipes/ImportFromUrlModal';
 import { CreateRecipeModal } from '@/components/recipes/CreateRecipeModal';
 import { recipeService } from '@/services/recipeService';
 import { mealPlanningService } from '@/services/mealPlanningService';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export function Recipes() {
+  const { t } = useLanguage();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [filteredRecipes, setFilteredRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,7 +32,7 @@ export function Recipes() {
         setFilteredRecipes(data);
       } catch (err) {
         console.error('Failed to load recipes:', err);
-        setError('Failed to load recipes');
+        setError(t('recipesError'));
       } finally {
         setLoading(false);
       }
@@ -47,7 +49,10 @@ export function Recipes() {
     const filtered = recipes.filter((recipe) =>
       recipe.title.toLowerCase().includes(query.toLowerCase()) ||
       recipe.description?.toLowerCase().includes(query.toLowerCase()) ||
-      recipe.tags?.some((tag) => tag.name.toLowerCase().includes(query.toLowerCase()))
+      recipe.tags?.some((tag) => {
+        const tagName = typeof tag === 'string' ? tag : tag.name;
+        return tagName.toLowerCase().includes(query.toLowerCase());
+      })
     );
     setFilteredRecipes(filtered);
   };
@@ -119,7 +124,7 @@ export function Recipes() {
         {/* Header with Search and Create Button */}
         <div className="flex items-center justify-between mb-6 gap-4">
           <div className="flex-1">
-            <SearchBar onSearch={handleSearch} placeholder="Search recipes..." />
+            <SearchBar onSearch={handleSearch} placeholder={t('searchRecipes')} />
           </div>
           <CreateRecipeButton
             onImportFromUrl={() => setIsImportModalOpen(true)}
@@ -128,7 +133,7 @@ export function Recipes() {
         </div>
 
         {/* Recipes List */}
-        <RecipeList recipes={filteredRecipes} title="All Recipes" />
+        <RecipeList recipes={filteredRecipes} title={t('allRecipes')} />
       </div>
 
       {/* Modals */}

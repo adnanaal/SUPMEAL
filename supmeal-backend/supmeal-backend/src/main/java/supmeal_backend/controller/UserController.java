@@ -73,9 +73,6 @@ public class UserController {
         if (request.getLastname() != null) {
             existingUser.setLastname(request.getLastname());
         }
-        if (request.getPassword() != null) {
-            existingUser.setPassword(request.getPassword());
-        }
         if (request.getAvatar() != null) {
             existingUser.setAvatar(request.getAvatar());
         }

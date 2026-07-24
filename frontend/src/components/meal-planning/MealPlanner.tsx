@@ -15,14 +15,9 @@ import {
   Clock,
   Utensils
 } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const MEAL_TYPES: MealType[] = [MealType.BREAKFAST, MealType.LUNCH, MealType.DINNER, MealType.SNACK];
-const MEAL_TYPE_LABELS: Record<MealType, string> = {
-  [MealType.BREAKFAST]: 'Breakfast',
-  [MealType.LUNCH]: 'Lunch',
-  [MealType.DINNER]: 'Dinner',
-  [MealType.SNACK]: 'Snack',
-};
 
 const MEAL_TYPE_COLORS: Record<MealType, string> = {
   [MealType.BREAKFAST]: 'bg-yellow-100 text-yellow-700 border-yellow-300',
@@ -41,6 +36,7 @@ interface MealPlan {
 }
 
 export function MealPlanner() {
+  const { t } = useLanguage();
   const [isEditMode, setIsEditMode] = useState(false);
   const [mealPlans, setMealPlans] = useState<MealPlan[]>([]);
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(() => {
@@ -52,6 +48,13 @@ export function MealPlanner() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedMealPlan, setSelectedMealPlan] = useState<MealPlan | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const MEAL_TYPE_LABELS: Record<MealType, string> = {
+    [MealType.BREAKFAST]: t('breakfast'),
+    [MealType.LUNCH]: t('lunch'),
+    [MealType.DINNER]: t('dinner'),
+    [MealType.SNACK]: t('snack'),
+  };
 
   useEffect(() => {
     loadMealPlans();
@@ -139,7 +142,7 @@ export function MealPlanner() {
   };
 
   const handleDeleteMeal = async (mealPlanId: number) => {
-    if (confirm('Are you sure you want to delete this meal?')) {
+    if (confirm(t('deleteMealConfirm'))) {
       try {
         await mealPlanningService.deleteMealPlanning(mealPlanId);
         await loadMealPlans();
@@ -180,7 +183,7 @@ export function MealPlanner() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-4">
-          <h1 className="text-2xl font-bold text-gray-900">Meal Planner</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('mealPlannerTitle')}</h1>
           <div className="flex items-center space-x-2">
             <button
               onClick={handlePreviousWeek}
@@ -212,7 +215,7 @@ export function MealPlanner() {
             }`}
           >
             <Eye className="w-4 h-4" />
-            <span>View</span>
+            <span>{t('view')}</span>
           </button>
           <button
             onClick={() => setIsEditMode(true)}
@@ -223,7 +226,7 @@ export function MealPlanner() {
             }`}
           >
             <Edit className="w-4 h-4" />
-            <span>Edit</span>
+            <span>{t('editMeal')}</span>
           </button>
         </div>
       </div>
@@ -232,7 +235,7 @@ export function MealPlanner() {
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         {/* Header Row */}
         <div className="grid grid-cols-8 border-b border-gray-200 bg-gray-50">
-          <div className="p-3 font-medium text-gray-700 text-center">Meal</div>
+          <div className="p-3 font-medium text-gray-700 text-center">{t('meal')}</div>
           {weekDates.map((date) => {
             const isToday = formatDate(date) === formatDate(new Date());
             return (
@@ -285,7 +288,7 @@ export function MealPlanner() {
                               />
                             )}
                             <p className="text-xs font-medium text-gray-900 line-clamp-1">
-                              {mealPlan.recipeTitle || 'Recipe not found'}
+                              {mealPlan.recipeTitle || t('recipeNotFound')}
                             </p>
 
                             {isEditMode && (
@@ -313,7 +316,7 @@ export function MealPlanner() {
                                     handleDeleteMeal(mealPlan.id);
                                   }}
                                   className="p-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-                                  title="Delete meal"
+                                  title={t('deleteMeal')}
                                 >
                                   <Trash2 className="w-3 h-3" />
                                 </button>
@@ -335,11 +338,11 @@ export function MealPlanner() {
       <div className="mt-4 flex items-center space-x-4 text-sm text-gray-600">
         <div className="flex items-center space-x-2">
           <div className="w-3 h-3 bg-orange-100 rounded-full border border-orange-300" />
-          <span>Today</span>
+          <span>{t('today')}</span>
         </div>
         <div className="flex items-center space-x-2">
           <Utensils className="w-4 h-4" />
-          <span>{isEditMode ? 'Click to add meal' : 'Empty slot'}</span>
+          <span>{isEditMode ? t('clickToAddMeal') : t('emptySlot')}</span>
         </div>
       </div>
 

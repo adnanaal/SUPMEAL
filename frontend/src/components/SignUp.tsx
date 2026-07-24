@@ -6,10 +6,12 @@ import Link from 'next/link';
 import { ChefHat, Mail, Lock, User, AlertCircle } from 'lucide-react';
 import { authService, RegisterRequest } from '@/services/authService';
 import { useAuthStore } from '@/stores/authStore';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export function SignUp() {
   const router = useRouter();
   const { setUser, setToken } = useAuthStore();
+  const { t } = useLanguage();
   const [firstname, setFirstname] = useState('');
   const [lastname, setLastname] = useState('');
   const [email, setEmail] = useState('');
@@ -23,12 +25,12 @@ export function SignUp() {
     setError('');
 
     if (password !== confirmPassword) {
-      setError('Les mots de passe ne correspondent pas');
+      setError(t('passwordMismatch'));
       return;
     }
 
     if (password.length < 8) {
-      setError('Le mot de passe doit contenir au moins 8 caractères');
+      setError(t('passwordTooShort'));
       return;
     }
 
@@ -75,7 +77,7 @@ export function SignUp() {
       console.error('Registration error:', err);
       console.error('Error response:', err.response?.data);
       console.error('Error status:', err.response?.status);
-      setError(err.response?.data?.message || err.response?.data || 'Échec de l\'inscription. Veuillez réessayer.');
+      setError(err.response?.data?.message || err.response?.data || t('signUpError'));
     } finally {
       setIsLoading(false);
     }
@@ -89,8 +91,8 @@ export function SignUp() {
           <Link href="/" className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-full mb-4 hover:opacity-80 transition">
             <ChefHat className="w-8 h-8 text-white" />
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900">SUPMEAL</h1>
-          <p className="text-gray-600 mt-2">Créez votre compte pour commencer</p>
+          <h1 className="text-3xl font-bold text-gray-900">{t('signUpTitle')}</h1>
+          <p className="text-gray-600 mt-2">{t('signUpSubtitle')}</p>
         </div>
 
         {/* Formulaire */}
@@ -99,7 +101,7 @@ export function SignUp() {
             {/* Nom */}
             <div>
               <label htmlFor="firstname" className="block text-sm font-medium text-gray-700 mb-2">
-                Prénom
+                {t('firstNameLabel')}
               </label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -109,7 +111,7 @@ export function SignUp() {
                   value={firstname}
                   onChange={(e) => setFirstname(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition text-gray-900"
-                  placeholder="Votre prénom"
+                  placeholder={t('firstNamePlaceholder')}
                   required
                 />
               </div>
@@ -118,7 +120,7 @@ export function SignUp() {
             {/* Nom de famille */}
             <div>
               <label htmlFor="lastname" className="block text-sm font-medium text-gray-700 mb-2">
-                Nom de famille
+                {t('lastNameLabel')}
               </label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -128,7 +130,7 @@ export function SignUp() {
                   value={lastname}
                   onChange={(e) => setLastname(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition text-gray-900"
-                  placeholder="Votre nom de famille"
+                  placeholder={t('lastNamePlaceholder')}
                   required
                 />
               </div>
@@ -137,7 +139,7 @@ export function SignUp() {
             {/* Email */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email
+                {t('emailLabel')}
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -147,7 +149,7 @@ export function SignUp() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition text-gray-900"
-                  placeholder="vous@exemple.com"
+                  placeholder={t('emailPlaceholder')}
                   required
                 />
               </div>
@@ -156,7 +158,7 @@ export function SignUp() {
             {/* Mot de passe */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Mot de passe
+                {t('passwordLabel')}
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -166,7 +168,7 @@ export function SignUp() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition text-gray-900"
-                  placeholder="••••••••"
+                  placeholder={t('passwordPlaceholder')}
                   required
                 />
               </div>
@@ -175,7 +177,7 @@ export function SignUp() {
             {/* Confirmation mot de passe */}
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                Confirmer le mot de passe
+                {t('confirmPasswordLabel')}
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -185,7 +187,7 @@ export function SignUp() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition text-gray-900"
-                  placeholder="••••••••"
+                  placeholder={t('passwordPlaceholder')}
                   required
                 />
               </div>
@@ -205,15 +207,15 @@ export function SignUp() {
               disabled={isLoading}
               className="w-full bg-primary hover:bg-primary-hover text-white font-medium py-3 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Création du compte...' : 'S\'inscrire'}
+              {isLoading ? t('signUpButtonLoading') : t('signUpButton')}
             </button>
           </form>
 
           {/* Lien vers connexion */}
           <p className="text-center text-sm text-gray-600 mt-6">
-            Déjà un compte ?{' '}
+            {t('alreadyHaveAccount')}{' '}
             <Link href="/login" className="text-primary hover:text-primary-hover font-medium">
-              Se connecter
+              {t('loginLink')}
             </Link>
           </p>
         </div>
@@ -221,7 +223,7 @@ export function SignUp() {
         {/* Retour à l'accueil */}
         <div className="text-center mt-6">
           <Link href="/" className="text-sm text-gray-600 hover:text-gray-900">
-            ← Retour à l'accueil
+            {t('backToHome')}
           </Link>
         </div>
       </div>

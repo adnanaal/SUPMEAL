@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation';
 import { Bell, Check, CheckCheck, Trash2, MessageSquare, BookOpen, UserPlus, ChefHat, X, Book } from 'lucide-react';
 import { invitationService, CookbookInvitation } from '@/services/invitationService';
 import { notificationService, Notification } from '@/services/notificationService';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export function Notifications() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [receivedInvitations, setReceivedInvitations] = useState<CookbookInvitation[]>([]);
   const [sentInvitations, setSentInvitations] = useState<CookbookInvitation[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -124,10 +126,10 @@ export function Notifications() {
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
 
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
+    if (diffMins < 1) return t('justNow');
+    if (diffMins < 60) return `${diffMins}${t('minutesAgo')}`;
+    if (diffHours < 24) return `${diffHours}${t('hoursAgo')}`;
+    if (diffDays < 7) return `${diffDays}${t('daysAgo')}`;
     return date.toLocaleDateString();
   };
 
@@ -192,8 +194,8 @@ export function Notifications() {
             )}
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
-            <p className="text-sm text-gray-500">{unreadCount} unread</p>
+            <h1 className="text-2xl font-bold text-gray-900">{t('notificationsTitle')}</h1>
+            <p className="text-sm text-gray-500">{unreadCount} {t('unread')}</p>
           </div>
         </div>
       </div>
@@ -202,13 +204,13 @@ export function Notifications() {
       <div className="mb-8">
         <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
           <UserPlus className="w-5 h-5" />
-          <span>Received Invitations</span>
+          <span>{t('receivedInvitations')}</span>
         </h2>
         <div className="space-y-3">
           {receivedInvitations.length === 0 ? (
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
               <UserPlus className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-              <p className="text-gray-500">No pending invitations</p>
+              <p className="text-gray-500">{t('noPendingInvitations')}</p>
             </div>
           ) : (
             receivedInvitations.map((invitation) => (
@@ -224,9 +226,9 @@ export function Notifications() {
                   </div>
                   <div className="flex-1">
                     <p className="font-medium text-gray-900">
-                      {invitation.senderName} invited you to join <span className="font-semibold">{invitation.cookbookName}</span>
+                      {invitation.senderName} {t('invitedYouToJoin')} <span className="font-semibold">{invitation.cookbookName}</span>
                     </p>
-                    <p className="text-sm text-gray-600 mt-1">Role: {invitation.permission}</p>
+                    <p className="text-sm text-gray-600 mt-1">{t('role')}: {invitation.permission}</p>
                     <p className="text-xs text-gray-400 mt-2">{formatTime(invitation.sentAt)}</p>
                     <div className="mt-3 flex items-center space-x-2">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(invitation.status)}`}>
@@ -241,14 +243,14 @@ export function Notifications() {
                         className="flex items-center space-x-1 px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm"
                       >
                         <Check className="w-4 h-4" />
-                        <span>Accept</span>
+                        <span>{t('accept')}</span>
                       </button>
                       <button
                         onClick={() => handleDeclineInvitation(invitation.id)}
                         className="flex items-center space-x-1 px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm"
                       >
                         <X className="w-4 h-4" />
-                        <span>Decline</span>
+                        <span>{t('decline')}</span>
                       </button>
                     </div>
                   )}
@@ -263,13 +265,13 @@ export function Notifications() {
       <div className="mb-8">
         <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
           <BookOpen className="w-5 h-5" />
-          <span>Sent Invitations</span>
+          <span>{t('sentInvitations')}</span>
         </h2>
         <div className="space-y-3">
           {sentInvitations.length === 0 ? (
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
               <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-              <p className="text-gray-500">No sent invitations</p>
+              <p className="text-gray-500">{t('noSentInvitations')}</p>
             </div>
           ) : (
             sentInvitations.map((invitation) => (
@@ -283,9 +285,9 @@ export function Notifications() {
                   </div>
                   <div className="flex-1">
                     <p className="font-medium text-gray-900">
-                      You invited {invitation.receiverName} to join <span className="font-semibold">{invitation.cookbookName}</span>
+                      {t('youInvited')} {invitation.receiverName} {t('toJoin')} <span className="font-semibold">{invitation.cookbookName}</span>
                     </p>
-                    <p className="text-sm text-gray-600 mt-1">Role: {invitation.permission}</p>
+                    <p className="text-sm text-gray-600 mt-1">{t('role')}: {invitation.permission}</p>
                     <p className="text-xs text-gray-400 mt-2">{formatTime(invitation.sentAt)}</p>
                     <div className="mt-3 flex items-center space-x-2">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(invitation.status)}`}>
@@ -297,7 +299,7 @@ export function Notifications() {
                     <button
                       onClick={() => handleDeleteInvitation(invitation.id)}
                       className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                      title="Delete invitation"
+                      title={t('deleteInvitation')}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -313,13 +315,13 @@ export function Notifications() {
       <div>
         <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
           <Bell className="w-5 h-5" />
-          <span>Activity Notifications</span>
+          <span>{t('activityNotifications')}</span>
         </h2>
         <div className="space-y-3">
           {notifications.length === 0 ? (
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
               <Bell className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-              <p className="text-gray-500">No activity notifications</p>
+              <p className="text-gray-500">{t('noActivityNotifications')}</p>
             </div>
           ) : (
             notifications.map((notification) => (
@@ -349,7 +351,7 @@ export function Notifications() {
                           handleMarkAsRead(notification.id);
                         }}
                         className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        title="Mark as read"
+                        title={t('markAsRead')}
                       >
                         <Check className="w-4 h-4" />
                       </button>
@@ -360,7 +362,7 @@ export function Notifications() {
                         handleDeleteNotification(notification.id);
                       }}
                       className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                      title="Delete"
+                      title={t('delete')}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>

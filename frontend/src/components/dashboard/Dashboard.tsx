@@ -11,8 +11,10 @@ import { Navbar } from '@/components/layout/Navbar';
 import { SearchBar } from '@/components/layout/SearchBar';
 import { apiClient } from '@/lib/api';
 import { BookOpen, Utensils, Calendar as CalendarIcon, TrendingUp } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export function Dashboard() {
+  const { t } = useLanguage();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [filteredRecipes, setFilteredRecipes] = useState<Recipe[]>([]);
   const [cookbooks, setCookbooks] = useState<Cookbook[]>([]);
@@ -45,7 +47,7 @@ export function Dashboard() {
         
         setMealPlannings(mealPlanningsWithRecipes.slice(0, 7)); // Show only 7 days of meal plans
       } catch (err) {
-        setError('Failed to load dashboard data');
+        setError(t('dashboardError'));
         console.error('Dashboard error:', err);
       } finally {
         setLoading(false);
@@ -95,31 +97,31 @@ export function Dashboard() {
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <StatsCard
-              title="Total Recipes"
+              title={t('totalRecipes')}
               value={recipes.length}
               icon={Utensils}
               trend={{ value: 12, isPositive: true }}
-              description="Recipes in your collection"
+              description={t('recipesInCollection')}
             />
             <StatsCard
-              title="Cookbooks"
+              title={t('dashboardCookbooks')}
               value={cookbooks.length}
               icon={BookOpen}
               trend={{ value: 8, isPositive: true }}
-              description="Shared cookbooks"
+              description={t('dashboardSharedCookbooks')}
             />
             <StatsCard
-              title="Meal Plans"
+              title={t('mealPlans')}
               value={mealPlannings.length}
               icon={CalendarIcon}
               trend={{ value: 5, isPositive: true }}
-              description="Upcoming meals"
+              description={t('upcomingMeals')}
             />
             <StatsCard
-              title="This Week"
-              value="Active"
+              title={t('thisWeek')}
+              value={t('active')}
               icon={TrendingUp}
-              description="Planning progress"
+              description={t('planningProgress')}
             />
           </div>
 
@@ -127,18 +129,18 @@ export function Dashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
             {/* Left Column - Recent Recipes */}
             <div className="lg:col-span-2">
-              <RecipeList recipes={filteredRecipes} title="My Recipes" />
+              <RecipeList recipes={filteredRecipes} title={t('myRecipes')} />
             </div>
 
             {/* Right Column - Meal Planning */}
             <div className="lg:col-span-1">
-              <MealPlanningCalendar mealPlannings={mealPlannings} title="Meal Planning" />
+              <MealPlanningCalendar mealPlannings={mealPlannings} title={t('mealPlanning')} />
             </div>
           </div>
 
           {/* Bottom Section - Cookbooks */}
           <div>
-            <CookbookList cookbooks={cookbooks} title="My Cookbooks" />
+            <CookbookList cookbooks={cookbooks} title={t('myCookbooks')} />
           </div>
         </div>
       </div>

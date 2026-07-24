@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { Utensils, AlertTriangle, Heart, Users, Check, X, Plus, Trash2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTheme } from '@/contexts/ThemeContext';
+import { translateAllergen } from '@/lib/allergyMapping';
 
 interface DietaryPreferencesProps {
   preferences: {
@@ -59,7 +61,8 @@ const getCuisineTypes = (t: any) => [
 ];
 
 export function DietaryPreferences({ preferences, onSave }: DietaryPreferencesProps) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const { theme } = useTheme();
   const [diet, setDiet] = useState<string[]>(preferences.diet);
   const [allergies, setAllergies] = useState<string[]>(preferences.allergies);
   const [cuisineTypes, setCuisineTypes] = useState<string[]>(preferences.cuisineTypes);
@@ -149,14 +152,14 @@ export function DietaryPreferences({ preferences, onSave }: DietaryPreferencesPr
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className={`max-w-4xl mx-auto space-y-6 ${theme === 'dark' ? 'dark' : ''}`}>
       {/* Diet Preferences */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+      <div className={`rounded-xl shadow-sm border p-6 ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'}`}>
         <div className="flex items-center space-x-3 mb-4">
           <Utensils className="w-5 h-5 text-orange-600" />
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t('dietaryPreferencesTitle')}</h2>
+          <h2 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{t('dietaryPreferencesTitle')}</h2>
         </div>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{t('selectDietaryPreferences')}</p>
+        <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{t('selectDietaryPreferences')}</p>
         <div className="flex flex-wrap gap-2">
           {DIET_OPTIONS.map((dietOption) => (
             <button
@@ -165,7 +168,9 @@ export function DietaryPreferences({ preferences, onSave }: DietaryPreferencesPr
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                 diet.includes(dietOption)
                   ? 'bg-orange-500 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  : theme === 'dark' 
+                    ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
               {dietOption}
@@ -179,7 +184,9 @@ export function DietaryPreferences({ preferences, onSave }: DietaryPreferencesPr
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-1 ${
                 diet.includes(customDietOption)
                   ? 'bg-orange-500 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  : theme === 'dark' 
+                    ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
               {customDietOption}
@@ -188,8 +195,8 @@ export function DietaryPreferences({ preferences, onSave }: DietaryPreferencesPr
           ))}
         </div>
         
-        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('customDietaryPreferences')}</p>
+        <div className={`border-t pt-4 ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+          <p className={`text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>{t('customDietaryPreferences')}</p>
           <div className="flex gap-2">
             <input
               type="text"
@@ -197,7 +204,11 @@ export function DietaryPreferences({ preferences, onSave }: DietaryPreferencesPr
               onChange={(e) => setCustomDiet(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && addCustomDiet()}
               placeholder={t('addCustomDiet')}
-              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-sm"
+              className={`flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-sm ${
+                theme === 'dark' 
+                  ? 'bg-gray-700 border-gray-600 text-white' 
+                  : 'bg-white border-gray-300 text-gray-900'
+              }`}
             />
             <button
               onClick={addCustomDiet}
@@ -210,12 +221,12 @@ export function DietaryPreferences({ preferences, onSave }: DietaryPreferencesPr
       </div>
 
       {/* Allergies */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+      <div className={`rounded-xl shadow-sm border p-6 ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'}`}>
         <div className="flex items-center space-x-3 mb-4">
           <AlertTriangle className="w-5 h-5 text-red-600" />
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t('allergies')}</h2>
+          <h2 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{t('allergies')}</h2>
         </div>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{t('selectAllergies')}</p>
+        <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{t('selectAllergies')}</p>
         
         <div className="flex flex-wrap gap-2 mb-4">
           {COMMON_ALLERGIES.map((allergy) => (
@@ -225,7 +236,9 @@ export function DietaryPreferences({ preferences, onSave }: DietaryPreferencesPr
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                 allergies.includes(allergy)
                   ? 'bg-red-500 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  : theme === 'dark' 
+                    ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
               {allergy}
@@ -234,8 +247,8 @@ export function DietaryPreferences({ preferences, onSave }: DietaryPreferencesPr
         </div>
 
         {/* Custom Allergies */}
-        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('customAllergies')}</p>
+        <div className={`border-t pt-4 ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+          <p className={`text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>{t('customAllergies')}</p>
           <div className="flex gap-2 mb-3">
             <input
               type="text"
@@ -243,7 +256,11 @@ export function DietaryPreferences({ preferences, onSave }: DietaryPreferencesPr
               onChange={(e) => setCustomAllergy(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && addCustomAllergy()}
               placeholder={t('addCustomAllergy')}
-              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-sm"
+              className={`flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-sm ${
+                theme === 'dark' 
+                  ? 'bg-gray-700 border-gray-600 text-white' 
+                  : 'bg-white border-gray-300 text-gray-900'
+              }`}
             />
             <button
               onClick={addCustomAllergy}
@@ -259,7 +276,7 @@ export function DietaryPreferences({ preferences, onSave }: DietaryPreferencesPr
                   key={allergy}
                   className="flex items-center space-x-2 px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm"
                 >
-                  <span>{allergy}</span>
+                  <span>{translateAllergen(allergy, language)}</span>
                   <button
                     onClick={() => removeCustomAllergy(allergy)}
                     className="hover:text-red-900"
@@ -274,12 +291,12 @@ export function DietaryPreferences({ preferences, onSave }: DietaryPreferencesPr
       </div>
 
       {/* Preferred Cuisine Types */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+      <div className={`rounded-xl shadow-sm border p-6 ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'}`}>
         <div className="flex items-center space-x-3 mb-4">
           <Heart className="w-5 h-5 text-pink-600" />
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t('preferredCuisineTypes')}</h2>
+          <h2 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{t('preferredCuisineTypes')}</h2>
         </div>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{t('selectFavoriteCuisine')}</p>
+        <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{t('selectFavoriteCuisine')}</p>
         
         <div className="flex flex-wrap gap-2 mb-4">
           {CUISINE_TYPES.map((cuisine) => (
@@ -289,7 +306,9 @@ export function DietaryPreferences({ preferences, onSave }: DietaryPreferencesPr
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                 cuisineTypes.includes(cuisine)
                   ? 'bg-pink-500 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  : theme === 'dark' 
+                    ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
               {cuisine}
@@ -298,8 +317,8 @@ export function DietaryPreferences({ preferences, onSave }: DietaryPreferencesPr
         </div>
 
         {/* Custom Cuisine Types */}
-        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('customCuisineTypes')}</p>
+        <div className={`border-t pt-4 ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+          <p className={`text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>{t('customCuisineTypes')}</p>
           <div className="flex gap-2 mb-3">
             <input
               type="text"
@@ -307,7 +326,11 @@ export function DietaryPreferences({ preferences, onSave }: DietaryPreferencesPr
               onChange={(e) => setCustomCuisine(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && addCustomCuisine()}
               placeholder={t('addCustomCuisine')}
-              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-sm"
+              className={`flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-sm ${
+                theme === 'dark' 
+                  ? 'bg-gray-700 border-gray-600 text-white' 
+                  : 'bg-white border-gray-300 text-gray-900'
+              }`}
             />
             <button
               onClick={addCustomCuisine}
@@ -338,29 +361,37 @@ export function DietaryPreferences({ preferences, onSave }: DietaryPreferencesPr
       </div>
 
       {/* Default Servings */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+      <div className={`rounded-xl shadow-sm border p-6 ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'}`}>
         <div className="flex items-center space-x-3 mb-4">
           <Users className="w-5 h-5 text-blue-600" />
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t('defaultServings')}</h2>
+          <h2 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{t('defaultServings')}</h2>
         </div>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{t('setDefaultServings')}</p>
+        <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{t('setDefaultServings')}</p>
         
         <div className="flex items-center space-x-4">
           <button
             onClick={() => setDefaultServings(Math.max(1, defaultServings - 1))}
-            className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center transition-colors"
+            className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
+              theme === 'dark' 
+                ? 'bg-gray-700 hover:bg-gray-600' 
+                : 'bg-gray-100 hover:bg-gray-200'
+            }`}
           >
-            <X className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+            <X className={`w-5 h-5 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`} />
           </button>
           <div className="w-20 text-center">
-            <span className="text-3xl font-bold text-gray-900 dark:text-white">{defaultServings}</span>
-            <span className="text-sm text-gray-500 dark:text-gray-400 ml-1">{t('people')}</span>
+            <span className={`text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{defaultServings}</span>
+            <span className={`text-sm ml-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{t('people')}</span>
           </div>
           <button
             onClick={() => setDefaultServings(Math.min(20, defaultServings + 1))}
-            className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center transition-colors"
+            className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
+              theme === 'dark' 
+                ? 'bg-gray-700 hover:bg-gray-600' 
+                : 'bg-gray-100 hover:bg-gray-200'
+            }`}
           >
-            <Plus className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+            <Plus className={`w-5 h-5 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`} />
           </button>
         </div>
       </div>
@@ -369,7 +400,11 @@ export function DietaryPreferences({ preferences, onSave }: DietaryPreferencesPr
       <div className="flex justify-end space-x-3">
         <button
           onClick={handleCancel}
-          className="flex items-center space-x-2 px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+          className={`flex items-center space-x-2 px-6 py-3 rounded-lg transition-colors ${
+            theme === 'dark' 
+              ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' 
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          }`}
         >
           <X className="w-4 h-4" />
           <span>{t('cancel')}</span>

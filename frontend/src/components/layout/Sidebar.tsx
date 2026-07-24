@@ -26,7 +26,7 @@ interface MenuItem {
   label: string;
   href: string;
   icon: LucideIcon;
-  translationKey: string;
+  translationKey: 'homePage' | 'recipes' | 'mealPlanner' | 'shoppingLists' | 'cookbooks' | 'organizers' | 'notifications' | 'preferences' | 'settings';
 }
 
 export function Sidebar() {
@@ -47,7 +47,8 @@ export function Sidebar() {
       
       setPendingCount(pendingInvitations.length + unreadNotifications.length);
     } catch (error) {
-      console.error('Failed to load pending count:', error);
+      // Silently handle errors - pending count is optional
+      setPendingCount(0);
     }
   };
 

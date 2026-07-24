@@ -13,11 +13,14 @@ import { AllergyWarning } from '@/components/recipes/AllergyWarning';
 import { recipeService } from '@/services/recipeService';
 import { favoriteService } from '@/services/favoriteService';
 import { preferencesService } from '@/services/preferencesService';
+import { containsAllergen, translateAllergen } from '@/lib/allergyMapping';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { ArrowLeft, Clock, Users, Tag, ChefHat, Utensils, Heart, Share2, Edit, Trash2, Check, ShoppingCart, Calendar, Link as ExternalLink, BookOpen } from 'lucide-react';
 
 export function RecipeDetail() {
   const params = useParams();
   const router = useRouter();
+  const { language, t } = useLanguage();
   const [favoriteStatus, setFavoriteStatus] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -82,11 +85,13 @@ export function RecipeDetail() {
       );
       
       allergies.forEach(allergy => {
-        const allergyLower = allergy.toLowerCase();
         ingredientNames.forEach(ingredient => {
-          if (ingredient.toLowerCase().includes(allergyLower)) {
-            if (!allergensFound.includes(allergy)) {
-              allergensFound.push(allergy);
+          // Utiliser le système de mapping multilingue pour détecter les allergènes
+          if (containsAllergen(ingredient, [allergy])) {
+            // Traduire l'allergène vers la langue de l'utilisateur
+            const translatedAllergen = translateAllergen(allergy, language);
+            if (!allergensFound.includes(translatedAllergen)) {
+              allergensFound.push(translatedAllergen);
             }
           }
         });

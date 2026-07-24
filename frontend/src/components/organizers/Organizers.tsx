@@ -8,6 +8,7 @@ import { cookbookService } from '@/services/cookbookService';
 import { favoriteService } from '@/services/favoriteService';
 import { MealType } from '@/types';
 import { recipeService } from '@/services/recipeService';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 // Types d'union pour tags et ingredients
 type TagOrString = string | TagType;
@@ -15,6 +16,7 @@ type IngredientOrString = string | Ingredient;
 
 export function Organizers() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [cookbooks, setCookbooks] = useState<Cookbook[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,7 +47,7 @@ export function Organizers() {
         setFavoriteRecipeIds(new Set(favoritesData));
       } catch (err) {
         console.error('Failed to load data:', err);
-        setError('Failed to load data');
+        setError(t('organizersError'));
       } finally {
         setLoading(false);
       }
@@ -244,7 +246,7 @@ export function Organizers() {
           <div className="p-2 bg-orange-100 rounded-lg">
             <Heart className="w-6 h-6 text-orange-600" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Organizers</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('organizersTitle')}</h1>
         </div>
 
         <button
@@ -254,7 +256,7 @@ export function Organizers() {
           }`}
         >
           <Filter className="w-5 h-5" />
-          <span>Filters {activeFiltersCount > 0 && `(${activeFiltersCount})`}</span>
+          <span>{t('filters')} {activeFiltersCount > 0 && `(${activeFiltersCount})`}</span>
         </button>
       </div>
 
@@ -266,7 +268,7 @@ export function Organizers() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search recipes by title, description, tags, or ingredients..."
+            placeholder={t('searchRecipesPlaceholder')}
             className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
           />
         </div>
@@ -276,12 +278,12 @@ export function Organizers() {
       {showFilters && (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Filters</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t('filters')}</h2>
             <button
               onClick={clearFilters}
               className="text-sm text-orange-600 hover:text-orange-700 dark:text-orange-400 dark:hover:text-orange-300"
             >
-              Clear All
+              {t('clearAll')}
             </button>
           </div>
 
@@ -289,7 +291,7 @@ export function Organizers() {
           <div className="mt-4">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               <ChefHat className="w-4 h-4 inline mr-1" />
-              Ingredients
+              {t('ingredients')}
             </label>
             <div className="flex flex-wrap gap-2">
               {allIngredients.map((ingredient) => (
@@ -312,7 +314,7 @@ export function Organizers() {
           <div className="mt-4">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               <Tag className="w-4 h-4 inline mr-1" />
-              Tags
+              {t('tags')}
             </label>
             <div className="flex flex-wrap gap-2">
               {allTags.map((tag) => (
@@ -342,7 +344,7 @@ export function Organizers() {
             />
             <label htmlFor="favorites" className="flex items-center space-x-2 cursor-pointer">
               <Heart className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Favorites Only</span>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('favoritesOnly')}</span>
             </label>
           </div>
 
@@ -351,14 +353,14 @@ export function Organizers() {
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 <BookOpen className="w-4 h-4 inline mr-1" />
-                Cookbook
+                {t('cookbook')}
               </label>
               <select
                 value={selectedCookbook || ''}
                 onChange={(e) => setSelectedCookbook(e.target.value ? parseInt(e.target.value) : null)}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
               >
-                <option value="">All Cookbooks</option>
+                <option value="">{t('allCookbooks')}</option>
                 {cookbooks.map((cookbook) => (
                   <option key={cookbook.id} value={cookbook.id}>
                     {cookbook.name}
@@ -371,7 +373,7 @@ export function Organizers() {
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 <Utensils className="w-4 h-4 inline mr-1" />
-                Meal Type
+                {t('mealType')}
               </label>
               <select
                 value={selectedMealType}
@@ -381,11 +383,11 @@ export function Organizers() {
                 }}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
               >
-                <option value="">All Meal Types</option>
-                <option value={MealType.BREAKFAST}>Breakfast</option>
-                <option value={MealType.LUNCH}>Lunch</option>
-                <option value={MealType.DINNER}>Dinner</option>
-                <option value={MealType.SNACK}>Snack</option>
+                <option value="">{t('allMealTypes')}</option>
+                <option value={MealType.BREAKFAST}>{t('breakfast')}</option>
+                <option value={MealType.LUNCH}>{t('lunch')}</option>
+                <option value={MealType.DINNER}>{t('dinner')}</option>
+                <option value={MealType.SNACK}>{t('snack')}</option>
               </select>
             </div>
 
@@ -393,13 +395,13 @@ export function Organizers() {
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 <Clock className="w-4 h-4 inline mr-1" />
-                Max Preparation Time (min)
+                {t('maxPrepTime')}
               </label>
               <input
                 type="number"
                 value={maxPrepTime || ''}
                 onChange={(e) => setMaxPrepTime(e.target.value ? parseInt(e.target.value) : null)}
-                placeholder="Any"
+                placeholder={t('any')}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
               />
             </div>
@@ -408,13 +410,13 @@ export function Organizers() {
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 <ChefHat className="w-4 h-4 inline mr-1" />
-                Max Cooking Time (min)
+                {t('maxCookTime')}
               </label>
               <input
                 type="number"
                 value={maxCookTime || ''}
                 onChange={(e) => setMaxCookTime(e.target.value ? parseInt(e.target.value) : null)}
-                placeholder="Any"
+                placeholder={t('any')}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
               />
             </div>
@@ -425,7 +427,7 @@ export function Organizers() {
       {/* Results */}
       <div className="mb-4 flex items-center justify-between">
         <p className="text-sm text-gray-600">
-          {filteredRecipes.length} recipe{filteredRecipes.length !== 1 ? 's' : ''} found
+          {filteredRecipes.length} {t('recipesFound')}
         </p>
         {activeFiltersCount > 0 && (
           <button
@@ -433,7 +435,7 @@ export function Organizers() {
             className="text-sm text-orange-600 hover:text-orange-700 flex items-center space-x-1"
           >
             <X className="w-4 h-4" />
-            <span>Clear filters</span>
+            <span>{t('clearFilters')}</span>
           </button>
         )}
       </div>
@@ -442,13 +444,13 @@ export function Organizers() {
       {filteredRecipes.length === 0 ? (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
           <Search className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No recipes found</h3>
-          <p className="text-gray-500 mb-4">Try adjusting your filters or search query</p>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">{t('noRecipesFound')}</h3>
+          <p className="text-gray-500 mb-4">{t('tryAdjustingFilters')}</p>
           <button
             onClick={clearFilters}
             className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
           >
-            Clear Filters
+            {t('clearFilters')}
           </button>
         </div>
       ) : (
@@ -475,7 +477,7 @@ export function Organizers() {
                   {recipe.preparationTime && (
                     <div className="flex items-center">
                       <Clock className="w-4 h-4 mr-1" />
-                      {recipe.preparationTime} min
+                      {recipe.preparationTime} {t('minutes')}
                     </div>
                   )}
                   {recipe.servings && (

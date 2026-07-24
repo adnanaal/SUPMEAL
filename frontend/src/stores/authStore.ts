@@ -24,11 +24,6 @@ export const useAuthStore = create<AuthState>()(
       setToken: (token) => set({ token }),
       setLoading: (isLoading) => set({ isLoading }),
       logout: () => {
-        // Nettoyer localStorage pour éviter le partage de données entre utilisateurs
-        localStorage.removeItem('userId');
-        localStorage.removeItem('auth-storage');
-        localStorage.removeItem('language');
-        localStorage.removeItem('theme');
         set({ user: null, token: null, isAuthenticated: false });
       },
     }),

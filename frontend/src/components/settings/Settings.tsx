@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Moon, Sun, Globe, User, Bell, HelpCircle, ChevronRight, Check, LucideIcon } from 'lucide-react';
+import { Moon, Sun, Globe, User, Bell, ChevronRight, Check, LucideIcon } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import ExportImport from './ExportImport';
@@ -80,7 +80,7 @@ export function Settings() {
       items: [
         {
           label: t('language'),
-          description: language === 'fr' ? 'Français' : 'English',
+          description: language === 'fr' ? t('frenchLanguage') : t('englishLanguage'),
           customAction: (
             <div className="relative z-50">
               <button
@@ -98,14 +98,14 @@ export function Settings() {
                     onClick={() => handleLanguageChange('fr')}
                     className="w-full flex items-center justify-between px-4 py-2 hover:bg-gray-50 transition-colors"
                   >
-                    <span className="text-sm text-gray-700">Français</span>
+                    <span className="text-sm text-gray-700">{t('frenchLanguage')}</span>
                     {language === 'fr' && <Check className="w-4 h-4 text-orange-500" />}
                   </button>
                   <button
                     onClick={() => handleLanguageChange('en')}
                     className="w-full flex items-center justify-between px-4 py-2 hover:bg-gray-50 transition-colors"
                   >
-                    <span className="text-sm text-gray-700">English</span>
+                    <span className="text-sm text-gray-700">{t('englishLanguage')}</span>
                     {language === 'en' && <Check className="w-4 h-4 text-orange-500" />}
                   </button>
                 </div>
@@ -123,22 +123,6 @@ export function Settings() {
           label: t('notificationsSettings'),
           description: t('manageNotificationPreferences'),
           onClick: () => router.push('/dashboard/notifications'),
-        },
-      ],
-    },
-    {
-      title: t('support'),
-      icon: HelpCircle,
-      items: [
-        {
-          label: t('helpCenter'),
-          description: t('getHelpSupport'),
-          onClick: () => {},
-        },
-        {
-          label: t('contactUs'),
-          description: t('contactSupportTeam'),
-          onClick: () => {},
         },
       ],
     },

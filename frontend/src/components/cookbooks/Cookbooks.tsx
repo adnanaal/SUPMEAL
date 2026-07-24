@@ -6,9 +6,11 @@ import { Plus, BookOpen, Users, Trash2, Settings } from 'lucide-react';
 import { Cookbook } from '@/types';
 import { cookbookService } from '@/services/cookbookService';
 import { CreateCookbookModal } from '@/components/cookbooks/CreateCookbookModal';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export function Cookbooks() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [cookbooks, setCookbooks] = useState<Cookbook[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +25,7 @@ export function Cookbooks() {
         setCookbooks(data);
       } catch (err) {
         console.error('Failed to load cookbooks:', err);
-        setError('Failed to load cookbooks');
+        setError(t('cookbooksError'));
       } finally {
         setLoading(false);
       }
@@ -61,7 +63,7 @@ export function Cookbooks() {
   };
 
   const handleDeleteCookbook = async (id: number) => {
-    if (confirm('Are you sure you want to delete this cookbook?')) {
+    if (confirm(t('deleteCookbookConfirm'))) {
       try {
         await cookbookService.deleteCookbook(id);
         setCookbooks(cookbooks.filter(cb => cb.id !== id));
@@ -109,7 +111,7 @@ export function Cookbooks() {
           <div className="p-2 bg-orange-100 rounded-lg">
             <BookOpen className="w-6 h-6 text-orange-600" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Cookbooks</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('cookbooksTitle')}</h1>
         </div>
 
         <button
@@ -117,7 +119,7 @@ export function Cookbooks() {
           className="flex items-center space-x-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
         >
           <Plus className="w-5 h-5" />
-          <span>Create Cookbook</span>
+          <span>{t('createCookbook')}</span>
         </button>
       </div>
 
@@ -125,13 +127,13 @@ export function Cookbooks() {
       {cookbooks.length === 0 ? (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
           <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No cookbooks yet</h3>
-          <p className="text-gray-500 mb-4">Create your first cookbook to start collecting recipes</p>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">{t('noCookbooks')}</h3>
+          <p className="text-gray-500 mb-4">{t('createFirstCookbook')}</p>
           <button
             onClick={() => setIsCreateModalOpen(true)}
             className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
           >
-            Create Cookbook
+            {t('createCookbook')}
           </button>
         </div>
       ) : (
@@ -168,7 +170,7 @@ export function Cookbooks() {
                         handleDeleteCookbook(cookbook.id);
                       }}
                       className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
-                      title="Delete cookbook"
+                      title={t('deleteCookbook')}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -178,16 +180,16 @@ export function Cookbooks() {
                 <div className="flex items-center space-x-4 text-sm text-gray-500">
                   <div className="flex items-center space-x-1">
                     <Users className="w-4 h-4" />
-                    <span>{cookbook.members?.length || 0} member{cookbook.members?.length !== 1 ? 's' : ''}</span>
+                    <span>{cookbook.members?.length || 0} {t('members')}{cookbook.members?.length !== 1 ? 's' : ''}</span>
                   </div>
                   <div className="flex items-center space-x-1">
                     <BookOpen className="w-4 h-4" />
-                    <span>{cookbook.recipeIds?.length || 0} recipe{cookbook.recipeIds?.length !== 1 ? 's' : ''}</span>
+                    <span>{cookbook.recipeIds?.length || 0} {t('cookbookRecipes')}{cookbook.recipeIds?.length !== 1 ? 's' : ''}</span>
                   </div>
                 </div>
 
                 <div className="mt-3 flex items-center space-x-2">
-                  <span className="text-xs text-gray-400">Created by {cookbook.ownerFirstname && cookbook.ownerLastname ? `${cookbook.ownerFirstname} ${cookbook.ownerLastname}` : cookbook.owner?.firstname || 'Unknown'}</span>
+                  <span className="text-xs text-gray-400">{t('createdBy')} {cookbook.ownerFirstname && cookbook.ownerLastname ? `${cookbook.ownerFirstname} ${cookbook.ownerLastname}` : cookbook.owner?.firstname || t('unknown')}</span>
                 </div>
               </div>
             </div>

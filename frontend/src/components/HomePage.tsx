@@ -1,7 +1,11 @@
+'use client';
+
 import Link from 'next/link';
 import { ChefHat, BookOpen, Users, Heart, ArrowRight } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export function HomePage() {
+  const { t } = useLanguage();
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-green-50">
       {/* Navigation */}
@@ -19,13 +23,13 @@ export function HomePage() {
                 href="/login"
                 className="text-gray-700 hover:text-gray-900 font-medium px-4 py-2"
               >
-                Connexion
+                {t('login')}
               </Link>
               <Link
                 href="/register"
                 className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-hover transition font-medium"
               >
-                S'inscrire
+                {t('signUp')}
               </Link>
             </div>
           </div>
@@ -36,24 +40,24 @@ export function HomePage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center mb-16">
           <h1 className="text-5xl font-bold text-gray-900 mb-6">
-            Gérez vos recettes avec simplicité
+            {t('heroTitle')}
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
-            SUPMEAL est votre application complète pour créer, organiser et partager vos recettes avec vos proches.
+            {t('heroDescription')}
           </p>
           <div className="flex items-center justify-center gap-4">
             <Link
               href="/register"
               className="flex items-center gap-2 bg-primary text-white px-8 py-4 rounded-lg hover:bg-primary-hover transition font-medium text-lg"
             >
-              Commencer gratuitement
+              {t('startFree')}
               <ArrowRight className="w-5 h-5" />
             </Link>
             <Link
               href="/login"
               className="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-lg hover:border-gray-400 transition font-medium text-lg"
             >
-              Se connecter
+              {t('signIn')}
             </Link>
           </div>
         </div>
@@ -62,18 +66,18 @@ export function HomePage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
           <FeatureCard
             icon={<BookOpen className="w-8 h-8" />}
-            title="Gestion de Recettes"
-            description="Créez et organisez vos recettes avec des ingrédients, étapes, temps de préparation et plus encore."
+            title={t('recipeManagement')}
+            description={t('recipeManagementDesc')}
           />
           <FeatureCard
             icon={<Users className="w-8 h-8" />}
-            title="Cookbooks Partagés"
-            description="Partagez vos recettes avec votre famille et amis dans des cookbooks collaboratifs."
+            title={t('sharedCookbooks')}
+            description={t('sharedCookbooksDesc')}
           />
           <FeatureCard
             icon={<Heart className="w-8 h-8" />}
-            title="Favoris & Planning"
-            description="Marquez vos recettes préférées et planifiez vos repas de la semaine."
+            title={t('favoritesPlanning')}
+            description={t('favoritesPlanningDesc')}
           />
         </div>
       </main>
@@ -81,7 +85,7 @@ export function HomePage() {
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-600">
-          <p>© 2026 SUPMEAL. Tous droits réservés.</p>
+          <p>{t('copyright')}</p>
         </div>
       </footer>
     </div>

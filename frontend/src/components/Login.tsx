@@ -6,10 +6,12 @@ import Link from 'next/link';
 import { ChefHat, Mail, Lock, AlertCircle } from 'lucide-react';
 import { authService } from '@/services/authService';
 import { useAuthStore } from '@/stores/authStore';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export function Login() {
   const router = useRouter();
   const { setUser, setToken } = useAuthStore();
+  const { t } = useLanguage();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -42,7 +44,7 @@ export function Login() {
       router.push('/dashboard');
     } catch (err: any) {
       console.error('Login error:', err);
-      setError(err.response?.data?.message || 'Échec de la connexion. Vérifiez vos identifiants.');
+      setError(err.response?.data?.message || t('loginError'));
     } finally {
       setIsLoading(false);
     }
@@ -56,8 +58,8 @@ export function Login() {
           <Link href="/" className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-full mb-4 hover:opacity-80 transition">
             <ChefHat className="w-8 h-8 text-white" />
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900">SUPMEAL</h1>
-          <p className="text-gray-600 mt-2">Connectez-vous pour gérer vos recettes</p>
+          <h1 className="text-3xl font-bold text-gray-900">{t('loginTitle')}</h1>
+          <p className="text-gray-600 mt-2">{t('loginSubtitle')}</p>
         </div>
 
         {/* Formulaire */}
@@ -66,7 +68,7 @@ export function Login() {
             {/* Email */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email
+                {t('emailLabel')}
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -76,7 +78,7 @@ export function Login() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
-                  placeholder="vous@exemple.com"
+                  placeholder={t('emailPlaceholder')}
                   required
                 />
               </div>
@@ -85,7 +87,7 @@ export function Login() {
             {/* Mot de passe */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Mot de passe
+                {t('passwordLabel')}
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -95,7 +97,7 @@ export function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
-                  placeholder="••••••••"
+                  placeholder={t('passwordPlaceholder')}
                   required
                 />
               </div>
@@ -115,15 +117,15 @@ export function Login() {
               disabled={isLoading}
               className="w-full bg-primary hover:bg-primary-hover text-white font-medium py-3 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Connexion...' : 'Se connecter'}
+              {isLoading ? t('loginButtonLoading') : t('loginButton')}
             </button>
           </form>
 
           {/* Lien vers inscription */}
           <p className="text-center text-sm text-gray-600 mt-6">
-            Pas encore de compte ?{' '}
+            {t('noAccount')}{' '}
             <Link href="/register" className="text-primary hover:text-primary-hover font-medium">
-              S'inscrire
+              {t('signUpLink')}
             </Link>
           </p>
         </div>
@@ -131,7 +133,7 @@ export function Login() {
         {/* Retour à l'accueil */}
         <div className="text-center mt-6">
           <Link href="/" className="text-sm text-gray-600 hover:text-gray-900">
-            ← Retour à l'accueil
+            {t('backToHome')}
           </Link>
         </div>
       </div>

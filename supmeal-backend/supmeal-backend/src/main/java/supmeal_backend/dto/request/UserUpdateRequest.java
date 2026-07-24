@@ -1,5 +1,6 @@
 package supmeal_backend.dto.request;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -17,8 +18,8 @@ public class UserUpdateRequest {
 
     private String lastname;
 
-    @Size(min = 8, message = "Password must be at least 8 characters")
-    private String password;
+    @Email(message = "Email should be valid")
+    private String email;
 
     private String avatar;
 

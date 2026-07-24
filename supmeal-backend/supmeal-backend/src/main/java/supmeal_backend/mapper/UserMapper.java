@@ -54,7 +54,7 @@ public class UserMapper {
         return User.builder()
                 .firstname(request.getFirstname())
                 .lastname(request.getLastname())
-                .password(request.getPassword())
+                .email(request.getEmail())
                 .avatar(request.getAvatar())
                 .dietaryPreferences(request.getDietaryPreferences())
                 .allergies(request.getAllergies())
